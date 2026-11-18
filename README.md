@@ -25,6 +25,15 @@ Adds indicators beside the party portraits:
 
 This is an extended version of EEex's own "Timer" module, and replaces it.
 
+### Combat Log
+
+Adds lines to the combat log that explain:
+
+- Spells and conditions ending: `Imoen- Haste wore off`
+- Failed saving throws: `Gnoll- Failed save vs. Spell against Sleep`
+- Why a spell did nothing: `Skeleton- Unaffected by Sleep: immune to sleep`
+- Why a weapon is ineffective: `Minsc- Long Sword is ineffective against Werewolf: it requires a +1 weapon or better`
+
 ## Installation
 
 1. Install EEex.
@@ -37,6 +46,7 @@ The settings of each component are in the game under Options > EEex Options, in 
 
 - **EEex's own modules are switched off.** When the Timer component is installed and EEex's module of the same name is enabled, Battle Sense turns the EEex one off, so that nothing is drawn twice. If you uninstall Battle Sense, turn EEex's module back on under Options > EEex Options > Modules.
 - **Battle Sense has its own settings.** They are stored separately from EEex's; settings you changed for EEex's Timer module are not carried over.
+- **The Combat Log component changes save games.** To report why a spell did nothing, it adds a hidden effect to every creature, and that effect is saved with the creature. Keep the component installed for saves that were made with it.
 
 ## Compatibility
 
@@ -55,6 +65,7 @@ BattleSense/
   language/                Installer strings
   copy/core/               Installed with the first component: startup file, strings, shared sprite helpers
   copy/timer/              Timer component
+  copy/combatlog/          Combat Log component
 ```
 
 - `M_ZJBSen.lua` is run by the engine during startup and starts the installed modules.

@@ -23,11 +23,12 @@ if not EEex_Active then return end
 -- The installer turns a module on by changing its "false" to "true". Do not edit by hand,
 -- uninstalling the component restores this file.
 ZJBattleSense_Modules = {
+	["ZJCmbLog"] = false,
 	["ZJTimer"]  = false,
 }
 
 -- The order the modules are started in
-ZJBattleSense_Private_ModuleOrder = { "ZJTimer" }
+ZJBattleSense_Private_ModuleOrder = { "ZJCmbLog", "ZJTimer" }
 
 -- A module can be an extended version of a module that ships with EEex. Running both versions
 -- at once would draw everything twice, so the EEex version is switched off:
