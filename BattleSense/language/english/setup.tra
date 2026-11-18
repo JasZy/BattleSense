@@ -1,0 +1,8 @@
+
+/////////////////////
+// BattleSense.tp2 //
+/////////////////////
+
+// Error messages
+@1000 = ~Game not supported. Battle Sense requires BG:EE, BG2:EE, EET or IWD:EE.~
+@1001 = ~Battle Sense requires EEex to be installed first.~

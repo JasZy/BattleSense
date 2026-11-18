@@ -1,0 +1,32 @@
+BACKUP ~weidu_external/BattleSense/backup~
+AUTHOR ~JasZy, https://github.com/JasZy~
+VERSION ~v0.1.0~
+
+///////////////
+// Functions //
+///////////////
+
+// WeiDU only allows actions inside a component; ALWAYS runs these at the start of every component.
+ALWAYS
+
+	// Installs the files every module needs. Only the first module to be installed copies them; if that module is
+	// later uninstalled, WeiDU reinstalls the modules that came after it, and the next one in line copies them again.
+	DEFINE_ACTION_FUNCTION ZJ_BATTLESENSE_INSTALL_CORE BEGIN
+		ACTION_IF !FILE_EXISTS ~override/M_ZJBSen.lua~ BEGIN
+			COPY ~BattleSense/copy/core~ ~override~
+		END
+	END
+
+	// Turns a module on in the startup file
+	DEFINE_ACTION_FUNCTION ZJ_BATTLESENSE_ENABLE_MODULE
+		STR_VAR
+			module = ~~
+	BEGIN
+		COPY ~override/M_ZJBSen.lua~ ~override~
+			REPLACE_TEXTUALLY ~^\([ %TAB%]*\["%module%"\][ %TAB%]*=[ %TAB%]*\)false~ ~\1true~
+		BUT_ONLY
+	END
+
+END
+
+LANGUAGE ~English~ ~english~ ~BattleSense/language/english/setup.tra~
