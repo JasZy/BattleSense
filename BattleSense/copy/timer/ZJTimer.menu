@@ -1,0 +1,108 @@
+
+menu
+{
+	name "ZJTimer_Menu"
+	ignoreesc
+
+	-- The engine won't change the cursor type over templates if there isn't at
+	-- least one "normal" element that occupies an xy of equal or greater value.
+	label
+	{
+		area 0 0 2147483647 2147483647
+		enabled "ZJTimer_Private_Menu_Tick()"
+	}
+
+	template
+	{
+		label
+		{
+			enabled "ZJTimer_Private_Menu_TEMPLATE_Background_Enabled()"
+			bam "ZJTBACKG"
+			scaleToClip
+		}
+		name "ZJTimer_Menu_TEMPLATE_Background"
+	}
+
+	template
+	{
+		label
+		{
+			enabled "ZJTimer_Private_Menu_TEMPLATE_TimerModal_Enabled()"
+			bam "ZJTMODAL"
+			scaleToClip
+			frame lua "ZJTimer_Private_Menu_TEMPLATE_TimerModal_Frame()"
+		}
+		name "ZJTimer_Menu_TEMPLATE_TimerModal"
+	}
+
+	template
+	{
+		label
+		{
+			enabled "ZJTimer_Private_Menu_TEMPLATE_TimerContingency_Enabled()"
+			bam "ZJTCONTI"
+			scaleToClip
+			frame lua "ZJTimer_Private_Menu_TEMPLATE_TimerContingency_Frame()"
+		}
+		name "ZJTimer_Menu_TEMPLATE_TimerContingency"
+	}
+
+	template
+	{
+		label
+		{
+			enabled "ZJTimer_Private_Menu_TEMPLATE_TimerCast_Enabled()"
+			bam "ZJTAURA"
+			scaleToClip
+			frame lua "ZJTimer_Private_Menu_TEMPLATE_TimerCast_Frame()"
+		}
+		name "ZJTimer_Menu_TEMPLATE_TimerCast"
+	}
+
+	template
+	{
+		label
+		{
+			enabled "ZJTimer_Private_Menu_TEMPLATE_CastMarker_Enabled()"
+			bam "ZJTAMARK"
+			scaleToClip
+		}
+		name "ZJTimer_Menu_TEMPLATE_CastMarker"
+	}
+
+	template
+	{
+		label
+		{
+			enabled "ZJTimer_Private_Menu_TEMPLATE_TimerAttack_Enabled()"
+			bam "ZJTATTCK"
+			scaleToClip
+			frame lua "ZJTimer_Private_Menu_TEMPLATE_TimerAttack_Frame()"
+		}
+		name "ZJTimer_Menu_TEMPLATE_TimerAttack"
+	}
+
+	template
+	{
+		label
+		{
+			enabled "ZJTimer_Private_Menu_TEMPLATE_AttackMarker_Enabled()"
+			bam "ZJTAMARK"
+			scaleToClip
+		}
+		name "ZJTimer_Menu_TEMPLATE_AttackMarker"
+	}
+
+	template
+	{
+		label
+		{
+			enabled "ZJTimer_Private_Menu_TEMPLATE_ResistRing_Enabled()"
+			bam "ZJTRESIS"
+			scaleToClip
+			sequence lua "ZJTimer_Private_Menu_TEMPLATE_ResistRing_Sequence()"
+			frame lua "ZJTimer_Private_Menu_TEMPLATE_ResistRing_Frame()"
+		}
+		name "ZJTimer_Menu_TEMPLATE_ResistRing"
+	}
+}

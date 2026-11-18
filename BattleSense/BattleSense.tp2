@@ -30,3 +30,15 @@ ALWAYS
 END
 
 LANGUAGE ~English~ ~english~ ~BattleSense/language/english/setup.tra~
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Timer: Casting, attack round, modal and contingency bars, and resistance rings, beside portraits    //
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+BEGIN @20 LABEL ~ZJ-BattleSense-Timer~ DESIGNATED 20
+REQUIRE_PREDICATE GAME_IS ~bgee bg2ee eet iwdee~ @1000 // Game not supported.
+REQUIRE_PREDICATE MOD_IS_INSTALLED ~EEex.tp2~ 1 @1001 // Battle Sense requires EEex to be installed first.
+
+	LAF ZJ_BATTLESENSE_INSTALL_CORE END
+	COPY ~BattleSense/copy/timer~ ~override~
+	LAF ZJ_BATTLESENSE_ENABLE_MODULE STR_VAR module = ~ZJTimer~ END

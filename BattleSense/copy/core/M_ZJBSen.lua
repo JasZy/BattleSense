@@ -23,10 +23,11 @@ if not EEex_Active then return end
 -- The installer turns a module on by changing its "false" to "true". Do not edit by hand,
 -- uninstalling the component restores this file.
 ZJBattleSense_Modules = {
+	["ZJTimer"]  = false,
 }
 
 -- The order the modules are started in
-ZJBattleSense_Private_ModuleOrder = { }
+ZJBattleSense_Private_ModuleOrder = { "ZJTimer" }
 
 -- A module can be an extended version of a module that ships with EEex. Running both versions
 -- at once would draw everything twice, so the EEex version is switched off:
@@ -35,6 +36,7 @@ ZJBattleSense_Private_ModuleOrder = { }
 --   "tick"   - The function that drives EEex's version. It is emptied, which silences it until that next launch.
 --
 ZJBattleSense_Private_Replaces = {
+	["ZJTimer"]  = { ["option"] = "EEex_Module_Timer",      ["tick"] = "B3Timer_Private_Menu_Tick"             },
 }
 
 function ZJBattleSense_Private_ReplaceEEexModule(replaces)
