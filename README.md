@@ -14,6 +14,20 @@ Battle Sense is built on [EEex](https://github.com/Bubb13/EEex) and requires it.
 
 Each component can be installed on its own.
 
+### Attack Info
+
+Hover the attack cursor over a creature to open a popup with, for every selected character:
+
+- The chance to hit, as a percentage or as the minimum d20 roll
+- Damage per hit, with the target's resistances applied, and extra on-hit damage
+- The target's stoneskins and mirror images, and the spells affecting it
+- Whether the target is immune to the weapon
+- Timer bars for the attack round, spell casting, contingencies and modal actions
+
+The left panel shows the same for the creature attacking your party: the roll it needs to hit each of them and its damage. Hold `Left Ctrl` or `Left Alt`, (the two open keybinds), to open the popup over any creature, without the attack cursor.
+
+This is an extended version of EEex's own "Attack Info" module, and replaces it.
+
 ### Timer
 
 Adds indicators beside the party portraits:
@@ -44,8 +58,8 @@ The settings of each component are in the game under Options > EEex Options, in 
 
 ## Good to know
 
-- **EEex's own modules are switched off.** When the Timer component is installed and EEex's module of the same name is enabled, Battle Sense turns the EEex one off, so that nothing is drawn twice. If you uninstall Battle Sense, turn EEex's module back on under Options > EEex Options > Modules.
-- **Battle Sense has its own settings.** They are stored separately from EEex's; settings you changed for EEex's Timer module are not carried over.
+- **EEex's own modules are switched off.** When the Attack Info or Timer component is installed and EEex's module of the same name is enabled, Battle Sense turns the EEex one off, so that nothing is drawn twice. If you uninstall Battle Sense, turn EEex's module back on under Options > EEex Options > Modules.
+- **Battle Sense has its own settings.** They are stored separately from EEex's; settings you changed for EEex's Attack Info or Timer module are not carried over.
 - **The Combat Log component changes save games.** To report why a spell did nothing, it adds a hidden effect to every creature, and that effect is saved with the creature. Keep the component installed for saves that were made with it.
 
 ## Compatibility
@@ -54,7 +68,7 @@ Battle Sense only adds files with the `ZJ` prefix to the override folder, and do
 
 ## Credits
 
-- [Bubb](https://github.com/Bubb13), for EEex, and for the Timer module that the component of the same name is built on
+- [Bubb](https://github.com/Bubb13), for EEex, and for the Attack Info and Timer modules that the components of the same name are built on
 - JasZy, for Battle Sense
 
 ## For developers
@@ -64,6 +78,7 @@ BattleSense/
   BattleSense.tp2          The installer
   language/                Installer strings
   copy/core/               Installed with the first component: startup file, strings, shared sprite helpers
+  copy/attackinfo/         Attack Info component
   copy/timer/              Timer component
   copy/combatlog/          Combat Log component
 ```

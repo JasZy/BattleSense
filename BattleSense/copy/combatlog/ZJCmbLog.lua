@@ -535,6 +535,27 @@ function ZJCombatLog_Private_UpdateScreen(sprite)
 			["sourceID"]     = spriteID,
 		})
 	end
+
+	-- A save made with the EEex fork Battle Sense started in has that fork's version of the screen on every creature.
+	-- It is removed, unless the fork's Combat Log is running and still uses it, (see M_ZJBSen.lua).
+	if B3CLSCRN == ZJBattleSense_Private_LegacyCombatLogScreen then
+		local legacyName = "B3CLSCRN"
+		local hasLegacyScreen = false
+		EEex_Utility_IterateCPtrList(sprite.m_timedEffectList, function(effect)
+			if effect.m_effectId == 403 and effect.m_res:get() == legacyName then
+				hasLegacyScreen = true
+				return true -- Break EEex_Utility_IterateCPtrList
+			end
+		end)
+		if hasLegacyScreen then
+			sprite:applyEffect({
+				["effectID"]     = 321, -- Remove effects by resource
+				["durationType"] = 1,
+				["res"]          = legacyName,
+				["sourceID"]     = spriteID,
+			})
+		end
+	end
 end
 
 -- Returns why `sprite` ignores `effect`, and the resref / source type of whatever grants that protection

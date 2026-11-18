@@ -4,6 +4,7 @@
 /////////////////////
 
 // Component names
+@10 = ~Attack Info: Show to-hit chances, damage and timers when hovering the attack cursor over a creature (replaces EEex's attack info module)~
 @20 = ~Timer: Show casting, attack round, modal and contingency bars, and resistance rings, beside portraits (replaces EEex's timer module)~
 @30 = ~Combat Log: Explain effects ending, failed saves, immunities and ineffective weapons (adds a hidden effect to creatures, which is stored in save games)~
 

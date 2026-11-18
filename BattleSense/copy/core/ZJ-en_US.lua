@@ -1,6 +1,187 @@
 
 -- Battle Sense - English strings. Translations go in ZJ-<language>.lua, (for example ZJ-de_DE.lua).
 
+-----------------
+-- Attack Info --
+-----------------
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_TabTitle"] = "Battle Sense: Attack Info"
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_Enable"] = "Enabled"
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_Enable_Description"] = [[
+Enables the attack information popup.
+
+The popup opens when hovering the attack cursor over a creature, (see "Open With Attack Cursor"), or when holding the open keybind, (by default 'Left Ctrl'), or the alternate open keybind, (by default 'Left Alt'), over any creature.
+
+It has two panels, with a row for each selected party member:
+
+- Left: what the creature can do to them. The roll it needs to hit each of them, its damage below its name, and timer bars for its attack round, spell casting, contingencies and modal action.
+
+- Right: what they can do to the creature. The roll each of them needs to hit it, the damage of a hit with the creature's resistance to it, any extra on-hit damage, and whether the creature is immune to their weapon.
+
+The right panel's header also lists the creature's stoneskins and mirror images, and the spells affecting it.
+
+-----------
+
+This replaces Bubb's "Attack Info" module that comes with EEex. That module has to be turned off, (Modules tab), or both popups are drawn on top of each other. Battle Sense turns it off by itself when the game starts, which takes effect from the next time the game is started.
+]]
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_FontPoint"] = "Font Point"
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_FontPoint_Description"] = [[
+The point (size) of the font used to display the attack information.
+]]
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_HitDisplayType"] = "Hit Display Type"
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_HitDisplayType_Description"] = [[
+How the popup displays an attacker's odds of hitting.
+
+'Roll' - The minimum d20 roll needed to land the attack, e.g. "14+". A dash means no roll can hit.
+
+'Percentage' - The chance to hit as a percentage, e.g. "35%".
+]]
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_HitDisplayType_Roll"] = "Roll"
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_HitDisplayType_Percentage"] = "Percentage"
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_ImmunityDisplayType"] = "Immunity Display Type"
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_ImmunityDisplayType_Description"] = [[
+The method used to display target immunities in the popup.
+
+'Color' - Show the hit roll and damage in red for entries where the target is immune to the attacker, with "Immune" behind the damage.
+
+'None' - Do not display immunity data.
+
+'Text' - Replace the hit roll and damage for entries where the target is immune to the attacker.
+]]
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_ImmunityDisplayType_Color"] = "Color"
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_ImmunityDisplayType_None"] = "None"
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_ImmunityDisplayType_Text"] = "Text"
+
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_OpenKeybind"] = "Open Keybind"
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_OpenKeybind_Description"] = [[
+This keybind opens the attack information popup.
+
+The popup has two panels: the left one shows the attacks of the creature under the cursor, the right one shows the attacks on that creature.
+]]
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_OpenWithAttackCursor"] = "Open With Attack Cursor"
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_OpenWithAttackCursor_Description"] = [[
+Determines whether the attack information popup automatically opens when an attack cursor is hovered over a creature.
+]]
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_ReverseKeybind"] = "Alternate Open Keybind"
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_ReverseKeybind_Description"] = [[
+A second keybind that opens the attack information popup, exactly like "Open Keybind".
+]]
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_ShowColumnHeaders"] = "Show Column Headers"
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_ShowColumnHeaders_Description"] = [[
+Determines whether the first line of the popup's information list is used to display column headers.
+]]
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_HideUnusedOffhandHeader"] = "Hide Unused Offhand Header"
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_HideUnusedOffhandHeader_Description"] = [[
+Determines whether a panel's offhand column header is hidden when that panel has zero entries to display in that column.
+]]
+
+-----------
+-- Timer --
+-----------
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_ShowTargetAttackTimer"] = "Show Target Attack Timer"
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_ShowTargetAttackTimer_Description"] = [[
+Adds an orange bar to the left panel while the creature under the cursor is attacking.
+
+This indicator displays how far the creature is through its attack round. The white ticks mark the points in the round where it makes its attack rolls.
+]]
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_ShowTargetCastTimer"] = "Show Target Cast Timer"
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_ShowTargetCastTimer_Description"] = [[
+Adds a cyan bar to the left panel while the creature under the cursor is casting a spell or is waiting to be able to use spells / items again.
+
+This indicator displays the creature's cooldown for using spells / items. While a spell is being cast, a white tick marks the point where it is released.
+]]
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_ShowTargetContingencyTimer"] = "Show Target Contingency Timer"
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_ShowTargetContingencyTimer_Description"] = [[
+Adds a green bar to the left panel while the creature under the cursor has contingency effects.
+
+This indicator displays the interval at which the creature's contingency conditions are checked.
+
+Note that some mods add contingency effects behind-the-scenes to implement certain behaviors - this may cause the contingency indicator to appear unexpectedly.
+]]
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_ShowTargetModalTimer"] = "Show Target Modal Timer"
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_ShowTargetModalTimer_Description"] = [[
+Adds a red bar to the left panel while the creature under the cursor is using a modal action.
+
+This indicator displays the interval of the creature's modal action: bard song, turn undead, etc.
+]]
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_ShowRowTimers"] = "Show Row Timers"
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_ShowRowTimers_Description"] = [[
+Adds timer bars below the names in the right panel, for every listed creature that is attacking the creature under the cursor.
+
+The orange bar is displayed while the creature is attacking, and shows how far it is through its attack round. The white ticks mark its attack rolls.
+
+The cyan bar is displayed while the creature is casting a spell or is waiting to be able to use spells / items again. While a spell is being cast, a white tick marks the point where it is released.
+]]
+
+-----------------
+-- Attack Info --
+-----------------
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_CompactForAllies"] = "Compact Popup For Allies"
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_CompactForAllies_Description"] = [[
+Uses a compact popup for party members and the party's summons / allies.
+
+The compact popup lists the creatures that the creature under the cursor is attacking or is being attacked by, with the roll the creature needs to hit them and the damage it does in the left panel, and their rolls and damage against the creature in the right panel.
+
+A creature is on the same row in both panels. If it is only attacking, or only being attacked, its row in the other panel is left empty.
+
+The compact popup only opens while the open or alternate open keybind is held.
+]]
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_ShowSpellEffects"] = "Show Spell Effects"
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_ShowSpellEffects_Description"] = [[
+Lists the spells affecting the creature under the cursor in the right panel's header, one per line. A spell with a set duration shows the time it has left in turns and rounds, e.g. "Haste (1,5)".
+
+These are the spells EEex's Effect Menu module shows: spells from items, permanent spells and spells without an icon are left out. A sub-spell without a name of its own, like the one Chant casts on every creature around, is listed under its parent spell's name.
+]]
+
+uiStrings["ZJBattleSense_TRANSLATION_AttackInfo_Immune"] = "Immune"
+
+uiStrings["ZJBattleSense_TRANSLATION_AttackInfo_Mainhand"] = "Main"
+
+uiStrings["ZJBattleSense_TRANSLATION_AttackInfo_Offhand"] = "Offhand"
+
+uiStrings["ZJBattleSense_TRANSLATION_AttackInfo_Stoneskins"] = "Stoneskins"
+
+uiStrings["ZJBattleSense_TRANSLATION_AttackInfo_MirrorImages"] = "Mirror images"
+
+uiStrings["ZJBattleSense_TRANSLATION_AttackInfo_Poison"] = "poison"
+
 -----------
 -- Timer --
 -----------

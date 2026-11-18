@@ -1,0 +1,3009 @@
+
+-------------
+-- Options --
+-------------
+
+EEex_Options_Register("ZJAttackInfo_Enable", EEex_Options_Option.new({
+	["default"]  = 1,
+	["type"]     = EEex_Options_ToggleType.new(),
+	["accessor"] = EEex_Options_ClampedAccessor.new({ ["min"] = 0, ["max"] = 1 }),
+	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Attack Info" }),
+	["onChange"] = function(self, oldValue) ZJAttackInfo_SetEnabled(self:get() ~= 0) end,
+}))
+
+ZJAttackInfo_Private_FontPoint = EEex_Options_Register("ZJAttackInfo_FontPoint", EEex_Options_Option.new({
+	["default"]  = 11,
+	["type"]     = EEex_Options_EditType.new(),
+	["accessor"] = EEex_Options_ClampedAccessor.new({ ["min"] = 1, ["max"] = 99 }),
+	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Attack Info Module: Font Point" }),
+}))
+
+-- 0 = Minimum d20 roll needed to hit, 1 = Hit chance percentage
+ZJAttackInfo_Private_HitDisplayType = EEex_Options_Register("ZJAttackInfo_HitDisplayType", EEex_Options_Option.new({
+	["default"]  = 0,
+	["accessor"] = EEex_Options_ClampedAccessor.new({ ["min"] = 0, ["max"] = 1 }),
+	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Attack Info Module: Hit Display Type" }),
+}))
+
+ZJAttackInfo_Private_ImmunityDisplayType = EEex_Options_Register("ZJAttackInfo_ImmunityDisplayType", EEex_Options_Option.new({
+	["default"]  = 0,
+	["accessor"] = EEex_Options_ClampedAccessor.new({ ["min"] = 0, ["max"] = 2 }),
+	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Attack Info Module: Immunity Display Type" }),
+}))
+
+EEex_Options_Register("ZJAttackInfo_OpenKeybind", EEex_Options_Option.new({
+	["default"]  = EEex_Options_UnmarshalKeybind("Left Ctrl|Down"),
+	["type"]     = EEex_Options_KeybindType.new({
+		["lockedFireType"] = EEex_Keybinds_FireType.DOWN,
+		["callback"]       = function() ZJAttackInfo_Private_OnOpenKeybindPressed()     end,
+		["onSatisfied"]    = function() ZJAttackInfo_Private_OnOpenKeybindSatisfied()   end,
+		["onUnsatisfied"]  = function() ZJAttackInfo_Private_OnOpenKeybindUnsatisfied() end,
+	}),
+	["accessor"] = EEex_Options_KeybindAccessor.new({ ["keybindID"] = "ZJAttackInfo_OpenKeybind" }),
+	["storage"]  = EEex_Options_KeybindLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Attack Info Module: Open Keybind" }),
+}))
+
+ZJAttackInfo_Private_OpenWithAttackCursor = EEex_Options_Register("ZJAttackInfo_OpenWithAttackCursor", EEex_Options_Option.new({
+	["default"]  = 1,
+	["type"]     = EEex_Options_ToggleType.new(),
+	["accessor"] = EEex_Options_ClampedAccessor.new({ ["min"] = 0, ["max"] = 1 }),
+	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Attack Info Module: Open With Attack Cursor" }),
+}))
+
+EEex_Options_Register("ZJAttackInfo_ReverseKeybind", EEex_Options_Option.new({
+	["default"]  = EEex_Options_UnmarshalKeybind("Left Alt|Down"),
+	["type"]     = EEex_Options_KeybindType.new({
+		["lockedFireType"] = EEex_Keybinds_FireType.DOWN,
+		["callback"]       = function() ZJAttackInfo_Private_OnReverseKeybindPressed()     end,
+		["onSatisfied"]    = function() ZJAttackInfo_Private_OnReverseKeybindSatisfied()   end,
+		["onUnsatisfied"]  = function() ZJAttackInfo_Private_OnReverseKeybindUnsatisfied() end,
+	}),
+	["accessor"] = EEex_Options_KeybindAccessor.new({ ["keybindID"] = "ZJAttackInfo_ReverseKeybind" }),
+	["storage"]  = EEex_Options_KeybindLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Attack Info Module: Reverse Keybind" }),
+}))
+
+ZJAttackInfo_Private_ShowColumnHeaders = EEex_Options_Register("ZJAttackInfo_ShowColumnHeaders", EEex_Options_Option.new({
+	["default"]  = 1,
+	["type"]     = EEex_Options_ToggleType.new(),
+	["accessor"] = EEex_Options_ClampedAccessor.new({ ["min"] = 0, ["max"] = 1 }),
+	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Attack Info Module: Show Column Headers" }),
+}))
+
+ZJAttackInfo_Private_HideUnusedOffhandHeader = EEex_Options_Register("ZJAttackInfo_HideUnusedOffhandHeader", EEex_Options_Option.new({
+	["default"]  = 1,
+	["type"]     = EEex_Options_ToggleType.new(),
+	["accessor"] = EEex_Options_ClampedAccessor.new({ ["min"] = 0, ["max"] = 1 }),
+	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Attack Info Module: Hide Unused Offhand Header" }),
+}))
+
+ZJAttackInfo_Private_ShowSpellEffects = EEex_Options_Register("ZJAttackInfo_ShowSpellEffects", EEex_Options_Option.new({
+	["default"]  = 1,
+	["type"]     = EEex_Options_ToggleType.new(),
+	["accessor"] = EEex_Options_ClampedAccessor.new({ ["min"] = 0, ["max"] = 1 }),
+	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Attack Info Module: Show Spell Effects" }),
+}))
+
+ZJAttackInfo_Private_ShowTargetAttackTimer = EEex_Options_Register("ZJAttackInfo_ShowTargetAttackTimer", EEex_Options_Option.new({
+	["default"]  = 1,
+	["type"]     = EEex_Options_ToggleType.new(),
+	["accessor"] = EEex_Options_ClampedAccessor.new({ ["min"] = 0, ["max"] = 1 }),
+	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Attack Info Module: Show Target Attack Timer" }),
+}))
+
+ZJAttackInfo_Private_CompactForAllies = EEex_Options_Register("ZJAttackInfo_CompactForAllies", EEex_Options_Option.new({
+	["default"]  = 1,
+	["type"]     = EEex_Options_ToggleType.new(),
+	["accessor"] = EEex_Options_ClampedAccessor.new({ ["min"] = 0, ["max"] = 1 }),
+	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Attack Info Module: Compact For Allies" }),
+}))
+
+ZJAttackInfo_Private_ShowTargetCastTimer = EEex_Options_Register("ZJAttackInfo_ShowTargetCastTimer", EEex_Options_Option.new({
+	["default"]  = 1,
+	["type"]     = EEex_Options_ToggleType.new(),
+	["accessor"] = EEex_Options_ClampedAccessor.new({ ["min"] = 0, ["max"] = 1 }),
+	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Attack Info Module: Show Target Cast Timer" }),
+}))
+
+ZJAttackInfo_Private_ShowTargetContingencyTimer = EEex_Options_Register("ZJAttackInfo_ShowTargetContingencyTimer", EEex_Options_Option.new({
+	["default"]  = 1,
+	["type"]     = EEex_Options_ToggleType.new(),
+	["accessor"] = EEex_Options_ClampedAccessor.new({ ["min"] = 0, ["max"] = 1 }),
+	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Attack Info Module: Show Target Contingency Timer" }),
+}))
+
+ZJAttackInfo_Private_ShowTargetModalTimer = EEex_Options_Register("ZJAttackInfo_ShowTargetModalTimer", EEex_Options_Option.new({
+	["default"]  = 1,
+	["type"]     = EEex_Options_ToggleType.new(),
+	["accessor"] = EEex_Options_ClampedAccessor.new({ ["min"] = 0, ["max"] = 1 }),
+	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Attack Info Module: Show Target Modal Timer" }),
+}))
+
+ZJAttackInfo_Private_ShowRowTimers = EEex_Options_Register("ZJAttackInfo_ShowRowTimers", EEex_Options_Option.new({
+	["default"]  = 1,
+	["type"]     = EEex_Options_ToggleType.new(),
+	["accessor"] = EEex_Options_ClampedAccessor.new({ ["min"] = 0, ["max"] = 1 }),
+	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Attack Info Module: Show Row Timers" }),
+}))
+
+EEex_Options_AddTab("ZJBattleSense_Options_TRANSLATION_AttackInfo_TabTitle", function() return {
+	{
+		EEex_Options_DisplayEntry.new({
+			["optionID"]    = "ZJAttackInfo_Enable",
+			["label"]       = "ZJBattleSense_Options_TRANSLATION_AttackInfo_Enable",
+			["description"] = "ZJBattleSense_Options_TRANSLATION_AttackInfo_Enable_Description",
+			["widget"]      = EEex_Options_ToggleWidget.new(),
+		}),
+		EEex_Options_DisplayEntry.new({
+			["optionID"]    = "ZJAttackInfo_FontPoint",
+			["label"]       = "ZJBattleSense_Options_TRANSLATION_AttackInfo_FontPoint",
+			["description"] = "ZJBattleSense_Options_TRANSLATION_AttackInfo_FontPoint_Description",
+			["widget"]      = EEex_Options_EditWidget.new({
+				["maxCharacters"] = 2,
+				["number"]        = true,
+			}),
+		}),
+		EEex_Options_DisplayEntry.new({
+			["optionID"]    = "ZJAttackInfo_HitDisplayType",
+			["label"]       = "ZJBattleSense_Options_TRANSLATION_AttackInfo_HitDisplayType",
+			["description"] = "ZJBattleSense_Options_TRANSLATION_AttackInfo_HitDisplayType_Description",
+			["widget"]      = EEex_Options_HorizontalMultiToggleWidget.new({
+				["toggles"] = {
+					{
+						["label"] = "ZJBattleSense_Options_TRANSLATION_AttackInfo_HitDisplayType_Roll",
+						["data"] = { ["toggleValue"] = 0 },
+					},
+					{
+						["label"] = "ZJBattleSense_Options_TRANSLATION_AttackInfo_HitDisplayType_Percentage",
+						["data"] = { ["toggleValue"] = 1 },
+					},
+				},
+			}),
+		}),
+		EEex_Options_DisplayEntry.new({
+			["optionID"]    = "ZJAttackInfo_ImmunityDisplayType",
+			["label"]       = "ZJBattleSense_Options_TRANSLATION_AttackInfo_ImmunityDisplayType",
+			["description"] = "ZJBattleSense_Options_TRANSLATION_AttackInfo_ImmunityDisplayType_Description",
+			["widget"]      = EEex_Options_HorizontalMultiToggleWidget.new({
+				["toggles"] = {
+					{
+						["label"] = "ZJBattleSense_Options_TRANSLATION_AttackInfo_ImmunityDisplayType_Color",
+						["data"] = { ["toggleValue"] = 0 },
+					},
+					{
+						["label"] = "ZJBattleSense_Options_TRANSLATION_AttackInfo_ImmunityDisplayType_None",
+						["data"] = { ["toggleValue"] = 1 },
+					},
+					{
+						["label"] = "ZJBattleSense_Options_TRANSLATION_AttackInfo_ImmunityDisplayType_Text",
+						["data"] = { ["toggleValue"] = 2 },
+					},
+				},
+			}),
+		}),
+		EEex_Options_DisplayEntry.new({
+			["optionID"]    = "ZJAttackInfo_OpenKeybind",
+			["label"]       = "ZJBattleSense_Options_TRANSLATION_AttackInfo_OpenKeybind",
+			["description"] = "ZJBattleSense_Options_TRANSLATION_AttackInfo_OpenKeybind_Description",
+			["widget"]      = EEex_Options_KeybindWidget.new(),
+		}),
+		EEex_Options_DisplayEntry.new({
+			["optionID"]    = "ZJAttackInfo_OpenWithAttackCursor",
+			["label"]       = "ZJBattleSense_Options_TRANSLATION_AttackInfo_OpenWithAttackCursor",
+			["description"] = "ZJBattleSense_Options_TRANSLATION_AttackInfo_OpenWithAttackCursor_Description",
+			["widget"]      = EEex_Options_ToggleWidget.new(),
+		}),
+		EEex_Options_DisplayEntry.new({
+			["optionID"]    = "ZJAttackInfo_ReverseKeybind",
+			["label"]       = "ZJBattleSense_Options_TRANSLATION_AttackInfo_ReverseKeybind",
+			["description"] = "ZJBattleSense_Options_TRANSLATION_AttackInfo_ReverseKeybind_Description",
+			["widget"]      = EEex_Options_KeybindWidget.new(),
+		}),
+		EEex_Options_DisplayEntry.new({
+			["optionID"]    = "ZJAttackInfo_ShowColumnHeaders",
+			["label"]       = "ZJBattleSense_Options_TRANSLATION_AttackInfo_ShowColumnHeaders",
+			["description"] = "ZJBattleSense_Options_TRANSLATION_AttackInfo_ShowColumnHeaders_Description",
+			["widget"]      = EEex_Options_ToggleWidget.new(),
+			["subOptions"]  = {
+				EEex_Options_DisplayEntry.new({
+					["optionID"]    = "ZJAttackInfo_HideUnusedOffhandHeader",
+					["label"]       = "ZJBattleSense_Options_TRANSLATION_AttackInfo_HideUnusedOffhandHeader",
+					["description"] = "ZJBattleSense_Options_TRANSLATION_AttackInfo_HideUnusedOffhandHeader_Description",
+					["widget"]      = EEex_Options_ToggleWidget.new(),
+				}),
+			}
+		}),
+		EEex_Options_DisplayEntry.new({
+			["optionID"]    = "ZJAttackInfo_ShowSpellEffects",
+			["label"]       = "ZJBattleSense_Options_TRANSLATION_AttackInfo_ShowSpellEffects",
+			["description"] = "ZJBattleSense_Options_TRANSLATION_AttackInfo_ShowSpellEffects_Description",
+			["widget"]      = EEex_Options_ToggleWidget.new(),
+		}),
+		EEex_Options_DisplayEntry.new({
+			["optionID"]    = "ZJAttackInfo_CompactForAllies",
+			["label"]       = "ZJBattleSense_Options_TRANSLATION_AttackInfo_CompactForAllies",
+			["description"] = "ZJBattleSense_Options_TRANSLATION_AttackInfo_CompactForAllies_Description",
+			["widget"]      = EEex_Options_ToggleWidget.new(),
+		}),
+		EEex_Options_DisplayEntry.new({
+			["optionID"]    = "ZJAttackInfo_ShowRowTimers",
+			["label"]       = "ZJBattleSense_Options_TRANSLATION_AttackInfo_ShowRowTimers",
+			["description"] = "ZJBattleSense_Options_TRANSLATION_AttackInfo_ShowRowTimers_Description",
+			["widget"]      = EEex_Options_ToggleWidget.new(),
+		}),
+		EEex_Options_DisplayEntry.new({
+			["optionID"]    = "ZJAttackInfo_ShowTargetAttackTimer",
+			["label"]       = "ZJBattleSense_Options_TRANSLATION_AttackInfo_ShowTargetAttackTimer",
+			["description"] = "ZJBattleSense_Options_TRANSLATION_AttackInfo_ShowTargetAttackTimer_Description",
+			["widget"]      = EEex_Options_ToggleWidget.new(),
+		}),
+		EEex_Options_DisplayEntry.new({
+			["optionID"]    = "ZJAttackInfo_ShowTargetCastTimer",
+			["label"]       = "ZJBattleSense_Options_TRANSLATION_AttackInfo_ShowTargetCastTimer",
+			["description"] = "ZJBattleSense_Options_TRANSLATION_AttackInfo_ShowTargetCastTimer_Description",
+			["widget"]      = EEex_Options_ToggleWidget.new(),
+		}),
+		EEex_Options_DisplayEntry.new({
+			["optionID"]    = "ZJAttackInfo_ShowTargetContingencyTimer",
+			["label"]       = "ZJBattleSense_Options_TRANSLATION_AttackInfo_ShowTargetContingencyTimer",
+			["description"] = "ZJBattleSense_Options_TRANSLATION_AttackInfo_ShowTargetContingencyTimer_Description",
+			["widget"]      = EEex_Options_ToggleWidget.new(),
+		}),
+		EEex_Options_DisplayEntry.new({
+			["optionID"]    = "ZJAttackInfo_ShowTargetModalTimer",
+			["label"]       = "ZJBattleSense_Options_TRANSLATION_AttackInfo_ShowTargetModalTimer",
+			["description"] = "ZJBattleSense_Options_TRANSLATION_AttackInfo_ShowTargetModalTimer_Description",
+			["widget"]      = EEex_Options_ToggleWidget.new(),
+		}),
+	},
+} end)
+
+-------------
+-- Globals --
+-------------
+
+ZJAttackInfo_Private_CombatantSearchRange = 896 -- Twice a sprite's default visual range
+ZJAttackInfo_Private_GoodCutoff = 30 -- EA.IDS, everything up to this value is on the party's side
+ZJAttackInfo_Private_ObjectTypes = {} -- [script object string] = CAIObjectType
+ZJAttackInfo_Private_CurrentTargetID = -1
+ZJAttackInfo_Private_Enabled = false
+ZJAttackInfo_Private_LastTargetID = -1
+ZJAttackInfo_Private_OpenDelayTarget = -1
+ZJAttackInfo_Private_OpenKeybindPressed = false
+ZJAttackInfo_Private_ReverseKeybindPressed = false
+
+-------------
+-- General --
+-------------
+
+-- @bubb_doc { ZJAttackInfo_SetEnabled }
+--
+-- @summary: Temporarily changes the enable state of the attack information popup.
+--
+-- @note: To persist this change, instead modify the ``ZJAttackInfo_Enable`` option.
+--
+-- @param { enabled / type=boolean }: The enable / disable state to set.
+
+function ZJAttackInfo_SetEnabled(enabled)
+	ZJAttackInfo_Private_Enabled = enabled
+	ZJAttackInfo_Private_Menu_Ticker_SetOpen(ZJAttackInfo_Private_Menu_Ticker_ShouldBeOpen and enabled)
+end
+
+----------
+-- Misc --
+----------
+
+function ZJAttackInfo_Private_GetCursorRenderData()
+
+	local vidMode = EngineGlobals.g_pBaldurChitin.cVideo.pCurrentMode
+	local cursorCell = vidMode.pPointerVidCell
+	if cursorCell == nil then return end
+
+	local centerX, centerY = cursorCell:GetCurrentCenterPoint()
+	local w, h = cursorCell:GetCurrentFrameSize()
+	return EEex_Menu_ScaleX(centerX), EEex_Menu_ScaleY(centerY), EEex_Menu_ScaleX(w), EEex_Menu_ScaleY(h)
+end
+
+function ZJAttackInfo_Private_GetSelectedSprites(targetSprite)
+
+	local selectedSprites = {}
+	local addedIDs = {}
+
+	local add = function(sprite)
+		if sprite == nil or EEex_UDEqual(sprite, targetSprite) then return end
+		local id = sprite.m_id
+		if addedIDs[id] then return end
+		addedIDs[id] = true
+		table.insert(selectedSprites, sprite)
+	end
+
+	EEex_Sprite_IterateSelected(function(sprite)
+		add(sprite)
+	end)
+
+	-- Always include party members that are attacking the target, or are being attacked by it, even if they aren't selected
+	for portraitIndex = 0, 5 do
+		local sprite = EEex_Sprite_GetInPortrait(portraitIndex)
+		if EEex_GameObject_IsSprite(sprite)
+			and (ZJAttackInfo_Private_IsEngaging(sprite, targetSprite) or ZJAttackInfo_Private_IsEngaging(targetSprite, sprite))
+		then
+			add(sprite)
+		end
+	end
+
+	-- The same goes for the party's summons and other allies near the target
+	ZJAttackInfo_Private_IterateCombatants(targetSprite, "[GOODCUTOFF]", add)
+
+	EEex_Utility_AlphanumericSortTable(selectedSprites, function(sprite)
+		return sprite:getName()
+	end)
+
+	return selectedSprites
+end
+
+-- Calls `func` for every creature near `targetSprite` that matches `objectTypeString`, (as per a script object),
+-- and is attacking `targetSprite` or is being attacked by it
+function ZJAttackInfo_Private_IterateCombatants(targetSprite, objectTypeString, func)
+
+	local objectType = ZJAttackInfo_Private_ObjectTypes[objectTypeString]
+	if objectType == nil then
+		-- Kept for the lifetime of the Lua state so the string isn't parsed every tick
+		objectType = EEex_Object_ParseString(objectTypeString)
+		ZJAttackInfo_Private_ObjectTypes[objectTypeString] = objectType
+	end
+
+	targetSprite:forAllOfTypeInRange(objectType, ZJAttackInfo_Private_CombatantSearchRange, function(sprite)
+		if EEex_GameObject_IsSprite(sprite)
+			and not EEex_UDEqual(sprite, targetSprite)
+			and (ZJAttackInfo_Private_IsEngaging(sprite, targetSprite) or ZJAttackInfo_Private_IsEngaging(targetSprite, sprite))
+		then
+			func(sprite)
+		end
+	end, 0) -- 0 = Don't require line of sight from the target
+end
+
+-- Returns every creature that `targetSprite` is attacking or is being attacked by
+function ZJAttackInfo_Private_GetCombatants(targetSprite)
+
+	local combatants = {}
+
+	ZJAttackInfo_Private_IterateCombatants(targetSprite, "[ANYONE]", function(sprite)
+		table.insert(combatants, sprite)
+	end)
+
+	EEex_Utility_AlphanumericSortTable(combatants, function(sprite)
+		return sprite:getName()
+	end)
+
+	return combatants
+end
+
+-- The compact popup is used for the party and its summons / allies. Instead of the selected party members,
+-- it lists the creatures the target is fighting.
+function ZJAttackInfo_Private_IsCompactTarget(targetSprite)
+	return ZJAttackInfo_Private_CompactForAllies:get() ~= 0
+		and targetSprite.m_typeAI.m_EnemyAlly <= ZJAttackInfo_Private_GoodCutoff
+end
+
+-- Returns the sprites to list for `targetSprite`, and whether the compact popup should be used
+function ZJAttackInfo_Private_GetRowSprites(targetSprite)
+	if ZJAttackInfo_Private_IsCompactTarget(targetSprite) then
+		return ZJAttackInfo_Private_GetCombatants(targetSprite), true
+	end
+	return ZJAttackInfo_Private_GetSelectedSprites(targetSprite), false
+end
+
+function ZJAttackInfo_Private_GetWeaponHitChance(sourceSprite, targetSprite, leftHand)
+
+	local sourceSpriteEquipment = sourceSprite.m_equipment
+
+	local nSourceSpriteSelectedWeapon
+	local nSourceSpriteSelectedWeaponAbility
+	local sourceSpriteSelectedWeapon
+
+	if leftHand then
+		nSourceSpriteSelectedWeapon = 9
+		nSourceSpriteSelectedWeaponAbility = 0
+		sourceSpriteSelectedWeapon = sourceSpriteEquipment.m_items:get(nSourceSpriteSelectedWeapon)
+	else
+		nSourceSpriteSelectedWeapon = sourceSpriteEquipment.m_selectedWeapon
+		nSourceSpriteSelectedWeaponAbility = sourceSpriteEquipment.m_selectedWeaponAbility
+		sourceSpriteSelectedWeapon = sourceSpriteEquipment.m_items:get(nSourceSpriteSelectedWeapon)
+	end
+
+	local isImmune = EEex.IsImmuneToWeapon(sourceSprite, targetSprite, nSourceSpriteSelectedWeapon, sourceSpriteSelectedWeapon, nSourceSpriteSelectedWeaponAbility)
+	local hitChance, reasoning = EEex.GetWeaponHitChance(sourceSprite, targetSprite, sourceSpriteSelectedWeapon, nSourceSpriteSelectedWeaponAbility, leftHand)
+
+	-- Reading the weapon's damage is cosmetic, never let it take the popup down
+	local ok, damageStr, extras, damageType, iconDamageType = pcall(ZJAttackInfo_Private_GetWeaponDamageString,
+		sourceSprite, sourceSpriteSelectedWeapon, nSourceSpriteSelectedWeaponAbility, leftHand)
+
+	if not ok or damageStr == nil then
+		return hitChance, isImmune, reasoning, nil, nil
+	end
+
+	-- The target's resistance to the weapon's damage type reduces what a hit does, (or increases it, if it is negative).
+	-- If the target is immune to the weapon, (and the "Immunity Display Type" option is 'Color'), a hit does nothing at
+	-- all, the resistance makes no difference then and "Immune" is shown in its place.
+	local okResistance, resistance = pcall(ZJAttackInfo_Private_GetDamageResistance, targetSprite, damageType)
+	if isImmune and ZJAttackInfo_Private_ImmunityDisplayType:get() == 0 then
+		damageStr = string.format("%s %s", damageStr, uiStrings["ZJBattleSense_TRANSLATION_AttackInfo_Immune"])
+	elseif okResistance and resistance ~= 0 then
+		damageStr = string.format("%s %s", damageStr, ZJAttackInfo_Private_FormatResistance(resistance))
+	end
+
+	-- The icons and the extra damage that go behind the damage
+	local okDisplay, handDisplay = pcall(ZJAttackInfo_Private_GetHandDisplay, iconDamageType, extras, targetSprite)
+
+	return hitChance, isImmune, reasoning, damageStr, okDisplay and handDisplay or nil
+end
+
+-- ITM ability damage type => the icon(s) that show it, (ZJATKDMG.BAM: frame = icon * 3 + variant).
+--   0 = sword (slashing), 1 = club (crushing), 2 = spear (piercing), 3 = bow (missile), 4 = slingshot (sling ammunition), 5 = fist
+-- The file also has: 6 = spell, 7 = item
+ZJAttackInfo_Private_DamageTypeIcons = {
+	[1] = { 2 },
+	[2] = { 1 },
+	[3] = { 0 },
+	[4] = { 3 },
+	[5] = { 5 },
+	[6] = { 2, 1 },
+	[7] = { 2, 0 },
+	[8] = { 1, 0 },
+	[9] = { 4 },
+}
+
+-- op12 damage type => { the icon of its element, the resistance stat of the target that applies to it }
+-- The icon is the frame in ZJATKELM.BAM: 0 = fire, 1 = cold, 2 = electricity, 3 = acid, 4 = magic
+ZJAttackInfo_Private_EffectDamageTypeIcons = {
+	[0x8]   = { 0, "m_nResistFire" },
+	[0x200] = { 0, "m_nResistMagicFire" },
+	[0x2]   = { 1, "m_nResistCold" },
+	[0x400] = { 1, "m_nResistMagicCold" },
+	[0x4]   = { 2, "m_nResistElectricity" },
+	[0x1]   = { 3, "m_nResistAcid" },
+	[0x40]  = { 4, "m_nResistMagic" },
+}
+
+ZJAttackInfo_Private_MaxHandIcons = 2 -- The menu has this many damage type icons, and this many extra damage icons, per hand
+
+-- Returns what is shown behind a weapon's damage:
+--
+--   typeIcons  => Array of the icons of its damage type(s), (see ZJAttackInfo_Private_DamageTypeIcons)
+--   extraText  => The extra damage it applies on a hit, e.g. "+1D6 -50% +poison", ("" if there is none)
+--   extraIcons => Array of the icons of the elements of that extra damage, (see ZJAttackInfo_Private_EffectDamageTypeIcons)
+--
+-- If `targetSprite` is given, its resistance to an element is shown behind the amount of that element, as its
+-- resistance to the weapon's damage type is behind the weapon's damage: "-50%" does half, "+25%" does a quarter more.
+function ZJAttackInfo_Private_GetHandDisplay(damageType, extras, targetSprite)
+
+	local display = {
+		["typeIcons"]  = ZJAttackInfo_Private_DamageTypeIcons[damageType] or {},
+		["extraText"]  = "",
+		["extraIcons"] = {},
+	}
+
+	local targetStats = targetSprite and targetSprite:getActiveStats() or nil
+	local textParts = {}
+
+	-- The extra damage that has an icon comes first, so the amounts are in the order of the icons
+	for pass = 1, 2 do
+		for _, extra in ipairs(extras) do
+
+			local iconInfo = ZJAttackInfo_Private_EffectDamageTypeIcons[extra.typeID]
+			local useIcon = iconInfo ~= nil and #display.extraIcons < ZJAttackInfo_Private_MaxHandIcons
+
+			if pass == 1 and useIcon then
+
+				local text = "+"..extra.amount
+
+				local resistance = targetStats and math.min(targetStats[iconInfo[2]], 100) or 0
+				if resistance ~= 0 then
+					text = string.format("%s %s", text, ZJAttackInfo_Private_FormatResistance(resistance))
+				end
+
+				table.insert(display.extraIcons, iconInfo[1])
+				table.insert(textParts, text)
+				extra.shown = true
+
+			elseif pass == 2 and not extra.shown then
+				table.insert(textParts, "+"..(extra.amount ~= "" and extra.amount.." " or "")..extra.typeName)
+			end
+		end
+	end
+
+	for _, extra in ipairs(extras) do
+		extra.shown = nil
+	end
+
+	display.extraText = table.concat(textParts, " ")
+	return display
+end
+
+-- A resistance that takes damage away is shown in red, one that adds damage, (a negative resistance), in green.
+-- The colors depend on the row the text ends up in, (a greyed out row has darker colors), so the text is marked
+-- here and colored by ZJAttackInfo_Private_ColorResistance().
+ZJAttackInfo_Private_ResistanceLessStart = "\1"
+ZJAttackInfo_Private_ResistanceMoreStart = "\3"
+ZJAttackInfo_Private_ResistanceColorEnd  = "\2"
+
+-- Formats what a resistance of `resistance` percent does to damage, e.g. "-50%", or "+25%" for a negative resistance
+function ZJAttackInfo_Private_FormatResistance(resistance)
+	local text = string.format("%+d%%", -resistance)
+	if resistance > 0 then
+		text = ZJAttackInfo_Private_ResistanceLessStart..text..ZJAttackInfo_Private_ResistanceColorEnd
+	elseif resistance < 0 then
+		text = ZJAttackInfo_Private_ResistanceMoreStart..text..ZJAttackInfo_Private_ResistanceColorEnd
+	end
+	return text
+end
+
+-- Colors the resistances that ZJAttackInfo_Private_FormatResistance() marked in `text`:
+--   lessColorStr => The color code for the ones that take damage away
+--   moreColorStr => The color code for the ones that add damage
+--   baseColorStr => The color code of the text around them, ("" if it has the item's own color)
+function ZJAttackInfo_Private_ColorResistance(text, lessColorStr, moreColorStr, baseColorStr)
+	text = text:gsub(ZJAttackInfo_Private_ResistanceLessStart, lessColorStr)
+	text = text:gsub(ZJAttackInfo_Private_ResistanceMoreStart, moreColorStr)
+	text = text:gsub(ZJAttackInfo_Private_ResistanceColorEnd, baseColorStr ~= "" and baseColorStr or "^-")
+	return text
+end
+
+-- op12 damage types, (the high word of the effect's second parameter)
+ZJAttackInfo_Private_EffectDamageTypeNames = {
+	[0x0]   = "crushing",
+	[0x1]   = "acid",
+	[0x2]   = "cold",
+	[0x4]   = "electricity",
+	[0x8]   = "fire",
+	[0x10]  = "piercing",
+	[0x20]  = "poison",
+	[0x40]  = "magic",
+	[0x80]  = "missile",
+	[0x100] = "slashing",
+	[0x200] = "magic fire",
+	[0x400] = "magic cold",
+	[0x800] = "stunning",
+}
+
+-- Returns an array of the extra damage the weapon's ability applies to what it hits, each:
+--
+--   amount   => e.g. "1D6+1", ("" if it has none)
+--   typeID   => The op12 damage type, (nil for poison)
+--   typeName => e.g. "fire"
+--
+-- These are effects of the item: saving throws and their chance to apply aren't looked at.
+function ZJAttackInfo_Private_GetOnHitDamage(weaponHeader, ability)
+
+	local extras = {}
+	local seen = {}
+
+	local add = function(amount, typeID, typeName)
+		local key = amount.." "..typeName
+		if not seen[key] then
+			seen[key] = true
+			table.insert(extras, { ["amount"] = amount, ["typeID"] = typeID, ["typeName"] = typeName })
+		end
+	end
+
+	local effectsAddress = EEex_UDToPtr(weaponHeader) + weaponHeader.effectsOffset
+
+	for i = ability.startingEffect, ability.startingEffect + ability.effectCount - 1 do
+
+		local effect = EEex_PtrToUD(effectsAddress + Item_effect_st.sizeof * i, "Item_effect_st")
+		local opcode = effect.effectID
+
+		if opcode == 12 then -- Damage
+
+			local typeID = EEex_RShift(effect.dwFlags, 16)
+			local typeName = ZJAttackInfo_Private_EffectDamageTypeNames[typeID] or "damage"
+			local numDice = effect.numDice
+			local diceSize = effect.diceSize
+			local amount = effect.effectAmount
+
+			local amountStr = ""
+			if numDice > 0 and diceSize > 0 then
+				amountStr = string.format("%dD%d", numDice, diceSize)
+				if amount ~= 0 then
+					amountStr = amountStr..string.format("%+d", amount)
+				end
+			elseif amount ~= 0 then
+				amountStr = string.format("%d", amount)
+			end
+
+			add(amountStr, typeID, typeName)
+
+		elseif opcode == 25 then -- Poison
+			add("", nil, uiStrings["ZJBattleSense_TRANSLATION_AttackInfo_Poison"])
+		end
+	end
+
+	return extras
+end
+
+-- ITM ability damage type => the resistance stat(s) of the target that apply to it. An attack with two damage types
+-- uses the one the target resists least.
+ZJAttackInfo_Private_DamageTypeResistances = {
+	[1] = { "m_nResistPiercing" },
+	[2] = { "m_nResistCrushing" },
+	[3] = { "m_nResistSlashing" },
+	[4] = { "m_nResistMissile" },
+	[5] = { "m_nResistCrushing" },
+	[6] = { "m_nResistPiercing", "m_nResistCrushing" },
+	[7] = { "m_nResistPiercing", "m_nResistSlashing" },
+	[8] = { "m_nResistCrushing", "m_nResistSlashing" },
+	[9] = { "m_nResistCrushing" },
+}
+
+-- Returns the percentage of a weapon's damage of `damageType` that `targetSprite` resists, (at most 100, can be negative)
+function ZJAttackInfo_Private_GetDamageResistance(targetSprite, damageType)
+
+	local statNames = ZJAttackInfo_Private_DamageTypeResistances[damageType]
+	if statNames == nil then return 0 end
+
+	local stats = targetSprite:getActiveStats()
+	local resistance = nil
+
+	for _, statName in ipairs(statNames) do
+		local statResistance = stats[statName]
+		if resistance == nil or statResistance < resistance then
+			resistance = statResistance
+		end
+	end
+
+	return math.min(resistance or 0, 100)
+end
+
+-- Returns the lowest d20 roll that lands the attack, derived from the hit chance, (every face of the die is worth 5%).
+-- Returns 21 if no roll can hit, and 1 if every roll hits.
+function ZJAttackInfo_Private_GetMinimumHitRoll(hitChance)
+	local hittingFaces = math.floor(hitChance / 5 + 0.5)
+	return math.max(1, math.min(21 - hittingFaces, 21))
+end
+
+ZJAttackInfo_Private_StrengthDamageBonusCache = {} -- [STR * 1000 + exceptional STR] = bonus
+
+-- The STRMOD.2DA + STRMODEX.2DA damage bonus of `stats`
+function ZJAttackInfo_Private_GetStrengthDamageBonus(stats)
+
+	local strength = stats.m_nSTR
+	local strengthExtra = stats.m_nSTRExtra
+
+	local cacheKey = strength * 1000 + strengthExtra
+	local bonus = ZJAttackInfo_Private_StrengthDamageBonusCache[cacheKey]
+
+	if bonus == nil then
+		local ruleTables = EngineGlobals.g_pBaldurChitin.m_pObjectGame.m_ruleTables
+		bonus = (tonumber(ruleTables.m_tStrengthMod:getAtLabels("DAMAGE", tostring(strength))) or 0)
+		      + (tonumber(ruleTables.m_tStrengthModExtra:getAtLabels("DAMAGE", tostring(strengthExtra))) or 0)
+		ZJAttackInfo_Private_StrengthDamageBonusCache[cacheKey] = bonus
+	end
+
+	return bonus
+end
+
+-- Returns, for the weapon `sprite` attacks with, (nil if the ability doesn't deal damage):
+--
+--   * The damage it rolls on a hit, e.g. "1D8+4"
+--   * The extra damage it applies on a hit, see ZJAttackInfo_Private_GetOnHitDamage()
+--   * The ITM damage type
+--   * The ITM damage type to show the icon(s) of, (see below)
+--
+-- This follows CGameSprite::Damage(), the dice and bonus of the weapon, (and of its launcher), are increased by:
+--
+--   * The attacker's damage bonus, (op73, etc.)
+--
+--   * The attacker's bonus for the hand the weapon is in. The engine maintains this, it holds the bonus from the weapon's
+--     proficiency, (WSPECIAL.2DA), the weapon style, (STYLBONU.2DA), and the melee / missile / fist damage bonuses.
+--
+--   * The attacker's strength, if the weapon / launcher asks for it
+--
+--   * Being berserk
+--
+-- Not included: Everything that depends on the roll or the target, (critical hits, backstabs, damage bonuses against specific
+-- creatures, the target's resistances), and the effects the weapon applies on hit, (e.g. extra elemental damage).
+function ZJAttackInfo_Private_GetWeaponDamageString(sprite, weapon, abilityNum, leftHand)
+
+	if weapon == nil then return nil end
+
+	local weaponRes = weapon.pRes
+	local weaponHeader = weaponRes and weaponRes.pHeader
+	if weaponHeader == nil or abilityNum < 0 or abilityNum >= weaponHeader.abilityCount then return nil end
+
+	local ability = weapon:getAbility(abilityNum)
+	if ability == nil then return nil end
+
+	local diceCount = ability.damageDiceCount
+	local diceSize = ability.damageDice
+	local bonus = ability.damageDiceBonus
+
+	local hasDice = diceCount > 0 and diceSize > 0
+	if not hasDice and bonus == 0 then
+		return nil -- Not a damaging ability
+	end
+
+	local diceStr = hasDice and string.format("%dD%d", diceCount, diceSize) or nil
+	local addStrength = EEex_BAnd(ability.abilityFlags, 0x5) ~= 0 -- BIT0 = strength bonus, BIT2 = strength bonus to damage only
+
+	-- Only the main hand fires a launcher
+	if not leftHand then
+
+		local launcher = sprite:getLauncher(ability)
+		local launcherRes = launcher and launcher.pRes
+		local launcherHeader = launcherRes and launcherRes.pHeader
+		local launcherAbility = launcherHeader and launcherHeader.abilityCount > 0 and launcher:getAbility(0) or nil
+
+		if launcherAbility ~= nil then
+
+			bonus = bonus + launcherAbility.damageDiceBonus
+
+			local launcherDiceCount = launcherAbility.damageDiceCount
+			local launcherDiceSize = launcherAbility.damageDice
+
+			if launcherDiceCount > 0 and launcherDiceSize > 0 then
+				if diceStr == nil then
+					diceStr = string.format("%dD%d", launcherDiceCount, launcherDiceSize)
+				elseif launcherDiceSize == diceSize then
+					diceStr = string.format("%dD%d", diceCount + launcherDiceCount, diceSize)
+				else
+					diceStr = string.format("%s+%dD%d", diceStr, launcherDiceCount, launcherDiceSize)
+				end
+			end
+
+			if EEex_BAnd(launcherAbility.abilityFlags, 0x5) ~= 0 then
+				addStrength = true
+			end
+		end
+	end
+
+	local stats = sprite:getActiveStats()
+
+	bonus = bonus + stats.m_nDamageBonus + (leftHand and stats.m_DamageBonusLeft or stats.m_DamageBonusRight)
+
+	if addStrength then
+		bonus = bonus + ZJAttackInfo_Private_GetStrengthDamageBonus(stats)
+	end
+
+	if EEex_BAnd(stats.m_generalState, 0x2) ~= 0 then -- STATE_BERSERK
+		bonus = bonus + 2
+	end
+
+	local damageStr
+
+	if diceStr == nil then
+		damageStr = tostring(bonus)
+	elseif bonus ~= 0 then
+		damageStr = diceStr..string.format("%+d", bonus)
+	else
+		damageStr = diceStr
+	end
+
+	local damageType = ability.damageType
+
+	-- Elemental damage, poison, etc. that the weapon applies on a hit. This is an extra, it may not take the damage down with it.
+	local okOnHit, extras = pcall(ZJAttackInfo_Private_GetOnHitDamage, weaponHeader, ability)
+	if not okOnHit then
+		extras = {}
+	end
+
+	-- The game's sling bullets do missile damage like arrows, the "blunt missile" type isn't used by its items.
+	-- A sling's ammunition is shown with that type's icon anyway, to tell it from a bow's.
+	local iconDamageType = damageType
+	if damageType == 4 and ability.launcherType == 3 then -- 3 = Sling
+		iconDamageType = 9
+	end
+
+	return damageStr, extras, damageType, iconDamageType
+end
+
+-- Attack(), GroupAttack(), AttackNoSound(), AttackOneRound(), AttackReevaluate()
+ZJAttackInfo_Private_AttackActions = {
+	[  3] = true,
+	[ 94] = true,
+	[ 98] = true,
+	[105] = true,
+	[134] = true,
+}
+
+-- Returns true if `attackerSprite` is currently executing an attack action against `targetSprite`
+function ZJAttackInfo_Private_IsAttacking(attackerSprite, targetSprite)
+
+	local curAction = attackerSprite.m_curAction
+	if not ZJAttackInfo_Private_AttackActions[curAction.m_actionID] then return false end
+
+	local acteeId = curAction.m_acteeID.m_Instance
+	if acteeId == nil or acteeId <= 0 then
+		-- The action's object hasn't been resolved to an instance, fall back to the sprite's attack target
+		acteeId = attackerSprite.m_targetId
+	end
+
+	return acteeId == targetSprite.m_id
+end
+
+-- Spell(), UseItem(), ForceSpell(), SpellNoDec(), ForceSpellRange(), (and their RES / slot variants)
+ZJAttackInfo_Private_TargetedCastActions = {
+	[ 31] = true,
+	[ 34] = true,
+	[113] = true,
+	[191] = true,
+	[318] = true,
+}
+
+-- SpellPoint(), ForceSpellPoint(), SpellPointNoDec(), ForceSpellPointRange(), (and their RES variants)
+ZJAttackInfo_Private_PointCastActions = {
+	[ 95] = true,
+	[114] = true,
+	[192] = true,
+	[319] = true,
+}
+
+-- The spell action ends before the caster's spell cooldown does, so the creature a sprite cast at is remembered for
+-- as long as that cooldown runs.
+ZJAttackInfo_Private_CastTargets = {} -- [caster id] = target id, emptied when the popup closes
+
+-- Returns true if `casterSprite` is casting a spell / using an item on `targetSprite`, or is still in the
+-- cooldown of having done so
+function ZJAttackInfo_Private_IsCastingAt(casterSprite, targetSprite)
+
+	local casterId = casterSprite.m_id
+	local curAction = casterSprite.m_curAction
+	local actionID = curAction.m_actionID
+
+	if ZJAttackInfo_Private_TargetedCastActions[actionID] then
+		ZJAttackInfo_Private_CastTargets[casterId] = curAction.m_acteeID.m_Instance
+	elseif ZJAttackInfo_Private_PointCastActions[actionID] or casterSprite:getCastTimerPercentage() <= 0 then
+		ZJAttackInfo_Private_CastTargets[casterId] = nil
+	end
+
+	return ZJAttackInfo_Private_CastTargets[casterId] == targetSprite.m_id
+end
+
+-- UseItem(), UseItemPoint()
+ZJAttackInfo_Private_ItemActions = {
+	[ 34] = true,
+	[ 97] = true,
+}
+
+-- Returns what `sprite` is doing: 1 = attacking, 2 = casting a spell, 3 = using an item, false = something else
+function ZJAttackInfo_Private_GetActionIcon(sprite)
+	local actionID = sprite.m_curAction.m_actionID
+	if ZJAttackInfo_Private_AttackActions[actionID] then return 1 end
+	if ZJAttackInfo_Private_ItemActions[actionID] then return 3 end
+	if ZJAttackInfo_Private_TargetedCastActions[actionID] or ZJAttackInfo_Private_PointCastActions[actionID] then return 2 end
+	return false
+end
+
+-- SPELL.IDS prefixes, [spell id / 1000]
+ZJAttackInfo_Private_SpellIDPrefixes = { [1] = "SPPR", [2] = "SPWI", [3] = "SPIN", [4] = "SPCL" }
+
+-- Reading a name demands the spell / item, so it is kept for as long as the sprite executes the same action
+ZJAttackInfo_Private_ActionNameCaches = {} -- [sprite id] = { key, name }, emptied when the popup closes
+
+-- Returns the first of the given strrefs that has text
+function ZJAttackInfo_Private_FetchName(...)
+	for _, strref in ipairs({...}) do
+		if strref >= 0 and strref < 0x7FFFFFFF then
+			local name = Infinity_FetchString(strref)
+			if name ~= nil and name ~= "" then return name end
+		end
+	end
+	return nil
+end
+
+function ZJAttackInfo_Private_ReadActionName(sprite)
+
+	local curAction = sprite.m_curAction
+	local actionID = curAction.m_actionID
+	local resref = (curAction.m_string1.m_pchData:get() or ""):upper()
+	local specificID = curAction.m_specificID
+
+	local cacheKey = string.format("%d:%s:%d", actionID, resref, specificID)
+	local id = sprite.m_id
+	local cache = ZJAttackInfo_Private_ActionNameCaches[id]
+
+	if cache ~= nil and cache.key == cacheKey then
+		return cache.name
+	end
+
+	cache = { ["key"] = cacheKey }
+	ZJAttackInfo_Private_ActionNameCaches[id] = cache
+
+	if ZJAttackInfo_Private_ItemActions[actionID] then
+
+		local itemHeader = nil
+		local identified = true
+
+		if resref ~= "" then
+			itemHeader = EEex_Resource_Demand(resref, "ITM")
+		elseif specificID >= 0 and specificID <= 38 then
+			-- The item is given by its inventory slot
+			local item = sprite.m_equipment.m_items:get(specificID)
+			if item ~= nil then
+				itemHeader = item.pRes.pHeader
+				identified = EEex_IsBitSet(item.m_flags, 0)
+			end
+		end
+
+		if itemHeader ~= nil then
+			if identified then
+				cache.name = ZJAttackInfo_Private_FetchName(itemHeader.identifiedName, itemHeader.genericName)
+			else
+				cache.name = ZJAttackInfo_Private_FetchName(itemHeader.genericName)
+			end
+		end
+	else
+		if resref == "" then
+			-- The spell is given by its SPELL.IDS value
+			local prefix = ZJAttackInfo_Private_SpellIDPrefixes[math.floor(specificID / 1000)]
+			if prefix ~= nil then
+				resref = string.format("%s%03d", prefix, specificID % 1000)
+			end
+		end
+
+		if resref ~= "" then
+			local spellHeader = EEex_Resource_Demand(resref, "SPL")
+			if spellHeader ~= nil then
+				cache.name = ZJAttackInfo_Private_FetchName(spellHeader.genericName)
+			end
+		end
+	end
+
+	-- A spell / item without a name is shown by its resref
+	if cache.name == nil and resref ~= "" then
+		cache.name = resref
+	end
+
+	return cache.name
+end
+
+-- Returns the name of the spell `sprite` is casting / the item it is using, or nil if that can't be determined.
+-- Only meaningful while ZJAttackInfo_Private_GetActionIcon() returns 2 or 3 for `sprite`.
+function ZJAttackInfo_Private_GetActionName(sprite)
+	-- The name is cosmetic, never let it take the popup down
+	local ok, name = pcall(ZJAttackInfo_Private_ReadActionName, sprite)
+	return ok and name or nil
+end
+
+-- The area a projectile affects where it lands, read once per projectile:
+-- [missile type] = { range, coneSize } / false if it has no area
+ZJAttackInfo_Private_ProjectileAreas = {}
+ZJAttackInfo_Private_ProjectileIDS = nil -- PROJECTL.IDS, loaded when first needed
+
+-- Returns nil if the projectile can't be determined
+function ZJAttackInfo_Private_ReadProjectileArea(missileType)
+
+	-- 1 = no projectile
+	if missileType <= 1 then return false end
+
+	if ZJAttackInfo_Private_ProjectileIDS == nil then
+		ZJAttackInfo_Private_ProjectileIDS = EEex_Resource_LoadIDS("PROJECTL")
+	end
+
+	-- A missile type is its PROJECTL.IDS value + 1, the symbol is the resref of the .PRO
+	local resref = ZJAttackInfo_Private_ProjectileIDS:getStart(missileType - 1)
+	if resref == nil then return nil end
+
+	resref = resref:gsub("%s+", ""):upper()
+	if resref == "" then return nil end
+
+	local projectile = EEex_Resource_Demand(resref, "PRO")
+	if projectile == nil then return nil end
+
+	-- 3 = area of effect
+	if projectile.m_wFileType ~= 3 then return false end
+
+	return {
+		["range"]    = projectile.m_explosionRange,
+		-- Bit 11 = cone shaped, the cone starts at the caster
+		["coneSize"] = EEex_IsBitSet(projectile.m_dwAreaFlags, 11) and projectile.m_coneSize or nil,
+	}
+end
+
+-- Reading an area demands the spell / item, so it is kept for as long as the sprite executes the same action
+ZJAttackInfo_Private_ActionAreaCaches = {} -- [sprite id] = { key, area }, emptied when the popup closes
+
+-- Returns the area, (see ZJAttackInfo_Private_ProjectileAreas), of the spell `sprite` is casting / the item it is using
+-- at a point, false if it has none, or nil if that can't be determined.
+function ZJAttackInfo_Private_ReadActionArea(sprite)
+
+	local curAction = sprite.m_curAction
+	local actionID = curAction.m_actionID
+	local resref = (curAction.m_string1.m_pchData:get() or ""):upper()
+	local specificID = curAction.m_specificID
+	local specificID2 = curAction.m_specificID2
+
+	local cacheKey = string.format("%d:%s:%d:%d", actionID, resref, specificID, specificID2)
+	local id = sprite.m_id
+	local cache = ZJAttackInfo_Private_ActionAreaCaches[id]
+
+	if cache ~= nil and cache.key == cacheKey then
+		return cache.area
+	end
+
+	cache = { ["key"] = cacheKey }
+	ZJAttackInfo_Private_ActionAreaCaches[id] = cache
+
+	local missileType = nil
+
+	if actionID == 97 then -- UseItemPoint()
+
+		local itemHeader = nil
+		local abilityNum = specificID
+
+		if resref ~= "" then
+			itemHeader = EEex_Resource_Demand(resref, "ITM")
+		elseif specificID >= 0 and specificID <= 38 then
+			-- The item is given by its inventory slot, followed by the ability
+			local item = sprite.m_equipment.m_items:get(specificID)
+			if item ~= nil then
+				itemHeader = item.pRes.pHeader
+			end
+			abilityNum = specificID2
+		end
+
+		if itemHeader ~= nil and abilityNum >= 0 and abilityNum < itemHeader.abilityCount then
+			local ability = EEex_PtrToUD(
+				EEex_UDToPtr(itemHeader) + itemHeader.abilityOffset + Item_ability_st.sizeof * abilityNum, "Item_ability_st")
+			missileType = ability.missileType
+		end
+	else
+		if resref == "" then
+			-- The spell is given by its SPELL.IDS value
+			local prefix = ZJAttackInfo_Private_SpellIDPrefixes[math.floor(specificID / 1000)]
+			if prefix ~= nil then
+				resref = string.format("%s%03d", prefix, specificID % 1000)
+			end
+		end
+
+		if resref ~= "" then
+			local spellHeader = EEex_Resource_Demand(resref, "SPL")
+			if spellHeader ~= nil then
+				local ability = spellHeader:getAbilityForLevel(sprite:getCasterLevelForSpell(resref, true))
+				if ability ~= nil then
+					missileType = ability.missileType
+				end
+			end
+		end
+	end
+
+	if missileType ~= nil then
+		local area = ZJAttackInfo_Private_ProjectileAreas[missileType]
+		if area == nil then
+			area = ZJAttackInfo_Private_ReadProjectileArea(missileType)
+			ZJAttackInfo_Private_ProjectileAreas[missileType] = area
+		end
+		cache.area = area
+	end
+
+	return cache.area
+end
+
+-- Returns true if `casterSprite` is currently executing a spell / item action that is aimed at `targetSprite`, or at a
+-- point with `targetSprite` standing in the area the spell / item affects. That is where the creature stands now: it
+-- can still walk in or out before the spell lands.
+function ZJAttackInfo_Private_IsCastingSpellAt(casterSprite, targetSprite)
+
+	local curAction = casterSprite.m_curAction
+	local actionID = curAction.m_actionID
+
+	if ZJAttackInfo_Private_TargetedCastActions[actionID] then
+		return curAction.m_acteeID.m_Instance == targetSprite.m_id
+	end
+
+	if not ZJAttackInfo_Private_PointCastActions[actionID] and actionID ~= 97 then -- UseItemPoint()
+		return false
+	end
+
+	-- An area that can't be determined counts for everyone, never let it take the popup down
+	local ok, area = pcall(ZJAttackInfo_Private_ReadActionArea, casterSprite)
+	if not ok or area == nil then return true end
+
+	-- Nothing lands on a creature, (a summon, a teleport)
+	if area == false then return false end
+
+	-- The engine measures distances in pixels, with the vertical axis stretched by 4/3
+	local casterPos = casterSprite.m_pos
+	local targetPos = targetSprite.m_pos
+	local dest = curAction.m_dest
+
+	local aimX = dest.x - casterPos.x
+	local aimY = (dest.y - casterPos.y) * 4 / 3
+	local aimLength = math.sqrt(aimX * aimX + aimY * aimY)
+
+	-- A cone starts at the caster and points at the destination, everything else is centered on the destination
+	local coneSize = area.coneSize
+	local isCone = coneSize ~= nil and coneSize > 0 and coneSize < 360 and aimLength > 0
+	local origin = isCone and casterPos or dest
+
+	local offsetX = targetPos.x - origin.x
+	local offsetY = (targetPos.y - origin.y) * 4 / 3
+	local distance = math.sqrt(offsetX * offsetX + offsetY * offsetY)
+
+	if distance > area.range then return false end
+	if not isCone or distance == 0 then return true end
+
+	-- Inside the cone if the angle between the aim and the creature is at most half the cone's width
+	local cosAngle = (offsetX * aimX + offsetY * aimY) / (distance * aimLength)
+	return cosAngle >= math.cos(math.rad(coneSize / 2))
+end
+
+-- Returns true if `sprite` is attacking or casting at `targetSprite`
+function ZJAttackInfo_Private_IsEngaging(sprite, targetSprite)
+	return ZJAttackInfo_Private_IsAttacking(sprite, targetSprite) or ZJAttackInfo_Private_IsCastingAt(sprite, targetSprite)
+end
+
+-- The attack roll frames only change when the sprite's attacks per round / weapon speed / animation changes.
+-- Reading them takes a hundred engine calls, so the result is kept per sprite and refreshed periodically.
+ZJAttackInfo_Private_AttackRollFramesCaches = {} -- [sprite id] = cache, emptied when the popup closes
+ZJAttackInfo_Private_TargetAttackRollFramesLifetime = 2000 -- Milliseconds
+ZJAttackInfo_Private_MaxTargetAttackMarkers = 5
+
+-- Returns the attack frames [0-99] on which `sprite` makes an attack roll in its current round
+function ZJAttackInfo_Private_GetAttackRollFrames(sprite)
+
+	local curTick = Infinity_GetClockTicks()
+
+	local id = sprite.m_id
+	local tableIndex = sprite:zjGetCombatRoundTableIndex()
+	local speedFactor = sprite:zjGetAttackSpeedFactor()
+
+	local cache = ZJAttackInfo_Private_AttackRollFramesCaches[id]
+	if cache == nil then
+		cache = {}
+		ZJAttackInfo_Private_AttackRollFramesCaches[id] = cache
+	end
+
+	if cache.frames == nil
+		or cache.tableIndex ~= tableIndex
+		or cache.speedFactor ~= speedFactor
+		or curTick >= cache.expireTick
+	then
+		cache.tableIndex = tableIndex
+		cache.speedFactor = speedFactor
+		cache.expireTick = curTick + ZJAttackInfo_Private_TargetAttackRollFramesLifetime
+		cache.frames = sprite:zjGetAttackRollFrames(tableIndex, speedFactor)
+
+		-- With a half attack, (1/2, 3/2, etc.), the last attack roll in the table is only made every other round
+		local lastFrame = cache.frames[#cache.frames]
+		if lastFrame and sprite:zjHasHalfAttack() then
+			cache.halfIndex = #cache.frames
+			cache.halfSwingStartFrame = sprite:zjGetAttackSwingStartFrame(lastFrame, tableIndex, speedFactor)
+		else
+			cache.halfIndex = nil
+			cache.halfSwingStartFrame = nil
+		end
+	end
+
+	-- Leave out the half attack during the rounds where its swing is cosmetic
+	if cache.halfIndex and not sprite:zjIsHalfAttackRealThisRound(cache.halfSwingStartFrame) then
+		local frames = {}
+		for i, frame in ipairs(cache.frames) do
+			if i ~= cache.halfIndex then table.insert(frames, frame) end
+		end
+		return frames
+	end
+
+	return cache.frames
+end
+
+-- The bars that can be shown for the target, in the order they are stacked, and how many markers each one has in the menu
+ZJAttackInfo_Private_TargetBarNames = { "Attack", "Cast", "Modal", "Contingency" }
+ZJAttackInfo_Private_TargetBarMaxMarkers = {
+	["Attack"]      = ZJAttackInfo_Private_MaxTargetAttackMarkers,
+	["Cast"]        = 1,
+	["Modal"]       = 0,
+	["Contingency"] = 0,
+}
+
+-- The rows of the right panel that can have timer bars at the same time, (the menu has this many sets of bar items)
+ZJAttackInfo_Private_MaxRowBars = 8
+ZJAttackInfo_Private_RowBarNames = { "Attack", "Cast" }
+
+-- Where `sprite` is in its attack round, the ticks are its attack rolls. Returns nil if the sprite isn't attacking.
+function ZJAttackInfo_Private_GetAttackBar(sprite)
+	if not sprite:zjIsAttacking() then return nil end
+	return {
+		["name"]       = "Attack",
+		["percentage"] = sprite:zjGetAttackTimerPercentage(),
+		["markers"]    = ZJAttackInfo_Private_GetAttackRollFrames(sprite),
+	}
+end
+
+-- The spell / item cooldown of `sprite`, the tick is where the spell being cast is released.
+-- Returns nil if the cooldown isn't running.
+function ZJAttackInfo_Private_GetCastBar(sprite)
+	local percentage = sprite:getCastTimerPercentage()
+	if percentage <= 0 then return nil end
+	local releaseTimer = sprite:zjGetCastReleaseTimer()
+	return {
+		["name"]       = "Cast",
+		-- The cast bar is (cast timer + 1) / 100 full, see EEex_Sprite_GetCastTimerPercentage()
+		["percentage"] = percentage,
+		["markers"]    = releaseTimer and { releaseTimer + 1 } or {},
+	}
+end
+
+-- Returns the attack and cast bars that currently apply to a sprite listed in the right panel, (same format as below)
+-- The attack bar is only included if `includeAttack`, (the sprite is attacking the target)
+function ZJAttackInfo_Private_GetRowBars(sprite, includeAttack)
+	local bars = {}
+	if includeAttack then
+		bars[#bars + 1] = ZJAttackInfo_Private_GetAttackBar(sprite)
+	end
+	bars[#bars + 1] = ZJAttackInfo_Private_GetCastBar(sprite)
+	return bars
+end
+
+-- Returns an array of the timer bars that currently apply to `sprite`:
+--   name       => The bar's name in ZJAttackInfo_Private_TargetBarNames
+--   percentage => [0-1], how full the bar is
+--   markers    => Array of the points [0-100] along the bar that have a tick
+function ZJAttackInfo_Private_GetTargetBars(sprite)
+
+	local bars = {}
+
+	if ZJAttackInfo_Private_ShowTargetAttackTimer:get() ~= 0 then
+		bars[#bars + 1] = ZJAttackInfo_Private_GetAttackBar(sprite)
+	end
+
+	if ZJAttackInfo_Private_ShowTargetCastTimer:get() ~= 0 then
+		bars[#bars + 1] = ZJAttackInfo_Private_GetCastBar(sprite)
+	end
+
+	-- The interval of the sprite's modal action
+	if ZJAttackInfo_Private_ShowTargetModalTimer:get() ~= 0 and sprite:getModalState() ~= 0 then
+		table.insert(bars, {
+			["name"]       = "Modal",
+			["percentage"] = sprite:getModalTimerPercentage(),
+			["markers"]    = {},
+		})
+	end
+
+	-- The interval at which the sprite's contingency conditions are checked
+	if ZJAttackInfo_Private_ShowTargetContingencyTimer:get() ~= 0 and sprite:getActiveStats().m_cContingencyList.m_nCount > 0 then
+		table.insert(bars, {
+			["name"]       = "Contingency",
+			["percentage"] = sprite:getContingencyTimerPercentage(),
+			["markers"]    = {},
+		})
+	end
+
+	return bars
+end
+
+-- The name of a spell as the Effect Menu module of EEex shows it, or false if it hides the spell:
+-- ["<resref>:<caster level>"] = name / false. Kept for the whole session, a spell's name doesn't change.
+ZJAttackInfo_Private_SpellEffectNames = {}
+
+function ZJAttackInfo_Private_ReadSpellEffectName(resref, casterLevel)
+
+	local spellHeader = EEex_Resource_Demand(resref, "SPL")
+	if spellHeader == nil then return false end
+
+	-- If the caster shouldn't have been able to cast the spell, the first ability is used
+	local ability = spellHeader:getAbilityForLevel(casterLevel) or spellHeader:getAbility(0)
+	if ability == nil then return false end
+
+	-- A spell without an icon is a behind-the-scenes spell
+	if ability.quickSlotIcon:get() == "" then return false end
+
+	local name = Infinity_FetchString(spellHeader.genericName)
+
+	if name == "" then
+		-- A sub-spell often has no name of its own, like Chant's SPPR203D that it casts on every creature around.
+		-- Its parent spell has the same resref without the letters at the end.
+		local parentResref = resref:match("^(.-%d)%a+$")
+		if parentResref == nil then return false end
+
+		local parentHeader = EEex_Resource_Demand(parentResref, "SPL")
+		if parentHeader == nil then return false end
+
+		name = Infinity_FetchString(parentHeader.genericName)
+		if name == "" then return false end
+	end
+
+	return name
+end
+
+-- Returns the names of the spells affecting `sprite`, sorted, with the same spells the Effect Menu module of EEex lists:
+-- no item effects, no permanent spells, no spells without an icon. Spells that give stoneskins or mirror images are left
+-- out, their count is shown on its own.
+function ZJAttackInfo_Private_GetSpellEffectNames(sprite)
+
+	local names = {}
+	local seenResrefs = {}
+	local skipResrefs = {}
+	local expiries = {}   -- [resref] = latest game time one of the spell's timed effects expires at
+	local openEnded = {}  -- [resref] = true if one of the spell's effects lasts until dispelled
+
+	EEex_Utility_IterateCPtrList(sprite.m_timedEffectList, function(effect)
+
+		-- 2 = item
+		if effect.m_sourceType == 2 then return end
+
+		local resref = effect.m_sourceRes:get()
+		if resref == "" then return end
+
+		-- 218 = stoneskin, 119 = mirror image
+		local effectId = effect.m_effectId
+		if effectId == 218 or effectId == 119 then
+			skipResrefs[resref] = true
+		end
+
+		-- 9 = permanent
+		local durationType = effect.m_durationType
+		if durationType == 9 then return end
+
+		-- 0x1000 = applied timed effect, which stores the game time it expires at; 1 = lasts until dispelled or death
+		if durationType == 0x1000 then
+			local expiry = effect.m_duration
+			if expiries[resref] == nil or expiry > expiries[resref] then expiries[resref] = expiry end
+		elseif durationType == 1 then
+			openEnded[resref] = true
+		end
+
+		if seenResrefs[resref] ~= nil then return end
+
+		local casterLevel = math.max(effect.m_casterLevel, 1)
+		local cacheKey = resref..":"..casterLevel
+		local name = ZJAttackInfo_Private_SpellEffectNames[cacheKey]
+
+		if name == nil then
+			name = ZJAttackInfo_Private_ReadSpellEffectName(resref, casterLevel)
+			ZJAttackInfo_Private_SpellEffectNames[cacheKey] = name
+		end
+
+		seenResrefs[resref] = name
+	end)
+
+	-- [name] = latest expiry of the spells with that name, or false if one of them has no end
+	local nameExpiries = {}
+
+	for resref, name in pairs(seenResrefs) do
+		if name and not skipResrefs[resref] then
+
+			local expiry = expiries[resref]
+			if openEnded[resref] or expiry == nil then expiry = false end
+
+			local known = nameExpiries[name]
+			if known == nil then
+				table.insert(names, name)
+				nameExpiries[name] = expiry
+			elseif known ~= false and (expiry == false or expiry > known) then
+				nameExpiries[name] = expiry
+			end
+		end
+	end
+
+	table.sort(names)
+
+	local now = EngineGlobals.g_pBaldurChitin.m_pObjectGame.m_worldTime.m_gameTime
+
+	for i, name in ipairs(names) do
+		local expiry = nameExpiries[name]
+		if expiry then
+			names[i] = name.." "..ZJAttackInfo_Private_FormatRemaining(expiry - now)
+		end
+	end
+
+	return names
+end
+
+-- Formats the game ticks an effect still lasts as "(<turns>,<rounds>)". 15 ticks are a second, a round is 6 seconds
+-- and a turn 10 rounds. Rounds are rounded up, so an effect that is about to end still shows "(0,1)".
+function ZJAttackInfo_Private_FormatRemaining(ticks)
+	local totalRounds = math.max(math.ceil(ticks / 90), 0)
+	return string.format("(%d,%d)", math.floor(totalRounds / 10), totalRounds % 10)
+end
+
+------------------------------
+-- ZJAttackInfo_Menu_Ticker --
+------------------------------
+
+ZJAttackInfo_Private_Menu_Ticker_IsOpen = false
+ZJAttackInfo_Private_Menu_Ticker_ShouldBeOpen = false
+
+-- The popup has two panels next to each other: the left one lists the attacks of `targetSprite` on `selectedSprites`,
+-- the right one lists their attacks on the target.
+--
+-- `compact` is used for the party and its summons / allies: `selectedSprites` are then the creatures the target is fighting.
+function ZJAttackInfo_Private_Layout(selectedSprites, targetSprite, compact)
+
+	--------------------------
+	--     Read options     --
+	--------------------------
+
+	local fontPoint                     = ZJAttackInfo_Private_FontPoint:get()
+	local hitDisplayType                = ZJAttackInfo_Private_HitDisplayType:get()
+	local immuneDisplayType             = ZJAttackInfo_Private_ImmunityDisplayType:get()
+	-- The compact popup can have nothing to list, in which case it only has its headers and the target's bars
+	local showColumnHeaders             = ZJAttackInfo_Private_ShowColumnHeaders:get() ~= 0 and selectedSprites[1] ~= nil
+	local hideUnusedOffhandHeader       = ZJAttackInfo_Private_HideUnusedOffhandHeader:get() ~= 0
+	local showRowTimers                 = ZJAttackInfo_Private_ShowRowTimers:get() ~= 0
+
+	------------------------------
+	--     Layout constants     --
+	------------------------------
+
+	local measure = function(text)
+		return EEex_Menu_GetTextWidthHeight(text, styles["normal"].font, fontPoint, styles["normal"].useFontZoom)
+	end
+
+	local spaceW, spaceH = measure(" ")
+
+	-----------
+	-- Popup --
+	-----------
+
+	local popupLeftSideAdjust  = 5
+	local popupRightSideAdjust = 5
+
+	----------------
+	-- Background --
+	----------------
+
+	local backgroundPad = 12
+
+	------------
+	-- Panels --
+	------------
+
+	local panelGap        = 10 -- On both sides of the separator between the panels
+	local panelSeparatorW = 2
+
+	------------
+	-- Header --
+	------------
+
+	local headerHorizontalSepPadTop    = 5
+	local headerHorizontalSepH         = 2
+	local headerHorizontalSepPadBottom = 8
+
+	-----------------
+	-- Target bars --
+	-----------------
+
+	-- Below the left panel's header
+	local targetBarsPadTop = 4
+	local targetBarH       = 6
+	local targetBarGap     = 3
+	local targetBarMarkerW = 2
+
+	--------------
+	-- Row bars --
+	--------------
+
+	-- Below the names in the right panel
+	local rowBarsPadTop    = 1
+	local rowBarH          = 4
+	local rowBarGap        = 2
+	local rowBarsPadBottom = 4
+	local rowBarMarkerW    = 2
+
+	---------------
+	-- List rows --
+	---------------
+
+	local rowHeightPad = 0
+
+	------------------
+	-- List columns --
+	------------------
+
+	local divider1ColumnW       = 3
+	local divider2ColumnPadLeft = spaceW
+	local divider2ColumnW       = 2
+	local divider3ColumnPadLeft = spaceW
+	local divider3ColumnW       = 2
+
+	local nameColumnIndex       = 1
+	local mainHandColumnIndex   = 2
+	local offHandColumnIndex    = 3
+
+	local divider1ColumnIndex   = 2
+	local divider2ColumnIndex   = 3
+	local divider3ColumnIndex   = 4
+
+	-- Extra (non-text) field in each list entry: false, or the icon to show in front of the name, (left list only):
+	-- what the target is doing to the creature on that row. It is an icon of ZJATKDMG.BAM, see
+	-- ZJAttackInfo_Private_DamageTypeIcons.
+	local attackIconEntryIndex  = 4
+	local attackIconPadRight    = 4
+
+	-- Extra fields in each list entry: the weapon damage of each hand, which is drawn right-aligned in the hand's column
+	local mainHandDamageEntryIndex = 5
+	local offHandDamageEntryIndex  = 6
+
+	-- A hand's column has two sub-columns: the roll, and to the right of the widest roll, the damage. Both are
+	-- left-aligned, so the rolls line up with each other and so do the damages. This is the room between the two.
+	local hitDamageGapStr = "   "
+	local hitDamageGapW = measure(hitDamageGapStr)
+
+	-- Behind the damage are more sub-columns: the icons of the damage type(s), the extra damage the weapon applies on a
+	-- hit, and the icons of the elements of that extra damage. Each is as wide as the row that needs the most of it.
+	local _, handIconSize = measure("X")
+	local handIconGapW = 3
+
+	-- Extra fields in each list entry: what is behind the damage of each hand, (see ZJAttackInfo_Private_GetHandDisplay()),
+	-- with `variant` added: the color of the damage type icons, 0 = green, 1 = red, 2 = grey
+	local handDisplayEntryIndexes = { [mainHandColumnIndex] = 8, [offHandColumnIndex] = 9 }
+
+	local panels = ZJAttackInfo_Private_Menu_Panels
+
+	---------------------------------------
+	--     Calculate header labels       --
+	---------------------------------------
+
+	-- 1 = attacking, 2 = casting a spell, 3 = using an item, false = something else
+	local targetActionIcon = ZJAttackInfo_Private_GetActionIcon(targetSprite)
+	local targetIsCasting = targetActionIcon == 2 or targetActionIcon == 3
+
+	-- The left panel's header has the target's name and what it attacks with, the right panel's header has the text below
+	local labelTexts = { "", "" }
+
+	-- The right panel's header shows what stands between the attacks on the target and its hit points
+	do
+		local ok, defensesStr = pcall(function()
+
+			local defenses = {}
+
+			local targetStats = targetSprite:getActiveStats()
+			local stoneSkins = targetStats.m_nStoneSkins + targetStats.m_nStoneSkinsGolem
+			if stoneSkins > 0 then
+				table.insert(defenses, string.format("%s: %d", uiStrings["ZJBattleSense_TRANSLATION_AttackInfo_Stoneskins"], stoneSkins))
+			end
+
+			local mirrorImages = targetSprite.m_nMirrorImages
+			if mirrorImages > 0 then
+				table.insert(defenses, string.format("%s: %d", uiStrings["ZJBattleSense_TRANSLATION_AttackInfo_MirrorImages"], mirrorImages))
+			end
+
+			return table.concat(defenses, ", ")
+		end)
+
+		if ok then
+			labelTexts[2] = defensesStr
+		end
+	end
+
+	-- The spells affecting the target are listed below the right panel's header, (see "Lay out spell effects")
+	local spellEffectNames = {}
+
+	if ZJAttackInfo_Private_ShowSpellEffects:get() ~= 0 then
+		local ok, names = pcall(ZJAttackInfo_Private_GetSpellEffectNames, targetSprite)
+		if ok then
+			spellEffectNames = names
+		end
+	end
+
+	-- The target is the attacker on every row of the left panel, so what it attacks with isn't repeated on the rows.
+	-- It is in the left panel's header, below the target's name: the spell it is casting / the item it is using, or
+	-- else, for each hand, its weapon damage, the icons of the damage type(s) and the extra damage.
+	--
+	-- `targetAttackHands` => Array of { text, icons, extra, extraIcons, textX, textW, iconsX, extraX, extraW, extraIconsX },
+	--                        the x's from the start of the left panel's header
+	-- `targetAttackW`     => The width of all of it
+	local targetAttackHands = {}
+	local targetAttackSeparatorStr = " / "
+	local targetAttackSeparatorXs = {}
+	local targetAttackW = 0
+
+	if targetIsCasting then
+		local actionName = ZJAttackInfo_Private_GetActionName(targetSprite)
+		if actionName ~= nil then
+			table.insert(targetAttackHands, { ["text"] = actionName, ["icons"] = {}, ["extra"] = "", ["extraIcons"] = {} })
+		end
+	else
+		local equipment = targetSprite.m_equipment
+		local items = equipment.m_items
+
+		local addHand = function(weapon, abilityNum, leftHand)
+
+			-- Reading the weapon's damage is cosmetic, never let it take the popup down
+			local ok, damageStr, extras, _, iconDamageType = pcall(ZJAttackInfo_Private_GetWeaponDamageString,
+				targetSprite, weapon, abilityNum, leftHand)
+
+			if not ok or damageStr == nil then return end
+
+			local okDisplay, handDisplay = pcall(ZJAttackInfo_Private_GetHandDisplay, iconDamageType, extras)
+
+			table.insert(targetAttackHands, {
+				["text"]       = damageStr,
+				["icons"]      = okDisplay and handDisplay.typeIcons or {},
+				["extra"]      = okDisplay and handDisplay.extraText or "",
+				["extraIcons"] = okDisplay and handDisplay.extraIcons or {},
+			})
+		end
+
+		addHand(items:get(equipment.m_selectedWeapon), equipment.m_selectedWeaponAbility, false)
+
+		if EEex.CanAttackWithLeftHand(targetSprite) then
+			addHand(items:get(9), 0, true)
+		end
+	end
+
+	for i, hand in ipairs(targetAttackHands) do
+
+		if i > 1 then
+			targetAttackSeparatorXs[i - 1] = targetAttackW
+			targetAttackW = targetAttackW + measure(targetAttackSeparatorStr)
+		end
+
+		hand.textX = targetAttackW
+		hand.textW = measure(hand.text)
+		targetAttackW = hand.textX + hand.textW
+
+		hand.iconsX = targetAttackW + handIconGapW
+		if #hand.icons > 0 then
+			targetAttackW = hand.iconsX + #hand.icons * handIconSize
+		end
+
+		hand.extraX = targetAttackW + spaceW
+		hand.extraW = 0
+		if hand.extra ~= "" then
+			hand.extraW = measure(hand.extra)
+			targetAttackW = hand.extraX + hand.extraW
+		end
+
+		hand.extraIconsX = targetAttackW + handIconGapW
+		if #hand.extraIcons > 0 then
+			targetAttackW = hand.extraIconsX + #hand.extraIcons * handIconSize
+		end
+	end
+
+	-- The icon of what the target attacks with, (the first damage type of its main hand weapon), for the rows of the
+	-- left list where it is attacking
+	local targetTypeIcon = targetAttackHands[1] and targetAttackHands[1].icons[1] or 0
+
+	-- The left header starts with the target's name, in front of the icon and the text above
+	-- `targetNameText` used in layout
+	local targetNameText = ""
+	do
+		local ok, name = pcall(function()
+			return targetSprite:getName()
+		end)
+
+		if ok and type(name) == "string" then
+			targetNameText = name
+		end
+	end
+
+	-------------------------------------
+	--     Calculate panel lists       --
+	-------------------------------------
+
+	-- A row is greyed out if its attack isn't taking place. That is per panel: on the left, the rows of the creatures
+	-- the target isn't attacking / casting at, on the right, the rows of the creatures that aren't attacking / casting
+	-- at the target. A creature that is being attacked without fighting back is white on the left and grey on the right.
+	local dimColorStr       = "^0xFF808080"
+	local dimImmuneColorStr = "^0xFF162680"
+	local redColorStr       = "^0xFF2B4BFF" -- The immune color, also used for the resistances that take damage away
+	local greenColorStr     = "^0xFF40E040" -- The resistances that add damage
+	local dimGreenColorStr  = "^0xFF207020"
+
+	local dimRowsLeft  = {} -- [index in selectedSprites] = true
+	local dimRowsRight = {} -- [index in selectedSprites] = true
+
+	do
+		local rows = {}
+
+		for spriteIndex, selectedSprite in ipairs(selectedSprites) do
+			rows[spriteIndex] = {
+				["sprite"] = selectedSprite,
+				["index"]  = spriteIndex,
+				["dimLeft"]  = not (
+					   ZJAttackInfo_Private_IsEngaging(targetSprite, selectedSprite)
+					or ZJAttackInfo_Private_IsCastingSpellAt(targetSprite, selectedSprite)
+				),
+				["dimRight"] = not (
+					   ZJAttackInfo_Private_IsEngaging(selectedSprite, targetSprite)
+					or ZJAttackInfo_Private_IsCastingSpellAt(selectedSprite, targetSprite)
+				),
+			}
+
+			-- 1 = party member, 2 = the party's summons / allies, 3 = everything else
+			local portraitIndex = selectedSprite:getPortraitIndex()
+			rows[spriteIndex].portraitIndex = portraitIndex
+			rows[spriteIndex].group = portraitIndex ~= -1 and 1
+				or selectedSprite.m_typeAI.m_EnemyAlly <= ZJAttackInfo_Private_GoodCutoff and 2
+				or 3
+		end
+
+		-- The party members are listed first, in the order of their portraits, then the party's summons / allies, then
+		-- everything else. Within the last two groups the order stays as it was, (by name). A creature keeps its row
+		-- whether it is fighting the target or not, that is what the greying out shows.
+		table.sort(rows, function(a, b)
+			if a.group ~= b.group then return a.group < b.group end
+			if a.group == 1 and a.portraitIndex ~= b.portraitIndex then return a.portraitIndex < b.portraitIndex end
+			return a.index < b.index
+		end)
+
+		selectedSprites = {}
+		for spriteIndex, row in ipairs(rows) do
+			selectedSprites[spriteIndex] = row.sprite
+			dimRowsLeft[spriteIndex] = row.dimLeft
+			dimRowsRight[spriteIndex] = row.dimRight
+		end
+	end
+
+	-- Formats a hand's column as the minimum roll needed to hit, (or the hit chance, depending on the "Hit Display Type"
+	-- option), and the weapon's damage, e.g. " 14+" and "1D8+1 C". The roll is on the left of the column, the damage
+	-- to the right of it. The damage is left out of the left panel, where it is the same on every row and shown in the header.
+	-- Returns:
+	--   The text that is measured to size the column
+	--   The roll text
+	--   The damage text
+	--   Whether the roll text isn't a roll, (it then doesn't push the damage of the other rows to the right)
+	-- `dim` => The row isn't part of the fight, its text is greyed out
+	local formatChanceStr = function(chance, immune, weaponDamageStr, dim)
+
+		if immune and immuneDisplayType == 2 then
+			local immuneStr = string.format(" %s%s", dim and dimColorStr or "", uiStrings["ZJBattleSense_TRANSLATION_AttackInfo_Immune"])
+			return immuneStr, immuneStr, "", true
+		end
+
+		local rollStr
+
+		if hitDisplayType == 1 then
+			rollStr = string.format("%d%%", chance)
+		else
+			local minimumRoll = ZJAttackInfo_Private_GetMinimumHitRoll(chance)
+			if minimumRoll > 20 then
+				rollStr = "-" -- No roll can hit
+			else
+				rollStr = string.format("%d+", minimumRoll)
+			end
+		end
+
+		local colorStr
+		if immune and immuneDisplayType == 0 then
+			colorStr = dim and dimImmuneColorStr or redColorStr
+		else
+			colorStr = dim and dimColorStr or ""
+		end
+		rollStr = string.format(" %s%s", colorStr, rollStr)
+
+		if weaponDamageStr == nil then
+			if not (immune and immuneDisplayType == 0) then
+				return rollStr, rollStr, "", false
+			end
+			-- Without the damage, (the left panel), "Immune" still takes its place
+			weaponDamageStr = uiStrings["ZJBattleSense_TRANSLATION_AttackInfo_Immune"]
+		end
+
+		weaponDamageStr = ZJAttackInfo_Private_ColorResistance(weaponDamageStr,
+			dim and dimImmuneColorStr or redColorStr, dim and dimGreenColorStr or greenColorStr, colorStr)
+
+		return rollStr..hitDamageGapStr..weaponDamageStr, rollStr, colorStr..weaponDamageStr, false
+	end
+
+	-- Builds the list of a panel. `reverse` => the target's attacks on the listed sprites, (the left panel).
+	-- Returns:
+	--   entries          => The list's rows, (ZJAttackInfo_Private_Menu_InfoList[2]_Table)
+	--   columnWidths     => The width every column needs
+	--   tallestRowHeight => The height of the tallest row
+	--   anyAttackIcon    => Whether any row shows the "currently attacking" icon
+	--   rowBars          => [index in selectedSprites] = The timer bars below that sprite's name, (right panel only)
+	--   maxRowBars       => The highest number of timer bars any row has
+	local buildPanel = function(panel, reverse)
+
+		local build = {
+			["entries"]          = {},
+			["columnWidths"]     = {},
+			["tallestRowHeight"] = 0,
+			["anyAttackIcon"]    = false,
+			["rowBars"]          = {},
+			["maxRowBars"]       = 0,
+		}
+
+		local rowBarsCount = 0
+
+		local columnWidths = build.columnWidths
+		for i = 1, panel.columnUDsSize do
+			columnWidths[i] = 0
+		end
+
+		-- The widest roll and the widest damage of each hand's column, [column index] = width
+		build.rollWidths   = { [mainHandColumnIndex] = 0, [offHandColumnIndex] = 0 }
+		build.damageWidths = { [mainHandColumnIndex] = 0, [offHandColumnIndex] = 0 }
+
+		-- Around the roll and the damage: the most icons in front of the roll, (damage types / spell / item), the widest
+		-- extra damage, the most extra damage icons
+		build.typeIconCounts  = { [mainHandColumnIndex] = 0, [offHandColumnIndex] = 0 }
+		build.extraWidths     = { [mainHandColumnIndex] = 0, [offHandColumnIndex] = 0 }
+		build.extraIconCounts = { [mainHandColumnIndex] = 0, [offHandColumnIndex] = 0 }
+
+		-- The widest text that isn't a roll, (a spell / item name, "Immune", a column header): it starts where the rolls
+		-- do, and runs over the sub-columns behind them
+		build.spanWidths = { [mainHandColumnIndex] = 0, [offHandColumnIndex] = 0 }
+
+		local measureHand = function(columnIndex, rollString, damageString, spans, handDisplay)
+			if not spans then
+				build.rollWidths[columnIndex] = math.max(build.rollWidths[columnIndex], (measure(rollString)))
+			elseif rollString ~= "" then
+				build.spanWidths[columnIndex] = math.max(build.spanWidths[columnIndex], (measure(rollString)))
+			end
+			if damageString ~= "" then
+				build.damageWidths[columnIndex] = math.max(build.damageWidths[columnIndex], (measure(damageString)))
+			end
+			if handDisplay ~= nil then
+				build.typeIconCounts[columnIndex] = math.max(build.typeIconCounts[columnIndex], #handDisplay.typeIcons)
+				build.extraIconCounts[columnIndex] = math.max(build.extraIconCounts[columnIndex], #handDisplay.extraIcons)
+				if handDisplay.extraText ~= "" then
+					build.extraWidths[columnIndex] = math.max(build.extraWidths[columnIndex], (measure(handDisplay.extraText)))
+				end
+			end
+		end
+
+		-- Stores the icons and extra damage of a hand in a list entry. `dim` => greyed out, like the row's text
+		local setHandDisplay = function(entry, columnIndex, handDisplay, dim)
+			if handDisplay == nil then return end
+			handDisplay.variant = dim and 2 or (reverse and 0 or 1)
+			if dim and handDisplay.extraText ~= "" then
+				handDisplay.extraText = dimColorStr..handDisplay.extraText
+			end
+			entry[handDisplayEntryIndexes[columnIndex]] = handDisplay
+		end
+
+		-- Measures a row, and returns its list entry
+		local calculate = function(columnsText)
+
+			---------------------------------
+			-- Calculate column dimensions --
+			---------------------------------
+
+			local columnsDimensions = {}
+			local infoListTableEntry = {}
+
+			for i, columnText in ipairs(columnsText) do
+				local columnW, columnH = measure(columnText)
+				columnsDimensions[i] = { columnW, columnH }
+				infoListTableEntry[i] = columnText
+			end
+
+			infoListTableEntry[mainHandDamageEntryIndex] = ""
+			infoListTableEntry[offHandDamageEntryIndex] = ""
+
+			-----------------------
+			-- Apply column pads --
+			-----------------------
+
+			local divider1ColumnDimensions = columnsDimensions[divider1ColumnIndex]
+			divider1ColumnDimensions[1] = divider1ColumnDimensions[1] + divider1ColumnW
+
+			local divider2ColumnDimensions = columnsDimensions[divider2ColumnIndex]
+			if divider2ColumnDimensions[1] > 0 then
+				divider2ColumnDimensions[1] = divider2ColumnPadLeft + divider2ColumnW + divider2ColumnDimensions[1]
+			end
+
+			---------------------------------------------
+			-- Calculate max column widths and heights --
+			---------------------------------------------
+
+			for i, columnDimensions in ipairs(columnsDimensions) do
+
+				if columnDimensions[1] > columnWidths[i] then
+					columnWidths[i] = columnDimensions[1]
+				end
+
+				if columnDimensions[2] > build.tallestRowHeight then
+					build.tallestRowHeight = columnDimensions[2]
+				end
+			end
+
+			return infoListTableEntry
+		end
+
+		local hadOffhand = false
+
+		-- Both panels have a row for every listed sprite, in the same order, so a sprite is on the same row in both
+		for spriteIndex, selectedSprite in ipairs(selectedSprites) do
+
+			-- Left panel:  Target vs Listed sprite
+			-- Right panel: Listed sprite vs Target
+			local attackerSprite = reverse and targetSprite or selectedSprite
+			local defenderSprite = reverse and selectedSprite or targetSprite
+
+			-- Left panel:  Is the target currently attacking this sprite?
+			-- Right panel: Is this sprite currently attacking the target?
+			local isAttacking = ZJAttackInfo_Private_IsAttacking(attackerSprite, defenderSprite)
+
+			-- Casting a spell at the defender counts as fighting it too, (for the timer bars and the compact popup)
+			local isEngaging = isAttacking or ZJAttackInfo_Private_IsCastingAt(attackerSprite, defenderSprite)
+
+			local entry
+
+			if compact and not isEngaging then
+
+				-- The compact popup lists the creatures fighting the target: the ones it attacks on the left, the ones
+				-- attacking it on the right. A creature that is only in one of the two leaves its row in the other panel empty.
+				entry = calculate({"", "", ""})
+				entry[attackIconEntryIndex] = false
+			else
+				local dim = (reverse and dimRowsLeft or dimRowsRight)[spriteIndex]
+
+				local rightHandString, rightHandRollString, rightHandDamageString, rightHandSpans = "", "", "", true
+				local leftHandString, leftHandRollString, leftHandDamageString, leftHandSpans = "", "", "", true
+				local rightHandDisplay, leftHandDisplay = nil, nil
+				local rightHandIneffective, leftHandIneffective = false, false
+
+				local attackerIsCasting = targetIsCasting
+				local attackerActionIcon = targetActionIcon
+				if not reverse then
+					attackerActionIcon = ZJAttackInfo_Private_GetActionIcon(attackerSprite)
+					attackerIsCasting = attackerActionIcon == 2 or attackerActionIcon == 3
+				end
+
+				if attackerIsCasting then
+
+					-- A creature that is casting a spell / using an item isn't swinging its weapon: the roll it needs to hit and
+					-- its weapon damage are replaced by the name of the spell / item. In the left panel that name is in the header.
+					if not reverse then
+						local actionName = ZJAttackInfo_Private_GetActionName(attackerSprite)
+						if actionName ~= nil then
+							rightHandString = string.format(" %s%s", dim and dimColorStr or "", actionName)
+							rightHandRollString = rightHandString
+						end
+
+						-- With the spell / item icon in front of it
+						rightHandDisplay = {
+							["typeIcons"]  = { attackerActionIcon == 3 and 7 or 6 },
+							["extraText"]  = "",
+							["extraIcons"] = {},
+						}
+					end
+				else
+					local rightHandChance, rightHandDamage
+					rightHandChance, rightHandIneffective, _, rightHandDamage, rightHandDisplay =
+						ZJAttackInfo_Private_GetWeaponHitChance(attackerSprite, defenderSprite, false)
+
+					rightHandString, rightHandRollString, rightHandDamageString, rightHandSpans = formatChanceStr(
+						rightHandChance, rightHandIneffective, not reverse and rightHandDamage or nil, dim)
+
+					if EEex.CanAttackWithLeftHand(attackerSprite) then
+
+						local leftHandChance, leftHandDamage
+						leftHandChance, leftHandIneffective, _, leftHandDamage, leftHandDisplay =
+							ZJAttackInfo_Private_GetWeaponHitChance(attackerSprite, defenderSprite, true)
+
+						leftHandString, leftHandRollString, leftHandDamageString, leftHandSpans = formatChanceStr(
+							leftHandChance, leftHandIneffective, not reverse and leftHandDamage or nil, dim)
+
+						hadOffhand = true
+					end
+
+					-- What is behind the damage is left out with it: in the left panel, and where "Immune" replaces it
+					if reverse or rightHandDamageString == "" then rightHandDisplay = nil end
+					if reverse or leftHandDamageString == "" then leftHandDisplay = nil end
+
+					-- An immune target isn't hurt by the extra damage of a hit either, ('Color' immunity display)
+					if immuneDisplayType == 0 then
+						if rightHandIneffective and rightHandDisplay ~= nil then
+							rightHandDisplay.extraText, rightHandDisplay.extraIcons = "", {}
+						end
+						if leftHandIneffective and leftHandDisplay ~= nil then
+							leftHandDisplay.extraText, leftHandDisplay.extraIcons = "", {}
+						end
+					end
+
+					for _, handDisplay in pairs({ rightHandDisplay, leftHandDisplay }) do
+						handDisplay.extraText = ZJAttackInfo_Private_ColorResistance(handDisplay.extraText,
+							dim and dimImmuneColorStr or redColorStr, dim and dimGreenColorStr or greenColorStr, dim and dimColorStr or "")
+					end
+				end
+
+				measureHand(mainHandColumnIndex, rightHandRollString, rightHandDamageString, rightHandSpans, rightHandDisplay)
+				measureHand(offHandColumnIndex, leftHandRollString, leftHandDamageString, leftHandSpans, leftHandDisplay)
+
+				-- The columns are sized for the roll and the damage next to each other
+				entry = calculate({
+					[nameColumnIndex]     = string.format("%s%s ", dim and dimColorStr or "", selectedSprite:getName()),
+					[mainHandColumnIndex] = rightHandString,
+					[offHandColumnIndex]  = leftHandString,
+				})
+
+				setHandDisplay(entry, mainHandColumnIndex, rightHandDisplay, dim)
+				setHandDisplay(entry, offHandColumnIndex, leftHandDisplay, dim)
+
+				-- They are drawn by separate items
+				entry[mainHandColumnIndex]      = rightHandRollString
+				entry[mainHandDamageEntryIndex] = rightHandDamageString
+				entry[offHandColumnIndex]       = leftHandRollString
+				entry[offHandDamageEntryIndex]  = leftHandDamageString
+
+				-- The left list has an icon in front of the names the target is attacking / casting at, for what it attacks
+				-- them with. The right list has no need for it: there the icon of each hand is in front of its roll.
+				-- Every row of the compact popup is an ongoing attack / cast, the icon would only repeat that.
+				local attackIcon = false
+				if reverse and not compact then
+					if isAttacking then
+						attackIcon = targetTypeIcon
+					elseif ZJAttackInfo_Private_IsCastingSpellAt(attackerSprite, defenderSprite) then
+						attackIcon = targetActionIcon == 3 and 7 or 6
+					end
+				end
+
+				entry[attackIconEntryIndex] = attackIcon
+				build.anyAttackIcon = build.anyAttackIcon or attackIcon ~= false
+
+				-- The left panel shows the target's timer bars below the sprite it is attacking / casting at
+				if reverse and isEngaging and build.targetBarsSpriteIndex == nil then
+					build.targetBarsSpriteIndex = spriteIndex
+				end
+
+				-- The right panel shows the attack round of every listed sprite that is attacking the target, and the
+				-- spell cooldown of every listed sprite, (a spell cast at a point has no target to check against)
+				if showRowTimers and not reverse and rowBarsCount < ZJAttackInfo_Private_MaxRowBars then
+					local rowBars = ZJAttackInfo_Private_GetRowBars(selectedSprite, isAttacking)
+					if rowBars[1] ~= nil then
+						rowBarsCount = rowBarsCount + 1
+						build.rowBars[spriteIndex] = rowBars
+						build.maxRowBars = math.max(build.maxRowBars, #rowBars)
+					end
+				end
+			end
+
+			table.insert(build.entries, entry)
+		end
+
+		if showColumnHeaders then
+
+			local mainhandHeader = string.format(" %s", uiStrings["ZJBattleSense_TRANSLATION_AttackInfo_Mainhand"])
+			local offhandHeader = ""
+
+			if not hideUnusedOffhandHeader or hadOffhand then
+				offhandHeader = string.format(" %s", uiStrings["ZJBattleSense_TRANSLATION_AttackInfo_Offhand"])
+			end
+
+			measureHand(mainHandColumnIndex, mainhandHeader, "", true, nil)
+			measureHand(offHandColumnIndex, offhandHeader, "", true, nil)
+
+			table.insert(build.entries, 1, calculate({"", mainhandHeader, offhandHeader}))
+		end
+
+		-- A hand's column has to fit the widest of each of its sub-columns next to each other, which can be on different
+		-- rows. Stores where each sub-column starts, (from the left of the column), for the layout of its items.
+		local fitHand = function(columnIndex, padW)
+
+			local x = padW
+			local offsets = {}
+
+			-- The icons come first: the damage type(s) of the weapon, or the spell / item icon
+			offsets.typeIcons = x + spaceW
+			if build.typeIconCounts[columnIndex] > 0 then
+				x = offsets.typeIcons + build.typeIconCounts[columnIndex] * handIconSize
+			end
+
+			offsets.roll = x
+			x = offsets.roll + build.rollWidths[columnIndex]
+
+			offsets.damage = x + hitDamageGapW
+			if build.damageWidths[columnIndex] > 0 then
+				x = offsets.damage + build.damageWidths[columnIndex]
+			end
+
+			offsets.extraText = x + hitDamageGapW
+			if build.extraWidths[columnIndex] > 0 then
+				x = offsets.extraText + build.extraWidths[columnIndex]
+			end
+
+			offsets.extraIcons = x + handIconGapW
+			if build.extraIconCounts[columnIndex] > 0 then
+				x = offsets.extraIcons + build.extraIconCounts[columnIndex] * handIconSize
+			end
+
+			build.handOffsets[columnIndex] = offsets
+
+			-- The text that isn't a roll starts where the rolls do
+			x = math.max(x, offsets.roll + build.spanWidths[columnIndex])
+
+			-- Only widen the column if it has something besides the rolls
+			if x > padW + build.rollWidths[columnIndex] then
+				columnWidths[columnIndex] = math.max(columnWidths[columnIndex], x)
+			end
+		end
+
+		build.handOffsets = {}
+		fitHand(mainHandColumnIndex, divider1ColumnW)
+		fitHand(offHandColumnIndex, divider2ColumnPadLeft + divider2ColumnW)
+
+		return build
+	end
+
+	local builds = {}
+	for panelIndex, panel in ipairs(panels) do
+		builds[panelIndex] = buildPanel(panel, panelIndex == 1)
+	end
+
+	-----------------------------------------
+	--     Calculate shared dimensions     --
+	-----------------------------------------
+
+	-- The header keeps its height when it has no text
+	-- `maxHeaderLabelH` used in layout
+	local _, minHeaderLabelH = measure("X")
+	local maxHeaderLabelH = minHeaderLabelH
+
+	-- The rows of both panels are the same height so they line up
+	local tallestRowHeight = 0
+
+	for panelIndex, build in ipairs(builds) do
+
+		build.labelText = labelTexts[panelIndex]
+
+		local labelW, labelH = measure(build.labelText)
+		build.labelW = labelW
+
+		maxHeaderLabelH = math.max(maxHeaderLabelH, labelH)
+		tallestRowHeight = math.max(tallestRowHeight, build.tallestRowHeight)
+	end
+
+	-- The target's name is the left header's first line. What the target attacks with, (its damage / spell), is on a
+	-- second line below it. The right header only has the first line, its spell effects start right below it.
+	-- `targetNameW`, `headerLine2H` and `headerTextH` used in layout
+	local targetNameW = 0
+	local hasHeaderLine2 = targetAttackW > 0
+
+	if targetNameText ~= "" then
+		local nameW, nameH = measure(targetNameText)
+		targetNameW = nameW
+		maxHeaderLabelH = math.max(maxHeaderLabelH, nameH)
+	end
+
+	-- Both lines are as tall as the tallest header text
+	local headerLine2H = hasHeaderLine2 and maxHeaderLabelH or 0
+	local headerTextH = maxHeaderLabelH + headerLine2H
+
+	-- The text of a row is at its top, the room below it is for the timer bars of the right panel.
+	-- Every row is as tall as the row with the most bars, as a list's rows are all the same height.
+	-- `textRowHeight` used in layout
+	local textRowHeight = tallestRowHeight + rowHeightPad
+	local maxRowBars = builds[2].maxRowBars
+
+	-- The bars show where the target is in its attack round, spell cast, etc. Each is only present while it applies.
+	-- They are stacked below the name of the sprite the target is attacking, in the left panel. If it isn't attacking
+	-- any of the listed sprites, they are stacked below the left panel's header, which makes that header taller.
+	-- `targetBars` and `targetBarsSpriteIndex` used in layout
+	local targetBars = ZJAttackInfo_Private_GetTargetBars(targetSprite)
+	local targetBarsCount = #targetBars
+	local targetBarsSpriteIndex = builds[1].targetBarsSpriteIndex
+	local targetBarsHeaderH = 0
+
+	if targetBarsCount > 0 then
+		if targetBarsSpriteIndex ~= nil then
+			maxRowBars = math.max(maxRowBars, targetBarsCount)
+		else
+			targetBarsHeaderH = targetBarsPadTop + targetBarsCount * targetBarH + (targetBarsCount - 1) * targetBarGap
+		end
+	end
+	local rowBarsTotalH = 0
+
+	if maxRowBars > 0 then
+		rowBarsTotalH = rowBarsPadTop + maxRowBars * rowBarH + (maxRowBars - 1) * rowBarGap + rowBarsPadBottom
+	end
+
+	-- `rowHeight` and `attackIconSize` used in layout
+	local rowHeight = textRowHeight + rowBarsTotalH
+	local attackIconSize = textRowHeight
+
+
+	-- Both lists have a row for every listed sprite
+	-- `infoListH` used in layout
+	local infoListH = #builds[1].entries * rowHeight
+
+	-----------------------------------
+	--     Finalize panel lists      --
+	-----------------------------------
+
+	ZJAttackInfo_Private_Menu_TargetName = targetNameText
+	ZJAttackInfo_Private_Menu_TargetNameUD.text.point = fontPoint
+
+	for _, textItemUD in ipairs(ZJAttackInfo_Private_Menu_TargetAttackTextUDs) do
+		textItemUD.text.point = fontPoint
+	end
+
+	for panelIndex, panel in ipairs(panels) do
+
+		local build = builds[panelIndex]
+		local columnWidths = build.columnWidths
+		local columnUDs = panel.columnUDs
+
+		_G[panel.tableVarName] = build.entries
+		_G[panel.labelVarName] = build.labelText
+
+		panel.labelUD.text.point = fontPoint
+		panel.listUD.list.rowheight = rowHeight
+
+		-- `totalHeaderW` used in layout
+		local totalHeaderW = build.labelW
+
+		if panelIndex == 1 then
+			-- The target's name, with what the target attacks with below it
+			totalHeaderW = math.max(targetNameW, targetAttackW)
+		end
+
+		----------------------------------
+		-- Reserve room for attack icon --
+		----------------------------------
+
+		if build.anyAttackIcon then
+			columnWidths[nameColumnIndex] = columnWidths[nameColumnIndex] + attackIconSize + attackIconPadRight
+		end
+
+		-------------------------
+		-- Calculate row width --
+		-------------------------
+
+		local rowWidth = 0
+		for _, columnWidth in ipairs(columnWidths) do
+			rowWidth = rowWidth + columnWidth
+		end
+
+		-- Close the list with a divider if the header is wide enough to leave room for it
+		local divider3ColumnNeededW = divider3ColumnPadLeft + divider3ColumnW
+		local divider3NeededRowWidth = rowWidth + divider3ColumnNeededW
+
+		if totalHeaderW >= divider3NeededRowWidth then
+			columnWidths[divider3ColumnIndex] = divider3ColumnNeededW
+			rowWidth = divider3NeededRowWidth
+		end
+
+		local infoListW = math.max(rowWidth, 1) -- The width is divided by below
+
+		---------------------------
+		-- Adjust column layouts --
+		---------------------------
+
+		local nameColumnTextItem = columnUDs[nameColumnIndex].items
+		nameColumnTextItem.text.point = fontPoint
+		nameColumnTextItem.area.y = 0
+		nameColumnTextItem.area.h = textRowHeight
+
+		-- Only the left list has an icon in front of the names
+		if panelIndex == 1 then
+			local nameColumnIconItem = nameColumnTextItem.next
+			nameColumnIconItem.area.x = 0
+			nameColumnIconItem.area.y = 0
+			nameColumnIconItem.area.w = attackIconSize
+			nameColumnIconItem.area.h = attackIconSize
+		end
+
+		local divider1Item = columnUDs[divider1ColumnIndex].items
+		divider1Item.area.w = divider1ColumnW
+
+		local diver1TextItem = divider1Item.next
+		diver1TextItem.area.x = divider1ColumnW
+
+		local mainHandColumnTextItem = columnUDs[mainHandColumnIndex].items.next
+		mainHandColumnTextItem.text.point = fontPoint
+		mainHandColumnTextItem.area.y = 0
+		mainHandColumnTextItem.area.h = textRowHeight
+
+		-- Places the items of a hand's column: the icons in front of the roll, the roll, the damage, the extra damage
+		-- and the extra damage icons. Returns the last of them.
+		local layoutHandItems = function(rollTextItem, columnIndex)
+
+			local offsets = build.handOffsets[columnIndex]
+			local iconY = math.floor((textRowHeight - handIconSize) / 2)
+
+			rollTextItem.area.x = offsets.roll
+
+			local damageItem = rollTextItem.next
+			damageItem.text.point = fontPoint
+			damageItem.area.x = offsets.damage
+			damageItem.area.y = 0
+			damageItem.area.h = textRowHeight
+
+			local item = damageItem
+
+			for slot = 1, ZJAttackInfo_Private_MaxHandIcons do
+				item = item.next
+				item.area.x = offsets.typeIcons + (slot - 1) * handIconSize
+				item.area.y = iconY
+				item.area.w = handIconSize
+				item.area.h = handIconSize
+			end
+
+			item = item.next
+			item.text.point = fontPoint
+			item.area.x = offsets.extraText
+			item.area.y = 0
+			item.area.h = textRowHeight
+
+			for slot = 1, ZJAttackInfo_Private_MaxHandIcons do
+				item = item.next
+				item.area.x = offsets.extraIcons + (slot - 1) * handIconSize
+				item.area.y = iconY
+				item.area.w = handIconSize
+				item.area.h = handIconSize
+			end
+
+			return item
+		end
+
+		layoutHandItems(mainHandColumnTextItem, mainHandColumnIndex)
+
+		local divider2Item = columnUDs[divider2ColumnIndex].items
+		divider2Item.area.x = columnWidths[divider2ColumnIndex] > 0 and divider2ColumnPadLeft or 0
+		divider2Item.area.w = columnWidths[divider2ColumnIndex] > 0 and divider2ColumnW or 0
+
+		local diver2TextItem = divider2Item.next
+		diver2TextItem.area.x = divider2ColumnPadLeft + divider2ColumnW
+
+		local offHandColumnTextItem = columnUDs[offHandColumnIndex].items.next
+		offHandColumnTextItem.text.point = fontPoint
+		offHandColumnTextItem.area.y = 0
+		offHandColumnTextItem.area.h = textRowHeight
+
+		layoutHandItems(offHandColumnTextItem, offHandColumnIndex)
+
+		local divider3Item = columnUDs[divider3ColumnIndex].items
+		divider3Item.area.x = columnWidths[divider3ColumnIndex] > 0 and divider3ColumnPadLeft or 0
+		divider3Item.area.w = columnWidths[divider3ColumnIndex] > 0 and divider3ColumnW or 0
+
+		-----------------------------------------------------------------------------
+		-- Convert and set calculated column lengths to percentages for the engine --
+		-----------------------------------------------------------------------------
+
+		local columnWidthPercentages = {}
+
+		while true do
+
+			local needGrow = false
+			local totalPercent = 0
+
+			for i, columnWidth in ipairs(columnWidths) do
+
+				local columnWidthPercent = math.ceil(columnWidth * 100 / infoListW)
+				local resultingColumnWidth = math.floor(infoListW * columnWidthPercent / 100)
+
+				columnWidthPercentages[i] = columnWidthPercent
+				totalPercent = totalPercent + columnWidthPercent
+
+				if resultingColumnWidth < columnWidth then
+					needGrow = true
+					break
+				end
+			end
+
+			if needGrow or totalPercent > 100 then
+				infoListW = infoListW + 1
+			else
+				break
+			end
+		end
+
+		for i, columnUD in ipairs(columnUDs) do
+			EEex_Menu_SetItemVariant(columnUD.reference_width, columnWidthPercentages[i])
+		end
+
+		build.infoListW = infoListW
+		build.panelW = math.max(totalHeaderW, infoListW)
+	end
+
+	----------------------------------
+	--      Lay out spell effects    --
+	----------------------------------
+
+	-- The spells affecting the target are listed below the right panel's header, one per line. A name that is wider
+	-- than the panel widens it.
+	-- `spellEffectsText`, `spellEffectsW` and `spellEffectsH` used in layout
+	local spellEffectsText = ""
+	local spellEffectsW = 0
+	local spellEffectsH = 0
+
+	if #spellEffectNames > 0 then
+
+		local lines = spellEffectNames
+
+		for _, lineText in ipairs(lines) do
+			spellEffectsW = math.max(spellEffectsW, (measure(lineText)))
+		end
+
+		-- Room for rounding, so the engine doesn't wrap a line that just fits a second time
+		spellEffectsW = spellEffectsW + 2
+		spellEffectsText = table.concat(lines, "\n")
+
+		local _, textH = EEex_Menu_GetTextWidthHeight(spellEffectsText, styles["normal"].font, fontPoint,
+			styles["normal"].useFontZoom, spellEffectsW)
+		spellEffectsH = textH
+
+		builds[2].panelW = math.max(builds[2].panelW, spellEffectsW)
+	end
+
+	ZJAttackInfo_Private_Menu_SpellEffects = spellEffectsText
+	ZJAttackInfo_Private_Menu_SpellEffectsUD.text.point = fontPoint
+
+	----------------------------
+	--     Layout panels      --
+	----------------------------
+
+	local headerY = backgroundPad
+
+	-- The left header's lines are followed by its target bars, the right header's line by its spell effects, the
+	-- separator is below whichever side is taller
+	-- `headerHorizontalSepY` and `infoListY` used in layout
+	-- Without defenses, the right header's line is empty and the spell effects take its place
+	-- `spellEffectsY` used in layout
+	local rightHeaderLineH = labelTexts[2] ~= "" and maxHeaderLabelH or 0
+	local spellEffectsY = headerY + rightHeaderLineH
+	local headerHorizontalSepY = math.max(headerY + headerTextH + targetBarsHeaderH, spellEffectsY + spellEffectsH)
+		+ headerHorizontalSepPadTop
+	local infoListY = headerHorizontalSepY + headerHorizontalSepH + headerHorizontalSepPadBottom
+
+	local panelX = backgroundPad
+
+	for panelIndex, panel in ipairs(panels) do
+
+		local build = builds[panelIndex]
+
+		if panelIndex > 1 then
+			-- The separator runs from the top of the headers to the bottom of the lists
+			local panelSeparatorX = panelX + panelGap
+			local panelSeparatorH = infoListY + infoListH - headerY
+			Infinity_SetArea("ZJAttackInfo_Menu_PanelSeparator", panelSeparatorX, headerY, panelSeparatorW, panelSeparatorH)
+			panelX = panelSeparatorX + panelSeparatorW + panelGap
+		end
+
+		build.panelX = panelX
+
+		local headerLabelX = panelX
+		local headerLabelY = headerY
+
+		if panelIndex == 1 then
+			Infinity_SetArea("ZJAttackInfo_Menu_TargetName", panelX, headerY, targetNameW, maxHeaderLabelH)
+
+			-- What the target attacks with is on the second line
+			local line2Y = headerY + maxHeaderLabelH
+			local iconY = line2Y + math.floor((maxHeaderLabelH - handIconSize) / 2)
+
+			for handIndex = 1, 2 do
+
+				local hand = targetAttackHands[handIndex]
+				local handState = ZJAttackInfo_Private_Menu_TargetAttack[handIndex]
+				local itemPrefix = "ZJAttackInfo_Menu_TargetAttack"..handIndex
+
+				handState.text  = hand and hand.text or ""
+				handState.icons = hand and hand.icons or {}
+				handState.extra = hand and hand.extra or ""
+				handState.extraIcons = hand and hand.extraIcons or {}
+
+				if hand ~= nil then
+					Infinity_SetArea(itemPrefix.."Text", panelX + hand.textX, line2Y, hand.textW, maxHeaderLabelH)
+					Infinity_SetArea(itemPrefix.."Extra", panelX + hand.extraX, line2Y, hand.extraW, maxHeaderLabelH)
+					for slot = 1, ZJAttackInfo_Private_MaxHandIcons do
+						Infinity_SetArea(itemPrefix.."Icon"..slot, panelX + hand.iconsX + (slot - 1) * handIconSize, iconY, handIconSize, handIconSize)
+						Infinity_SetArea(itemPrefix.."ExtraIcon"..slot, panelX + hand.extraIconsX + (slot - 1) * handIconSize, iconY, handIconSize, handIconSize)
+					end
+				end
+			end
+
+			local separatorX = targetAttackSeparatorXs[1]
+			ZJAttackInfo_Private_Menu_TargetAttackSeparator = separatorX and targetAttackSeparatorStr or ""
+			if separatorX ~= nil then
+				Infinity_SetArea("ZJAttackInfo_Menu_TargetAttackSeparator", panelX + separatorX, line2Y,
+					measure(targetAttackSeparatorStr), maxHeaderLabelH)
+			end
+		end
+		Infinity_SetArea(panel.labelName, headerLabelX, headerLabelY, build.labelW, maxHeaderLabelH)
+
+		if panelIndex == 2 then
+			Infinity_SetArea("ZJAttackInfo_Menu_SpellEffects", panelX, spellEffectsY, spellEffectsW, spellEffectsH)
+		end
+
+		Infinity_SetArea(panel.listName, panelX, infoListY, build.infoListW, infoListH)
+
+		panelX = panelX + build.panelW
+	end
+
+	-- `backgroundWidth` used in layout
+	local backgroundWidth = panelX + backgroundPad
+
+	------------------------------------
+	--     Layout label separator     --
+	------------------------------------
+
+	local headerHorizontalSepX = backgroundPad
+	local headerHorizontalSepW = backgroundWidth - backgroundPad * 2
+
+	Infinity_SetArea("ZJAttackInfo_Menu_LabelSeparator", headerHorizontalSepX, headerHorizontalSepY, headerHorizontalSepW, headerHorizontalSepH)
+
+	-------------------------------
+	--     Layout background     --
+	-------------------------------
+
+	local backgroundHeight = infoListY + infoListH + backgroundPad
+
+	local cursorX, cursorY = EEex_Menu_GetMousePos()
+	local cursorCenterX, cursorCenterY, cursorW, cursorH = ZJAttackInfo_Private_GetCursorRenderData()
+
+	local cursorRenderX = cursorX - cursorCenterX
+	local cursorRenderY = cursorY - cursorCenterY
+
+	local backgroundX = cursorRenderX + cursorW + popupRightSideAdjust
+	local backgroundY = cursorRenderY
+
+	local screenW, screenH = Infinity_GetScreenSize()
+
+	if backgroundX + backgroundWidth > screenW then
+		backgroundX = cursorRenderX - backgroundWidth - popupLeftSideAdjust
+	end
+
+	-- Two panels can be wider than the room on either side of the cursor
+	if backgroundX < 0 then
+		backgroundX = math.max(0, screenW - backgroundWidth)
+	end
+
+	local backgroundBottom = backgroundY + backgroundHeight
+
+	if backgroundBottom > screenH then
+		backgroundY = backgroundY - (backgroundBottom - screenH)
+	end
+
+	Infinity_SetOffset("ZJAttackInfo_Menu", backgroundX, backgroundY)
+	Infinity_SetArea("ZJAttackInfo_Menu_BackgroundRect", 0, 0, backgroundWidth, backgroundHeight)
+
+	-------------------------
+	--     Layout bars     --
+	-------------------------
+
+	local hideBar = function(barState)
+		barState.track = false
+		barState.fill = false
+		for i in pairs(barState.markers) do
+			barState.markers[i] = false
+		end
+	end
+
+	-- Places the items of a bar, (`itemPrefix`.."Track" / "Fill" / "Marker<n>"), and enables them through `barState`
+	local layoutBar = function(itemPrefix, barState, bar, barX, barY, barW, barH, markerW)
+
+		barState.track = true
+		Infinity_SetArea(itemPrefix.."Track", barX, barY, barW, barH)
+
+		-- The bar fills from left to right
+		local percentage = math.max(0, math.min(bar.percentage, 1))
+		local fillW = math.floor(barW * percentage + 0.5)
+
+		if fillW > 0 then
+			barState.fill = true
+			Infinity_SetArea(itemPrefix.."Fill", barX, barY, fillW, barH)
+		end
+
+		-- White ticks, (attack rolls / spell release)
+		for i, value in ipairs(bar.markers) do
+
+			if i > ZJAttackInfo_Private_TargetBarMaxMarkers[bar.name] then break end
+
+			local markerX = barX + math.floor(barW * value / 100 + 0.5) - math.floor(markerW / 2)
+			markerX = math.max(barX, math.min(markerX, barX + barW - markerW))
+
+			barState.markers[i] = true
+			Infinity_SetArea(itemPrefix.."Marker"..i, markerX, barY, markerW, barH)
+		end
+	end
+
+	-----------------
+	-- Target bars --
+	-----------------
+
+	local targetBarStates = ZJAttackInfo_Private_Menu_TargetBars
+
+	for _, barName in ipairs(ZJAttackInfo_Private_TargetBarNames) do
+		hideBar(targetBarStates[barName])
+	end
+
+	local headerRowCount = showColumnHeaders and 1 or 0
+
+	-- The bars belong to the target, so they are in the left panel, which lists its attacks
+	local targetBarX = builds[1].panelX
+	local targetBarY, targetBarW, targetBarStepH, targetBarStepGap, targetBarStepMarkerW
+
+	if targetBarsSpriteIndex ~= nil then
+		-- Below the name of the sprite the target is attacking, laid out like the row bars of the right panel
+		local rowY = infoListY + (headerRowCount + targetBarsSpriteIndex - 1) * rowHeight
+		targetBarY = rowY + textRowHeight + rowBarsPadTop
+		targetBarW = math.max(builds[1].columnWidths[nameColumnIndex] - spaceW, 1)
+		targetBarStepH, targetBarStepGap, targetBarStepMarkerW = rowBarH, rowBarGap, rowBarMarkerW
+	else
+		-- Below the panel's header, as wide as the panel
+		targetBarY = headerY + headerTextH + targetBarsPadTop
+		targetBarW = builds[1].panelW
+		targetBarStepH, targetBarStepGap, targetBarStepMarkerW = targetBarH, targetBarGap, targetBarMarkerW
+	end
+
+	for _, targetBar in ipairs(targetBars) do
+		local barName = targetBar.name
+		layoutBar("ZJAttackInfo_Menu_Target"..barName.."Bar", targetBarStates[barName], targetBar,
+			targetBarX, targetBarY, targetBarW, targetBarStepH, targetBarStepMarkerW)
+		targetBarY = targetBarY + targetBarStepH + targetBarStepGap
+	end
+
+	--------------
+	-- Row bars --
+	--------------
+
+	local rowBarStates = ZJAttackInfo_Private_Menu_RowBars
+
+	for _, rowBarState in ipairs(rowBarStates) do
+		for _, barName in ipairs(ZJAttackInfo_Private_RowBarNames) do
+			hideBar(rowBarState[barName])
+		end
+	end
+
+	-- The bars of a row are below its name in the right panel, and as wide as the name column, (less its trailing space)
+	local rowBarX = builds[2].panelX
+	local rowBarW = math.max(builds[2].columnWidths[nameColumnIndex] - spaceW, 1)
+
+	-- Every row with bars uses the next set of bar items in the menu
+	local rowBarSet = 0
+
+	for spriteIndex = 1, #selectedSprites do
+
+		local rowBars = builds[2].rowBars[spriteIndex]
+
+		if rowBars ~= nil then
+
+			rowBarSet = rowBarSet + 1
+
+			local rowY = infoListY + (headerRowCount + spriteIndex - 1) * rowHeight
+			local rowBarY = rowY + textRowHeight + rowBarsPadTop
+
+			for _, rowBar in ipairs(rowBars) do
+				local barName = rowBar.name
+				layoutBar("ZJAttackInfo_Menu_Row"..rowBarSet..barName.."Bar", rowBarStates[rowBarSet][barName], rowBar,
+					rowBarX, rowBarY, rowBarW, rowBarH, rowBarMarkerW)
+				rowBarY = rowBarY + rowBarH + rowBarGap
+			end
+		end
+	end
+end
+
+function ZJAttackInfo_Private_Menu_Ticker_Tick()
+
+	local targetSprite = EEex_GameObject_GetUnderCursor()
+
+	if not EEex_GameObject_IsSprite(targetSprite) then
+		-- Hide the popup if no sprite is under the cursor
+		ZJAttackInfo_Private_LastTargetID = -1
+		ZJAttackInfo_Private_Menu_SetOpen(false)
+		return
+	end
+
+	local lastTargetId = ZJAttackInfo_Private_LastTargetID
+	local targetId = targetSprite.m_id
+	ZJAttackInfo_Private_LastTargetID = targetId
+
+	local chitin = EngineGlobals.g_pBaldurChitin
+
+	if (chitin.m_pObjectGame.m_nState ~= 2 and EEex_Key_IsDown(SDL_Keycode.SDLK_TAB)) or (B3EffectMenu_IsOpen ~= nil and B3EffectMenu_IsOpen()) then
+		-- Hide the popup if a tooltip is being forced or the effect menu popup is open
+		ZJAttackInfo_Private_Menu_SetOpen(false)
+		return
+	end
+
+	local selectedSprites, compact = ZJAttackInfo_Private_GetRowSprites(targetSprite)
+
+	if not compact and selectedSprites[1] == nil then
+		-- Hide the popup if no currently selected sprites are eligible
+		ZJAttackInfo_Private_Menu_SetOpen(false)
+		return
+	end
+
+	-- Checking if the popup should open from a keybind
+	local shouldBeOpen = ZJAttackInfo_Private_OpenKeybindPressed or ZJAttackInfo_Private_ReverseKeybindPressed
+
+	-- Checking if the popup should open from an attack cursor, (the compact popup only opens from a keybind)
+	if not compact and not shouldBeOpen and ZJAttackInfo_Private_OpenWithAttackCursor:get() ~= 0 then
+		local nCurrentCursor = chitin.m_pObjectCursor.nCurrentCursor
+		shouldBeOpen = nCurrentCursor == 12 or (nCurrentCursor == 101 and EEex.IsDefaultAttackCursor())
+	end
+
+	if not shouldBeOpen then
+		-- Hide the popup if neither a keybind or the cursor shape are attempting to open it
+		ZJAttackInfo_Private_Menu_SetOpen(false)
+		return
+	end
+
+	local waiting = true
+
+	-- Delay opening by 1 tick to wait for the cursor shape to update
+	if targetId ~= lastTargetId or ZJAttackInfo_Private_OpenDelayTarget == -1 then
+		ZJAttackInfo_Private_OpenDelayTarget = Infinity_GetFrameCounter() + 1
+	elseif Infinity_GetFrameCounter() >= ZJAttackInfo_Private_OpenDelayTarget then
+		waiting = false
+	end
+
+	if waiting then
+
+		-- Attempt to layout with the previous target if we are currently waiting
+		local lastTarget = EEex_GameObject_Get(ZJAttackInfo_Private_CurrentTargetID)
+		local lastSelectedSprites, lastCompact
+		if EEex_GameObject_IsSprite(lastTarget) then
+			lastSelectedSprites, lastCompact = ZJAttackInfo_Private_GetRowSprites(lastTarget)
+		end
+
+		if lastSelectedSprites ~= nil and (lastCompact or lastSelectedSprites[1] ~= nil) then
+			ZJAttackInfo_Private_Layout(lastSelectedSprites, lastTarget, lastCompact)
+		else
+			ZJAttackInfo_Private_Menu_SetOpen(false, true)
+		end
+
+		return
+	end
+
+	ZJAttackInfo_Private_CurrentTargetID = targetId
+	ZJAttackInfo_Private_Layout(selectedSprites, targetSprite, compact)
+	ZJAttackInfo_Private_Menu_SetOpen(true)
+end
+
+function ZJAttackInfo_Private_Menu_Ticker_Open()
+	Infinity_PushMenu("ZJAttackInfo_Menu_Ticker")
+	ZJAttackInfo_Private_Menu_Ticker_IsOpen = true
+end
+
+function ZJAttackInfo_Private_Menu_Ticker_Close()
+	ZJAttackInfo_Private_Menu_SetOpen(false)
+	Infinity_PopMenu("ZJAttackInfo_Menu_Ticker")
+	ZJAttackInfo_Private_Menu_Ticker_IsOpen = false
+end
+
+function ZJAttackInfo_Private_Menu_Ticker_SetOpen(open)
+	if open then
+		if ZJAttackInfo_Private_Enabled and not ZJAttackInfo_Private_Menu_Ticker_IsOpen then
+			ZJAttackInfo_Private_Menu_Ticker_Open()
+		end
+	elseif ZJAttackInfo_Private_Menu_Ticker_IsOpen then
+		ZJAttackInfo_Private_Menu_Ticker_Close()
+	end
+end
+
+function ZJAttackInfo_Private_Menu_Ticker_SetShouldBeOpen(open)
+	ZJAttackInfo_Private_Menu_Ticker_SetOpen(open)
+	ZJAttackInfo_Private_Menu_Ticker_ShouldBeOpen = open
+end
+
+-----------------------
+-- ZJAttackInfo_Menu --
+-----------------------
+
+ZJAttackInfo_Private_Menu_SpellEffects          = ""    -- The spells affecting the target, one or more lines
+ZJAttackInfo_Private_Menu_SpellEffectsUD        = nil   -- uiItem
+ZJAttackInfo_Private_Menu_InfoList_SelectedRow  = 0
+ZJAttackInfo_Private_Menu_InfoList_Table        = {}    -- Left panel:  The target's attacks on the listed sprites
+ZJAttackInfo_Private_Menu_InfoList2_SelectedRow = 0
+ZJAttackInfo_Private_Menu_InfoList2_Table       = {}    -- Right panel: The listed sprites' attacks on the target
+ZJAttackInfo_Private_Menu_IsOpen                = false
+ZJAttackInfo_Private_Menu_Label                 = ""    -- Left panel's header
+ZJAttackInfo_Private_Menu_Label2                = ""    -- Right panel's header
+ZJAttackInfo_Private_Menu_Panels                = nil   -- table, see the main file loaded listener
+ZJAttackInfo_Private_Menu_TargetName            = ""    -- The target's name, at the start of the left panel's header
+ZJAttackInfo_Private_Menu_TargetNameUD          = nil   -- uiItem
+
+-- What the target attacks with, below the target's name in the left panel's header: for each hand, its damage, the icons of
+-- the damage type(s), (see ZJAttackInfo_Private_DamageTypeIcons), the extra damage, and the icons of the elements
+-- of that extra damage, (frames in ZJATKELM.BAM)
+ZJAttackInfo_Private_Menu_TargetAttack = {
+	{ ["text"] = "", ["icons"] = {}, ["extra"] = "", ["extraIcons"] = {} },
+	{ ["text"] = "", ["icons"] = {}, ["extra"] = "", ["extraIcons"] = {} },
+}
+ZJAttackInfo_Private_Menu_TargetAttackSeparator = ""    -- Between the two hands
+ZJAttackInfo_Private_Menu_TargetAttackTextUDs   = {}    -- Array of uiItem, the text items of the above
+
+-- Which items of a timer bar are shown: { track = boolean, fill = boolean, markers = { [markerIndex] = boolean } }
+ZJAttackInfo_Private_Menu_TargetBars            = {}    -- table, [barName] = bar state, below the left panel's header
+ZJAttackInfo_Private_Menu_RowBars               = {}    -- table, [bar set][barName] = bar state, below the right panel's names
+
+for _, barName in ipairs(ZJAttackInfo_Private_TargetBarNames) do
+	ZJAttackInfo_Private_Menu_TargetBars[barName] = { ["track"] = false, ["fill"] = false, ["markers"] = {} }
+end
+
+for rowBarSet = 1, ZJAttackInfo_Private_MaxRowBars do
+	local rowBarState = {}
+	for _, barName in ipairs(ZJAttackInfo_Private_RowBarNames) do
+		rowBarState[barName] = { ["track"] = false, ["fill"] = false, ["markers"] = {} }
+	end
+	ZJAttackInfo_Private_Menu_RowBars[rowBarSet] = rowBarState
+end
+
+-- The frame in ZJATKDMG.BAM of the icon in front of a name in the left list, nil if the row has none
+function ZJAttackInfo_Private_Menu_InfoList_RowIcon(infoListTable, rowNumber)
+	local entry = infoListTable[rowNumber]
+	local icon = entry and entry[4]
+	if not icon then return nil end
+	return icon * 3 -- The green variant
+end
+
+-- The frame in ZJATKDMG.BAM of an icon in front of the roll of a hand, nil if that slot isn't used
+function ZJAttackInfo_Private_Menu_InfoList_TypeIcon(infoListTable, rowNumber, handEntryIndex, slot)
+	local entry = infoListTable[rowNumber]
+	local handDisplay = entry and entry[handEntryIndex]
+	local icon = handDisplay and handDisplay.typeIcons[slot]
+	if icon == nil then return nil end
+	return icon * 3 + handDisplay.variant
+end
+
+-- The extra damage behind the damage of a hand
+function ZJAttackInfo_Private_Menu_InfoList_ExtraText(infoListTable, rowNumber, handEntryIndex)
+	local entry = infoListTable[rowNumber]
+	local handDisplay = entry and entry[handEntryIndex]
+	return handDisplay and handDisplay.extraText or ""
+end
+
+-- The frame in ZJATKELM.BAM of an extra damage icon behind the damage of a hand, nil if that slot isn't used
+function ZJAttackInfo_Private_Menu_InfoList_ExtraIcon(infoListTable, rowNumber, handEntryIndex, slot)
+	local entry = infoListTable[rowNumber]
+	local handDisplay = entry and entry[handEntryIndex]
+	return handDisplay and handDisplay.extraIcons[slot] or nil
+end
+
+function ZJAttackInfo_Private_Menu_Open()
+	EngineGlobals.g_pBaldurChitin.m_pObjectGame.m_tempCursor = 4 -- Clear tooltip
+	Infinity_PushMenu("ZJAttackInfo_Menu")
+	ZJAttackInfo_Private_Menu_IsOpen = true
+end
+
+function ZJAttackInfo_Private_Menu_Close()
+	Infinity_PopMenu("ZJAttackInfo_Menu")
+	ZJAttackInfo_Private_Menu_IsOpen = false
+	ZJAttackInfo_Private_AttackRollFramesCaches = {}
+	ZJAttackInfo_Private_CastTargets = {}
+	ZJAttackInfo_Private_ActionNameCaches = {}
+	ZJAttackInfo_Private_ActionAreaCaches = {}
+end
+
+function ZJAttackInfo_Private_Menu_SetOpen(open, dontResetOpenDelay)
+	if open then
+		if not ZJAttackInfo_Private_Menu_IsOpen then
+			ZJAttackInfo_Private_Menu_Open()
+		end
+	elseif ZJAttackInfo_Private_Menu_IsOpen then
+		if not dontResetOpenDelay then
+			ZJAttackInfo_Private_OpenDelayTarget = -1
+		end
+		ZJAttackInfo_Private_CurrentTargetID = -1
+		ZJAttackInfo_Private_Menu_Close()
+	end
+end
+
+-----------------------
+-- Keybind Listeners --
+-----------------------
+
+-- Both keybinds open the same popup. The "reverse" keybind used to switch the popup to the target's attacks, which
+-- are now always shown in the left panel; it keeps its name so existing settings carry over.
+--
+-- The resets allow the keybinds to build off each other, e.g. CTRL, ALT, CTRL+ALT, and ALT+CTRL all open the popup.
+
+function ZJAttackInfo_Private_OnOpenKeybindPressed()
+	ZJAttackInfo_Private_OpenKeybindPressed = true
+end
+
+function ZJAttackInfo_Private_OnOpenKeybindSatisfied()
+	if EEex_Keybinds_IsSatisfied("ZJAttackInfo_ReverseKeybind") then return end
+	-- Allow the alternate keybinding to start after this one
+	EEex_Keybinds_Reset("ZJAttackInfo_ReverseKeybind")
+end
+
+function ZJAttackInfo_Private_OnOpenKeybindUnsatisfied()
+	ZJAttackInfo_Private_OpenKeybindPressed = false
+end
+
+function ZJAttackInfo_Private_OnReverseKeybindPressed()
+	ZJAttackInfo_Private_ReverseKeybindPressed = true
+end
+
+function ZJAttackInfo_Private_OnReverseKeybindSatisfied()
+	if EEex_Keybinds_IsSatisfied("ZJAttackInfo_OpenKeybind") then return end
+	-- Allow the normal keybinding to start after this one
+	EEex_Keybinds_Reset("ZJAttackInfo_OpenKeybind")
+end
+
+function ZJAttackInfo_Private_OnReverseKeybindUnsatisfied()
+	ZJAttackInfo_Private_ReverseKeybindPressed = false
+end
+
+---------------------
+-- Other Listeners --
+---------------------
+
+function ZJAttackInfo_Private_OnActionbarOpened()
+	ZJAttackInfo_Private_Menu_Ticker_SetShouldBeOpen(true)
+end
+
+function ZJAttackInfo_Private_OnActionbarClosed()
+	ZJAttackInfo_Private_Menu_Ticker_SetShouldBeOpen(false)
+end
+
+EEex_Menu_AddMainFileLoadedListener(function()
+
+	EEex_Menu_LoadFile("ZJAtkInf")
+
+	---------------
+	-- Store UDs --
+	---------------
+
+	ZJAttackInfo_Private_Menu_TargetNameUD = EEex_Menu_GetItem("ZJAttackInfo_Menu_TargetName")
+	ZJAttackInfo_Private_Menu_SpellEffectsUD = EEex_Menu_GetItem("ZJAttackInfo_Menu_SpellEffects")
+
+	ZJAttackInfo_Private_Menu_TargetAttackTextUDs = {
+		EEex_Menu_GetItem("ZJAttackInfo_Menu_TargetAttack1Text"),
+		EEex_Menu_GetItem("ZJAttackInfo_Menu_TargetAttack1Extra"),
+		EEex_Menu_GetItem("ZJAttackInfo_Menu_TargetAttack2Text"),
+		EEex_Menu_GetItem("ZJAttackInfo_Menu_TargetAttack2Extra"),
+		EEex_Menu_GetItem("ZJAttackInfo_Menu_TargetAttackSeparator"),
+	}
+	-- The left and right panel, whose items and variables only differ by a suffix
+	ZJAttackInfo_Private_Menu_Panels = {}
+
+	for panelIndex, suffix in ipairs({ "", "2" }) do
+
+		local listUD = EEex_Menu_GetItem("ZJAttackInfo_Menu_InfoList"..suffix)
+
+		local columnUDs = {}
+		local columnUDsSize = 0
+
+		local columnUD = listUD.list.columns
+		while true do
+			if columnUD == nil then break end
+			columnUDsSize = columnUDsSize + 1
+			columnUDs[columnUDsSize] = columnUD
+			columnUD = columnUD.next
+		end
+
+		ZJAttackInfo_Private_Menu_Panels[panelIndex] = {
+			["labelName"]     = "ZJAttackInfo_Menu_Label"..suffix,
+			["labelUD"]       = EEex_Menu_GetItem("ZJAttackInfo_Menu_Label"..suffix),
+			["labelVarName"]  = "ZJAttackInfo_Private_Menu_Label"..suffix,
+			["listName"]      = "ZJAttackInfo_Menu_InfoList"..suffix,
+			["listUD"]        = listUD,
+			["columnUDs"]     = columnUDs,
+			["columnUDsSize"] = columnUDsSize,
+			["tableVarName"]  = "ZJAttackInfo_Private_Menu_InfoList"..suffix.."_Table",
+		}
+	end
+
+	--------------------------------------
+	-- Listen to actionbar open / close --
+	--------------------------------------
+
+	local listenToEngineEvent = function(eventRef, listener)
+		local oldFunc = EEex_Menu_GetItemFunction(eventRef) or function() end
+		EEex_Menu_SetItemFunction(eventRef, function()
+			local toReturn = oldFunc()
+			listener()
+			return toReturn
+		end)
+	end
+
+	local menu = EEex_Menu_Find("WORLD_ACTIONBAR")
+	listenToEngineEvent(menu.reference_onOpen, ZJAttackInfo_Private_OnActionbarOpened)
+	listenToEngineEvent(menu.reference_onClose, ZJAttackInfo_Private_OnActionbarClosed)
+end)
+
+EEex.RegisterSlicedRect("ZJAttackInfo_BackgroundRect", {
+	["topLeft"]     = {  0,  0, 32, 32 },
+	["top"]         = { 16,  0, 32, 32 },
+	["topRight"]    = { 32,  0, 32, 32 },
+	["right"]       = { 32, 16, 32, 32 },
+	["bottomRight"] = { 32, 32, 32, 32 },
+	["bottom"]      = { 16, 32, 32, 32 },
+	["bottomLeft"]  = {  0, 32, 32, 32 },
+	["left"]        = {  0, 16, 32, 32 },
+	["center"]      = { 16, 16, 32, 32 },
+	["dimensions"]  = { 64, 64 },
+	["resref"]      = "X-OPTBOX",
+	["flags"]       = 0,
+})
+
+function ZJAttackInfo_Private_Background_Render(item)
+	EEex.DrawSlicedRect("ZJAttackInfo_BackgroundRect", { item:getArea() }, 255 * 0.85)
+end
+
+EEex_Menu_AddBeforeUIItemRenderListener("ZJAttackInfo_Menu_BackgroundRect", ZJAttackInfo_Private_Background_Render)
+
+EEex_Utility_NewScope(function()
+	local old = EEex_Sprite_Hook_CheckSuppressTooltip
+	EEex_Sprite_Hook_CheckSuppressTooltip = function()
+		return ZJAttackInfo_Private_Menu_IsOpen or old()
+	end
+end)

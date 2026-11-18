@@ -23,20 +23,22 @@ if not EEex_Active then return end
 -- The installer turns a module on by changing its "false" to "true". Do not edit by hand,
 -- uninstalling the component restores this file.
 ZJBattleSense_Modules = {
+	["ZJAtkInf"] = false,
 	["ZJCmbLog"] = false,
 	["ZJTimer"]  = false,
 }
 
 -- The order the modules are started in
-ZJBattleSense_Private_ModuleOrder = { "ZJCmbLog", "ZJTimer" }
+ZJBattleSense_Private_ModuleOrder = { "ZJAtkInf", "ZJCmbLog", "ZJTimer" }
 
--- A module can be an extended version of a module that ships with EEex. Running both versions
+-- Two of the modules are extended versions of a module that ships with EEex. Running both versions
 -- at once would draw everything twice, so the EEex version is switched off:
 --
 --   "option" - The EEex option that enables its version. It is turned off, which EEex applies on the next launch.
 --   "tick"   - The function that drives EEex's version. It is emptied, which silences it until that next launch.
 --
 ZJBattleSense_Private_Replaces = {
+	["ZJAtkInf"] = { ["option"] = "EEex_Module_AttackInfo", ["tick"] = "B3AttackInfo_Private_Menu_Ticker_Tick" },
 	["ZJTimer"]  = { ["option"] = "EEex_Module_Timer",      ["tick"] = "B3Timer_Private_Menu_Tick"             },
 }
 
@@ -92,6 +94,21 @@ if type(EEex_Options_Private_SpecialSortTabs) == "function" and type(EEex_Option
 		specialSortTabs(...)
 		EEex_Utility_TryIgnore(ZJBattleSense_Private_SortTabs)
 	end
+end
+
+------------------------------
+-- Saves from the EEex fork --
+------------------------------
+
+-- Battle Sense started as modules inside a fork of EEex. That fork's Combat Log added an op403 effect to every creature
+-- that calls B3CLSCRN(), and saves made with it still carry that effect. Without the fork the function doesn't exist,
+-- so a do-nothing version stands in for it. The Combat Log component also removes the effect, (see ZJCmbLog.lua).
+function ZJBattleSense_Private_LegacyCombatLogScreen(op403, effect, sprite)
+	return false
+end
+
+if B3CLSCRN == nil then
+	B3CLSCRN = ZJBattleSense_Private_LegacyCombatLogScreen
 end
 
 -------------
