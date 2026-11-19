@@ -1,0 +1,35 @@
+
+-- Always open while a game is running, looks for an item under the cursor
+menu
+{
+	name "ZJItemInfo_Menu_Ticker"
+	ignoreesc
+
+	label
+	{
+		opacity lua "ZJItemInfo_Private_Tick()"
+	}
+}
+
+-- The popup, opened on top of everything else while the cursor is over an item (areas set in ZJItemInfo_Private_Layout())
+menu
+{
+	name "ZJItemInfo_Menu"
+	ignoreesc
+
+	label
+	{
+		name "ZJItemInfo_Menu_Background"
+		area 0 0 -1 -1
+	}
+
+	label
+	{
+		name "ZJItemInfo_Menu_Text"
+		area -1 -1 -1 -1
+		text style "normal"
+		text lua "ZJItemInfo_Private_Menu_Text"
+		text align left top
+		text color 255 255 255 255
+	}
+}

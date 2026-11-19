@@ -317,3 +317,162 @@ The number of seconds, (game time), before an identical immunity or ineffective 
 
 The lowest value is 1.
 ]]
+
+---------------
+-- Item Info --
+---------------
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_ItemInfo_TabTitle"] = "Battle Sense: Item Info"
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_ItemInfo_Enable"] = "Enabled"
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_ItemInfo_Enable_Description"] = [[
+Enables the item popup.
+
+The item popup opens when hovering the cursor over an item in a store, or in the quick loot bar, and displays the properties of that item.
+]]
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_ItemInfo_FontPoint"] = "Font Point"
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_ItemInfo_FontPoint_Description"] = [[
+The size of the text in the item popup.
+]]
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_ItemInfo_ShowFullDescription"] = "Show Full Description"
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_ItemInfo_ShowFullDescription_Description"] = [[
+Displays the whole description of the item, instead of only the part that lists its properties, (below "STATISTICS:").
+]]
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_ItemInfo_ShowComparison"] = "Show Stat Changes"
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_ItemInfo_ShowComparison_Description"] = [[
+Displays how the stats of the selected character would change if they equipped the item, in place of what they have equipped now.
+
+In a store this is the character whose portrait is selected, otherwise it is the first selected character.
+
+The changes are what the items say they do while equipped. Not taken into account: bonuses that don't stack, and what a changed ability score does to other stats.
+
+If the character can't use the item, the popup says so instead.
+
+An item that isn't identified has no stat changes listed.
+]]
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_ItemInfo_ShowWeaponStats"] = "Include Weapon Stats"
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_ItemInfo_ShowWeaponStats_Description"] = [[
+For a weapon, also lists how its damage, THAC0 bonus, speed factor and the character's proficiency points compare with the weapon in hand. The damage, THAC0 bonus and speed factor include what the character's proficiency in the weapon adds, (or the penalty for not being proficient), and what its weapon style adds, (two-handed, sword and shield, single weapon or two weapons). When the style changes, the armor class includes the style's armor class bonus.
+]]
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_ItemInfo_ShowInStores"] = "Show In Stores"
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_ItemInfo_ShowInStores_Description"] = [[
+Opens the popup when hovering an item in a store's lists.
+]]
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_ItemInfo_ShowInQuickLoot"] = "Show In Quick Loot Bar"
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_ItemInfo_ShowInQuickLoot_Description"] = [[
+Opens the popup when hovering an item in the quick loot bar.
+]]
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_ItemInfo_ShowInContainers"] = "Show In Containers"
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_ItemInfo_ShowInContainers_Description"] = [[
+Opens the popup when hovering an item in an opened container, or in the character's inventory beside it.
+]]
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_ItemInfo_ShowOnQuickItems"] = "Show On Quick Items"
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_ItemInfo_ShowOnQuickItems_Description"] = [[
+Opens a popup when hovering a quick item on the action bar that is used on its owner, (a potion): what drinking it does to the selected character, its hit points, stats, and the effects it gains.
+
+Items aimed at a creature, (a wand, a thrown potion), are described by Spell Info once a target is under the cursor.
+]]
+
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Unidentified"]        = "Not identified"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_IfEquipped"]          = "If %s equips this:"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_IfEquippedReplacing"] = "If %s equips this instead of %s:"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_NoChange"]            = "No stat changes"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_NotUsable"]           = "Not usable by %s"
+
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Stat_ArmorClass"]         = "Armor Class"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Stat_ArmorClassCrushing"] = "Armor Class bonus vs. crushing"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Stat_ArmorClassMissile"]  = "Armor Class bonus vs. missile"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Stat_ArmorClassPiercing"] = "Armor Class bonus vs. piercing"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Stat_ArmorClassSlashing"] = "Armor Class bonus vs. slashing"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Stat_THAC0"]              = "THAC0"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Stat_DamageBonus"]        = "Damage bonus"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Stat_MaxHitPoints"]       = "Maximum Hit Points"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Stat_STR"]                = "Strength"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Stat_DEX"]                = "Dexterity"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Stat_CON"]                = "Constitution"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Stat_INT"]                = "Intelligence"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Stat_WIS"]                = "Wisdom"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Stat_CHR"]                = "Charisma"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Stat_SaveDeath"]          = "Save vs. Death"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Stat_SaveWands"]          = "Save vs. Wands"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Stat_SavePoly"]           = "Save vs. Polymorph"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Stat_SaveBreath"]         = "Save vs. Breath"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Stat_SaveSpell"]          = "Save vs. Spell"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Stat_ResistMagic"]        = "Magic resistance"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Stat_ResistFire"]         = "Fire resistance"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Stat_ResistCold"]         = "Cold resistance"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Stat_ResistElectricity"]  = "Electricity resistance"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Stat_ResistAcid"]         = "Acid resistance"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Stat_ResistPoison"]       = "Poison resistance"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Stat_ResistMagicDamage"]  = "Magic damage resistance"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Stat_ResistMagicFire"]    = "Magical fire resistance"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Stat_ResistMagicCold"]    = "Magical cold resistance"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Stat_ResistSlashing"]     = "Slashing resistance"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Stat_ResistCrushing"]     = "Crushing resistance"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Stat_ResistPiercing"]     = "Piercing resistance"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Stat_ResistMissile"]      = "Missile resistance"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Stat_Luck"]               = "Luck"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Stat_OpenLocks"]          = "Open Locks"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Stat_FindTraps"]          = "Find Traps"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Stat_PickPockets"]        = "Pick Pockets"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Stat_MoveSilently"]       = "Move Silently"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Stat_HideInShadows"]      = "Hide in Shadows"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Stat_HitPoints"]          = "Hit Points"
+
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_IfUsed"]             = "If %s uses this:"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Lasts"]              = "Lasts %s"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Permanent"]          = "Permanent"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Turn"]               = "%d turn"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Turns"]              = "%d turns"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Round"]              = "%d round"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Rounds"]             = "%d rounds"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Seconds"]            = "%d seconds"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Use_AlreadyFull"]    = "already full"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Use_Damage"]         = "Takes %s damage"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Use_Excluded"]       = "No effect: the item excludes %s"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Use_ImmuneTo"]       = "Immune to %s"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Use_ImmuneToLevels"] = "Immune to level %s spells"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Use_CurePoison"]     = "Cures poison"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Use_CureDisease"]    = "Cures disease"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Use_CureStun"]       = "Removes stun"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Use_CureHold"]       = "Removes hold"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Use_Death"]          = "Death"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Use_DispelMagic"]    = "Dispels magic on the user"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Use_Haste"]          = "Haste"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Use_Invisibility"]   = "Invisibility"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Use_Poison"]         = "Poisoned"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Use_Slow"]           = "Slowed"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Use_Infravision"]    = "Infravision"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Use_Blindness"]      = "Blinded"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Use_Feeblemind"]     = "Feebleminded"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Use_Intoxication"]   = "Intoxicated"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Use_Regeneration"]   = "Regeneration"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Use_FreeAction"]     = "Free action"
+
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Weapon_Damage"]      = "Weapon damage"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Weapon_THAC0Bonus"]  = "THAC0 bonus"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Weapon_SpeedFactor"] = "Speed factor"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Weapon_Proficiency"] = "Proficiency points"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Weapon_Style"]       = "Weapon style"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Style_NONE"]           = "none"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Style_TWOHANDED"]      = "Two-handed"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Style_SWORDANDSHIELD"] = "Sword and shield"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Style_SINGLEWEAPON"]   = "Single weapon"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Style_TWOWEAPON"]      = "Two weapons"

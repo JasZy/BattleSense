@@ -48,6 +48,17 @@ Adds lines to the combat log that explain:
 - Why a spell did nothing: `Skeleton- Unaffected by Sleep: immune to sleep`
 - Why a weapon is ineffective: `Minsc- Long Sword is ineffective against Werewolf: it requires a +1 weapon or better`
 
+### Item Info
+
+Hover the cursor over an item in a store, in an opened container, or in the quick loot bar, to open a popup with:
+
+- The properties of the item, (the "STATISTICS" part of its description)
+- How the stats of the selected character would change if they equipped it in place of what they have equipped now: `Armor Class: 6 -> 4 (-2)`
+
+The stat changes are added up from what the items say they do while equipped. If the character can't use the item, the popup says "Not usable" instead. An item that isn't identified has no stat changes listed.
+
+For a potion, (or any item used on its owner), the popup shows what drinking it does to the selected character. This also works when you hover it in a quick item slot on the action bar: `Hit Points: 12/30 -> 21/30 (+9)`, `Strength: 16 -> 19 (+3)`, the effects it gains, (haste, immunities, ...), and how long they last.
+
 ## Installation
 
 1. Install EEex.
