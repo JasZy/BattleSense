@@ -208,6 +208,7 @@ ZJCombatLog_Private_ScreenChecked = {} -- [spriteID] = true once the op403 scree
 ZJCombatLog_Private_Recent        = {} -- [key] = game time a line / check was last made
 ZJCombatLog_Private_RecentCount   = 0
 ZJCombatLog_Private_NameCache     = {} -- [resref] = display name ("" if none)
+ZJCombatLog_Private_LevelCoverCache = {} -- ["resref|opcode|level"] = whether some version of the effect lands at that level
 
 -------------
 -- General --
@@ -559,23 +560,87 @@ function ZJCombatLog_Private_UpdateScreen(sprite)
 	end
 end
 
+-- Returns whether the spell / item `resref` has an effect with `opcode` whose level range includes `level`.
+-- Some spells have one version of an effect for low levels and another for high levels, (Command: no save up to
+-- level 5, a save from level 6), so an effect skipped for its level range only means the creature is unaffected
+-- when no other version of it lands. Every ability is looked at, which can only make this say "covered" more often.
+function ZJCombatLog_Private_SourceCoversLevel(resref, sourceType, opcode, level)
+
+	local key = string.format("%s|%d|%d", resref, opcode, level)
+	local cached = ZJCombatLog_Private_LevelCoverCache[key]
+	if cached ~= nil then return cached end
+
+	local scan = function(extension, abilitySize)
+
+		local header = EEex_Resource_Demand(resref, extension)
+		if header == nil then return nil end
+
+		-- SPL and ITM headers share these offsets; only the size of an ability differs
+		local headerAddress = EEex_UDToPtr(header)
+		local effectsAddress = headerAddress + EEex_ReadU32(headerAddress + 0x6A)
+
+		local checkRange = function(first, count)
+			for i = first, first + count - 1 do
+				local address = effectsAddress + 0x30 * i
+				if EEex_ReadU16(address) == opcode then
+					local maxLevel = EEex_ReadU32(address + 0x1C)
+					local minLevel = EEex_ReadU32(address + 0x20)
+					if (maxLevel == 0 or level <= maxLevel) and (minLevel == 0 or level >= minLevel) then
+						return true
+					end
+				end
+			end
+			return false
+		end
+
+		if checkRange(EEex_ReadU16(headerAddress + 0x6E), EEex_ReadU16(headerAddress + 0x70)) then return true end
+
+		local abilitiesAddress = headerAddress + EEex_ReadU32(headerAddress + 0x64)
+		for j = 0, EEex_ReadU16(headerAddress + 0x68) - 1 do
+			local abilityAddress = abilitiesAddress + abilitySize * j
+			if checkRange(EEex_ReadU16(abilityAddress + 0x20), EEex_ReadU16(abilityAddress + 0x1E)) then return true end
+		end
+		return false
+	end
+
+	local covers
+	if sourceType == 2 then
+		covers = scan("ITM", 0x38)
+		if covers == nil then covers = scan("SPL", 0x28) end
+	else
+		covers = scan("SPL", 0x28)
+		if covers == nil then covers = scan("ITM", 0x38) end
+	end
+	covers = covers == true
+
+	ZJCombatLog_Private_LevelCoverCache[key] = covers
+	return covers
+end
+
 -- Returns why `sprite` ignores `effect`, and the resref / source type of whatever grants that protection
 function ZJCombatLog_Private_FindBlocker(sprite, effect, opcode, sourceResref)
 
-	-- Effects can be limited to a level range, (Sleep only affects creatures up to level 4)
-	local level = sprite.m_derivedStats.m_nLevel1
-	local minLevel = effect.m_minLevel
-	local maxLevel = effect.m_maxLevel
-
-	if maxLevel > 0 and level > maxLevel then
-		return string.format("level %d is above the limit of %d", level, maxLevel)
-	end
-
-	if minLevel > 0 and level < minLevel then
-		return string.format("level %d is below the minimum of %d", level, minLevel)
-	end
-
 	local opcodeName = ZJCombatLog_Private_OpcodeNames[opcode]
+
+	-- The named effects can be limited to a level range, (Sleep only affects creatures up to level 4)
+	if opcodeName ~= nil then
+
+		local level = sprite.m_derivedStats.m_nLevel1
+		local minLevel = effect.m_minLevel
+		local maxLevel = effect.m_maxLevel
+		local outside = (maxLevel > 0 and level > maxLevel) or (minLevel > 0 and level < minLevel)
+
+		if outside then
+			local ok, covered = pcall(ZJCombatLog_Private_SourceCoversLevel, sourceResref, effect.m_sourceType, opcode, level)
+			if ok and covered then return nil end
+
+			if maxLevel > 0 and level > maxLevel then
+				return string.format("level %d is above the limit of %d", level, maxLevel)
+			end
+			return string.format("level %d is below the minimum of %d", level, minLevel)
+		end
+	end
+
 	local spellLevel = effect.m_spellLevel
 	local school = effect.m_school
 	local secondaryType = effect.m_secondaryType

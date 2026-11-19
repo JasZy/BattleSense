@@ -459,25 +459,30 @@ function ZJSpellInfo_Private_CheckSplprot(sprite, row, value)
 	return compare(spriteValue, value), label
 end
 
--- Returns why `target` ignores `effect`, or nil
+-- Returns why a creature of `level` is outside `effect`'s level range, or nil if the effect lands on it.
+-- The named opcodes, and op324, use their dice fields as a level range, (Sleep only affects creatures up to level 4).
+function ZJSpellInfo_Private_LevelExcludes(effect, level)
+
+	local opcodeName = ZJSpellInfo_Private_OpcodeNames[effect.opcode]
+	if opcodeName == nil and effect.opcode ~= 324 then return nil end
+
+	local maxLevel = effect.numDice
+	local minLevel = effect.diceSize
+	if maxLevel > 0 and level > maxLevel then
+		return string.format(ZJSpellInfo_Private_T("AboveLevel"), opcodeName or "", level, maxLevel)
+	end
+	if minLevel > 0 and level < minLevel then
+		return string.format(ZJSpellInfo_Private_T("BelowLevel"), opcodeName or "", level, minLevel)
+	end
+	return nil
+end
+
+-- Returns why `target` ignores `effect`, or nil, (level ranges are handled by ZJSpellInfo_Private_LevelExcludes)
 function ZJSpellInfo_Private_FindBlocker(target, effect)
 
 	local opcode = effect.opcode
 	local origin = effect.origin
 	local opcodeName = ZJSpellInfo_Private_OpcodeNames[opcode]
-
-	-- Effects can be limited to a level range by their dice fields, (Sleep only affects creatures up to level 4)
-	if opcodeName ~= nil then
-		local level = target:getActiveStats().m_nLevel1
-		local maxLevel = effect.numDice
-		local minLevel = effect.diceSize
-		if maxLevel > 0 and level > maxLevel then
-			return string.format(ZJSpellInfo_Private_T("AboveLevel"), opcodeName, level, maxLevel)
-		end
-		if minLevel > 0 and level < minLevel then
-			return string.format(ZJSpellInfo_Private_T("BelowLevel"), opcodeName, level, minLevel)
-		end
-	end
 
 	local reason
 
@@ -532,6 +537,21 @@ function ZJSpellInfo_Private_Describe(target, effects)
 	local lines = {}
 	local red, green, grey = ZJSpellInfo_Private_RedColorStr, ZJSpellInfo_Private_GreenColorStr, ZJSpellInfo_Private_GreyColorStr
 	local stats = target:getActiveStats()
+
+	-- Keep only the effects that land on a creature of the target's level. Some spells have one version of an effect
+	-- for low levels and another for high levels, (Command: no save up to level 5, a save from level 6), so an effect
+	-- outside its range only makes the target unaffected when no other version of it applies.
+	local level = stats.m_nLevel1
+	local applying, levelReasons = {}, {}
+	for _, effect in ipairs(effects) do
+		local levelReason = ZJSpellInfo_Private_LevelExcludes(effect, level)
+		if levelReason == nil then
+			table.insert(applying, effect)
+		elseif ZJSpellInfo_Private_OpcodeNames[effect.opcode] ~= nil then
+			table.insert(levelReasons, { ["effect"] = effect, ["reason"] = levelReason })
+		end
+	end
+	effects = applying
 
 	-- The spell's own exclusions, (op324: "the target is immune to this spell if it matches SPLPROT row X")
 	local excluded = {} -- [spell resref] = reason
@@ -659,6 +679,20 @@ function ZJSpellInfo_Private_Describe(target, effects)
 
 	for _, reason in pairs(excluded) do
 		addReason(reason)
+	end
+
+	for _, entry in ipairs(levelReasons) do
+		local skipped = entry.effect
+		local otherVersionApplies = false
+		for _, effect in ipairs(effects) do
+			if effect.opcode == skipped.opcode and effect.origin.resref == skipped.origin.resref then
+				otherVersionApplies = true
+				break
+			end
+		end
+		if not otherVersionApplies and excluded[skipped.origin.resref] == nil then
+			addReason(entry.reason)
+		end
 	end
 
 	for _, effect in ipairs(effects) do
