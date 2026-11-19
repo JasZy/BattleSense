@@ -432,7 +432,8 @@ function ZJCombatLog_Private_DescribeSaveNeed(sprite, group)
 	return string.format(" (needed %d+)", need)
 end
 
-function ZJCombatLog_Private_ReportFailedSaves(sprite, oldGroups, newGroups)
+-- (Not named ..._ReportFailedSaves: that is the option, and a function by the same name would replace it)
+function ZJCombatLog_Private_PrintFailedSaves(sprite, oldGroups, newGroups)
 
 	local spriteID = sprite.m_id
 	local lines = {}
@@ -485,7 +486,7 @@ function ZJCombatLog_Private_OnListsResolved(sprite)
 	if oldGroups == nil then return end
 
 	if reportFailedSaves then
-		ZJCombatLog_Private_ReportFailedSaves(sprite, oldGroups, newGroups)
+		ZJCombatLog_Private_PrintFailedSaves(sprite, oldGroups, newGroups)
 	end
 
 	if reportEffectEnds then
