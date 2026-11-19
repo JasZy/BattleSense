@@ -3,7 +3,7 @@
 | ZJSpellInfo - What a spell will do to the creature under the cursor, while the spell waits for a target      |
 +--------------------------------------------------------------------------------------------------------------+
 |   When a spell, or an item ability such as a wand or a scroll, is picked from the action bar, the game      |
-|   waits for a target, (CInfGame.m_nState == 1), and the selected caster's m_currentUseButton names it.      |
+|   waits for a target, (CInfGame.m_nState 1 / 2), and the selected caster's m_currentUseButton names it.     |
 |   This popup reads the spell's effects for the caster's level, (following "cast spell" effects into the     |
 |   spells they cast), and compares them with the creature under the cursor:                                 |
 |                                                                                                              |
@@ -789,9 +789,11 @@ function ZJSpellInfo_Private_GetText()
 
 	if not ZJSpellInfo_Private_Enabled then return nil end
 
-	-- Only on the world screen, while a spell / item is waiting for a target
+	-- Only on the world screen, while a spell / item is waiting for a target,
+	-- (m_nState is 1 when it is aimed at a point, like Sleep, and 2 when it is aimed at a creature, like Command)
 	if e:GetActiveEngine() ~= worldScreen then return nil end
-	if EngineGlobals.g_pBaldurChitin.m_pObjectGame.m_nState ~= 1 then return nil end
+	local state = EngineGlobals.g_pBaldurChitin.m_pObjectGame.m_nState
+	if state ~= 1 and state ~= 2 then return nil end
 
 	local target = EEex_GameObject_GetUnderCursor()
 	if not EEex_GameObject_IsSprite(target) then return nil end
