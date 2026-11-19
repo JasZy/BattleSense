@@ -9,21 +9,32 @@ VERSION ~v0.1.0~
 // WeiDU only allows actions inside a component; ALWAYS runs these at the start of every component.
 ALWAYS
 
-	// Installs the files every module needs. Only the first module to be installed copies them; if that module is
-	// later uninstalled, WeiDU reinstalls the modules that came after it, and the next one in line copies them again.
+	// Installs the files every module needs. Only the first module to be installed copies the startup file, which
+	// holds which modules are on; if that module is later uninstalled, WeiDU reinstalls the modules that came after it,
+	// and the next one in line copies it again. The strings and shared helpers are copied by every module, so a module
+	// added to an existing install gets the strings it needs.
 	DEFINE_ACTION_FUNCTION ZJ_BATTLESENSE_INSTALL_CORE BEGIN
 		ACTION_IF !FILE_EXISTS ~override/M_ZJBSen.lua~ BEGIN
 			COPY ~BattleSense/copy/core~ ~override~
+		END ELSE BEGIN
+			COPY ~BattleSense/copy/core/ZJ-en_US.lua~ ~override~
+			     ~BattleSense/copy/core/ZJSprite.lua~ ~override~
 		END
 	END
 
-	// Turns a module on in the startup file
+	// Turns a module on in the startup file. A startup file copied by an older version of Battle Sense doesn't list
+	// modules added since, those are added to its module list and start order.
 	DEFINE_ACTION_FUNCTION ZJ_BATTLESENSE_ENABLE_MODULE
 		STR_VAR
 			module = ~~
 	BEGIN
 		COPY ~override/M_ZJBSen.lua~ ~override~
-			REPLACE_TEXTUALLY ~^\([ %TAB%]*\["%module%"\][ %TAB%]*=[ %TAB%]*\)false~ ~\1true~
+			PATCH_IF (INDEX_BUFFER (~\["%module%"\]~) < 0) BEGIN
+				REPLACE_TEXTUALLY ~ZJBattleSense_Modules = {~ ~ZJBattleSense_Modules = {%WNL%%TAB%["%module%"] = true,~
+				REPLACE_TEXTUALLY ~ZJBattleSense_Private_ModuleOrder = {~ ~ZJBattleSense_Private_ModuleOrder = { "%module%",~
+			END ELSE BEGIN
+				REPLACE_TEXTUALLY ~^\([ %TAB%]*\["%module%"\][ %TAB%]*=[ %TAB%]*\)false~ ~\1true~
+			END
 		BUT_ONLY
 	END
 
@@ -78,3 +89,15 @@ REQUIRE_PREDICATE MOD_IS_INSTALLED ~EEex.tp2~ 1 @1001 // Battle Sense requires E
 	LAF ZJ_BATTLESENSE_INSTALL_CORE END
 	COPY ~BattleSense/copy/iteminfo~ ~override~
 	LAF ZJ_BATTLESENSE_ENABLE_MODULE STR_VAR module = ~ZJItmInf~ END
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Spell Info: What a spell will do to a creature, when hovering it while the spell waits for a target  //
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+BEGIN @50 LABEL ~ZJ-BattleSense-Spell-Info~ DESIGNATED 50
+REQUIRE_PREDICATE GAME_IS ~bgee bg2ee eet iwdee~ @1000 // Game not supported.
+REQUIRE_PREDICATE MOD_IS_INSTALLED ~EEex.tp2~ 1 @1001 // Battle Sense requires EEex to be installed first.
+
+	LAF ZJ_BATTLESENSE_INSTALL_CORE END
+	COPY ~BattleSense/copy/spellinfo~ ~override~
+	LAF ZJ_BATTLESENSE_ENABLE_MODULE STR_VAR module = ~ZJSplInf~ END

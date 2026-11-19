@@ -2673,6 +2673,12 @@ function ZJAttackInfo_Private_Menu_Ticker_Tick()
 	local targetId = targetSprite.m_id
 	ZJAttackInfo_Private_LastTargetID = targetId
 
+	-- While a spell waits for a target, the Spell Info module's popup, (if installed), describes the creature instead
+	if ZJSpellInfo_IsOpen ~= nil and ZJSpellInfo_IsOpen() then
+		ZJAttackInfo_Private_Menu_SetOpen(false)
+		return
+	end
+
 	local chitin = EngineGlobals.g_pBaldurChitin
 
 	if (chitin.m_pObjectGame.m_nState ~= 2 and EEex_Key_IsDown(SDL_Keycode.SDLK_TAB)) or (B3EffectMenu_IsOpen ~= nil and B3EffectMenu_IsOpen()) then

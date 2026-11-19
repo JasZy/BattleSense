@@ -59,6 +59,15 @@ The stat changes are added up from what the items say they do while equipped. If
 
 For a potion, (or any item used on its owner), the popup shows what drinking it does to the selected character. This also works when you hover it in a quick item slot on the action bar: `Hit Points: 12/30 -> 21/30 (+9)`, `Strength: 16 -> 19 (+3)`, the effects it gains, (haste, immunities, ...), and how long they last.
 
+### Spell Info
+
+Pick a spell, wand, scroll or throwable potion, (from the spellbook or a quick item slot), then hover the creature you want to target to open a popup with what it will do to that creature:
+
+- Its magic resistance, or that the spell ignores it
+- The saving throws it gets, and the roll it needs to save
+- The spell's damage per element, with the creature's resistance to each
+- Why it would be unaffected: immunities, (e.g. an undead's immunity to sleep), the spell's own exclusions, (Sleep doesn't affect elves), and level limits
+
 ## Installation
 
 1. Install EEex.

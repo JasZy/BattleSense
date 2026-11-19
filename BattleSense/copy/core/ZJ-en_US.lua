@@ -170,6 +170,95 @@ Lists the spells affecting the creature under the cursor in the right panel's he
 These are the spells EEex's Effect Menu module shows: spells from items, permanent spells and spells without an icon are left out. A sub-spell without a name of its own, like the one Chant casts on every creature around, is listed under its parent spell's name.
 ]]
 
+uiStrings["ZJBattleSense_Options_TRANSLATION_SpellInfo_TabTitle"] = "Battle Sense: Spell Info"
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_SpellInfo_Enable"] = "Enabled"
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_SpellInfo_Enable_Description"] = [[
+While a spell, wand, scroll or other item ability is waiting for a target, hovering a creature shows what it will do to that creature: its magic resistance, the saving throws it gets and the roll it needs, the damage with its resistance to each element, and why it would be unaffected, (immunities, the spell's own exclusions and level limits).
+]]
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_SpellInfo_FontPoint"] = "Font Point"
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_SpellInfo_FontPoint_Description"] = [[
+The size of the popup's text.
+]]
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_SpellInfo_SaveDisplayType"] = "Save Display Type"
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_SpellInfo_SaveDisplayType_Description"] = [[
+How the popup displays the creature's odds of making its saving throw.
+
+'Roll' - The minimum d20 roll the creature needs to save, e.g. "saves on 14+".
+
+'Percentage' - The chance the creature saves, e.g. "35% to save".
+
+'Both' - The roll followed by the chance, e.g. "saves on 14+ (35%)".
+]]
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_SpellInfo_SaveDisplayType_Roll"] = "Roll"
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_SpellInfo_SaveDisplayType_Percentage"] = "Percentage"
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_SpellInfo_SaveDisplayType_Both"] = "Both"
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_SpellInfo_ShowMagicResistance"] = "Show Magic Resistance"
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_SpellInfo_ShowMagicResistance_Description"] = [[
+Displays the creature's magic resistance, and whether the spell ignores it.
+]]
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_SpellInfo_ShowSavingThrows"] = "Show Saving Throws"
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_SpellInfo_ShowSavingThrows_Description"] = [[
+Displays the saving throws the creature gets against the spell, with the spell's bonus or penalty to them, and the creature's odds of saving, (see "Save Display Type").
+]]
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_SpellInfo_ShowDamage"] = "Show Damage"
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_SpellInfo_ShowDamage_Description"] = [[
+Displays the damage the spell does, per element, with the creature's resistance to that element.
+]]
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_SpellInfo_ShowImmunities"] = "Show Immunities"
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_SpellInfo_ShowImmunities_Description"] = [[
+Displays why the creature would be unaffected by the spell: its immunities to the effect, the spell, the spell's level or school, the spell's own exclusions, (e.g. Sleep doesn't affect elves), and level limits.
+]]
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_SpellInfo_ShowOnParty"] = "Show On Party Members"
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_SpellInfo_ShowOnParty_Description"] = [[
+Also opens the popup when the creature under the cursor is a party member, or one of the party's summons / allies.
+
+Turn this off to keep the popup out of the way while healing or buffing the party.
+]]
+
+uiStrings["ZJBattleSense_TRANSLATION_SpellInfo_Title"]              = "%s on %s"
+uiStrings["ZJBattleSense_TRANSLATION_SpellInfo_MagicResistance"]    = "Magic resistance"
+uiStrings["ZJBattleSense_TRANSLATION_SpellInfo_Bypassed"]           = "this spell ignores it"
+uiStrings["ZJBattleSense_TRANSLATION_SpellInfo_SaveVs"]             = "Save vs."
+uiStrings["ZJBattleSense_TRANSLATION_SpellInfo_SaveSpell"]          = "Spell"
+uiStrings["ZJBattleSense_TRANSLATION_SpellInfo_SaveBreath"]         = "Breath"
+uiStrings["ZJBattleSense_TRANSLATION_SpellInfo_SaveDeath"]          = "Death"
+uiStrings["ZJBattleSense_TRANSLATION_SpellInfo_SaveWand"]           = "Wand"
+uiStrings["ZJBattleSense_TRANSLATION_SpellInfo_SavePolymorph"]      = "Polymorph"
+uiStrings["ZJBattleSense_TRANSLATION_SpellInfo_SavesOn"]            = "saves on %d+ (%d%%)"
+uiStrings["ZJBattleSense_TRANSLATION_SpellInfo_SavesOnRoll"]        = "saves on %d+"
+uiStrings["ZJBattleSense_TRANSLATION_SpellInfo_SavesChance"]        = "%d%% to save"
+uiStrings["ZJBattleSense_TRANSLATION_SpellInfo_AlwaysSaves"]        = "always saves"
+uiStrings["ZJBattleSense_TRANSLATION_SpellInfo_CannotSave"]         = "cannot save"
+uiStrings["ZJBattleSense_TRANSLATION_SpellInfo_Damage"]             = "%s damage"
+uiStrings["ZJBattleSense_TRANSLATION_SpellInfo_Immune"]             = "Immune"
+uiStrings["ZJBattleSense_TRANSLATION_SpellInfo_AboveLevel"]         = "Unaffected by %s: level %d is above the limit of %d"
+uiStrings["ZJBattleSense_TRANSLATION_SpellInfo_BelowLevel"]         = "Unaffected by %s: level %d is below the minimum of %d"
+uiStrings["ZJBattleSense_TRANSLATION_SpellInfo_ImmuneTo"]           = "Immune to %s"
+uiStrings["ZJBattleSense_TRANSLATION_SpellInfo_ImmuneToLevel"]      = "Immune to level %d spells"
+uiStrings["ZJBattleSense_TRANSLATION_SpellInfo_ImmuneToSchool"]     = "Immune to %s spells"
+uiStrings["ZJBattleSense_TRANSLATION_SpellInfo_ImmuneToType"]       = "Immune to this type of spell"
+uiStrings["ZJBattleSense_TRANSLATION_SpellInfo_ProtectedFromSpell"] = "Protected from this spell"
+uiStrings["ZJBattleSense_TRANSLATION_SpellInfo_Excludes"]           = "Unaffected: the spell excludes %s"
+
 uiStrings["ZJBattleSense_TRANSLATION_AttackInfo_Immune"] = "Immune"
 
 uiStrings["ZJBattleSense_TRANSLATION_AttackInfo_Mainhand"] = "Main"

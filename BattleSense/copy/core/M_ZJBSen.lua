@@ -26,11 +26,12 @@ ZJBattleSense_Modules = {
 	["ZJAtkInf"] = false,
 	["ZJCmbLog"] = false,
 	["ZJItmInf"] = false,
+	["ZJSplInf"] = false,
 	["ZJTimer"]  = false,
 }
 
 -- The order the modules are started in
-ZJBattleSense_Private_ModuleOrder = { "ZJAtkInf", "ZJCmbLog", "ZJItmInf", "ZJTimer" }
+ZJBattleSense_Private_ModuleOrder = { "ZJAtkInf", "ZJCmbLog", "ZJItmInf", "ZJSplInf", "ZJTimer" }
 
 -- Two of the modules are extended versions of a module that ships with EEex. Running both versions
 -- at once would draw everything twice, so the EEex version is switched off:

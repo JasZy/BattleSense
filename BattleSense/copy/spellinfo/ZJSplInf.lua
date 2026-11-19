@@ -1,0 +1,891 @@
+--[[
++--------------------------------------------------------------------------------------------------------------+
+| ZJSpellInfo - What a spell will do to the creature under the cursor, while the spell waits for a target      |
++--------------------------------------------------------------------------------------------------------------+
+|   When a spell, or an item ability such as a wand or a scroll, is picked from the action bar, the game      |
+|   waits for a target, (CInfGame.m_nState == 1), and the selected caster's m_currentUseButton names it.      |
+|   This popup reads the spell's effects for the caster's level, (following "cast spell" effects into the     |
+|   spells they cast), and compares them with the creature under the cursor:                                 |
+|                                                                                                              |
+|     * Its magic resistance, and whether the spell can be resisted at all                                      |
+|     * The saving throws it gets, and the roll it needs                                                        |
+|     * The damage the spell does, with the creature's resistance to each element                              |
+|     * Why it would be unaffected: immunities to the effect / spell / level / school, the spell's own          |
+|       exclusions, (SPLPROT.2DA checks, e.g. Sleep doesn't affect elves), and level limits                     |
+|                                                                                                              |
+|   This is read-only: it never changes what the spell does.                                                   |
++--------------------------------------------------------------------------------------------------------------+
+--]]
+
+-------------
+-- Options --
+-------------
+
+EEex_Options_Register("ZJSpellInfo_Enable", EEex_Options_Option.new({
+	["default"]  = 1,
+	["type"]     = EEex_Options_ToggleType.new(),
+	["accessor"] = EEex_Options_ClampedAccessor.new({ ["min"] = 0, ["max"] = 1 }),
+	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Spell Info" }),
+	["onChange"] = function(self, oldValue) ZJSpellInfo_SetEnabled(self:get() ~= 0) end,
+}))
+
+ZJSpellInfo_Private_FontPoint = EEex_Options_Register("ZJSpellInfo_FontPoint", EEex_Options_Option.new({
+	["default"]  = 11,
+	["type"]     = EEex_Options_EditType.new(),
+	["accessor"] = EEex_Options_ClampedAccessor.new({ ["min"] = 1, ["max"] = 99 }),
+	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Spell Info Module: Font Point" }),
+}))
+
+-- 0 = Minimum d20 roll needed to save, 1 = Chance to save, 2 = Both
+ZJSpellInfo_Private_SaveDisplayType = EEex_Options_Register("ZJSpellInfo_SaveDisplayType", EEex_Options_Option.new({
+	["default"]  = 2,
+	["accessor"] = EEex_Options_ClampedAccessor.new({ ["min"] = 0, ["max"] = 2 }),
+	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Spell Info Module: Save Display Type" }),
+}))
+
+ZJSpellInfo_Private_ShowMagicResistance = EEex_Options_Register("ZJSpellInfo_ShowMagicResistance", EEex_Options_Option.new({
+	["default"]  = 1,
+	["type"]     = EEex_Options_ToggleType.new(),
+	["accessor"] = EEex_Options_ClampedAccessor.new({ ["min"] = 0, ["max"] = 1 }),
+	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Spell Info Module: Show Magic Resistance" }),
+}))
+
+ZJSpellInfo_Private_ShowSavingThrows = EEex_Options_Register("ZJSpellInfo_ShowSavingThrows", EEex_Options_Option.new({
+	["default"]  = 1,
+	["type"]     = EEex_Options_ToggleType.new(),
+	["accessor"] = EEex_Options_ClampedAccessor.new({ ["min"] = 0, ["max"] = 1 }),
+	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Spell Info Module: Show Saving Throws" }),
+}))
+
+ZJSpellInfo_Private_ShowDamage = EEex_Options_Register("ZJSpellInfo_ShowDamage", EEex_Options_Option.new({
+	["default"]  = 1,
+	["type"]     = EEex_Options_ToggleType.new(),
+	["accessor"] = EEex_Options_ClampedAccessor.new({ ["min"] = 0, ["max"] = 1 }),
+	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Spell Info Module: Show Damage" }),
+}))
+
+ZJSpellInfo_Private_ShowImmunities = EEex_Options_Register("ZJSpellInfo_ShowImmunities", EEex_Options_Option.new({
+	["default"]  = 1,
+	["type"]     = EEex_Options_ToggleType.new(),
+	["accessor"] = EEex_Options_ClampedAccessor.new({ ["min"] = 0, ["max"] = 1 }),
+	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Spell Info Module: Show Immunities" }),
+}))
+
+ZJSpellInfo_Private_ShowOnParty = EEex_Options_Register("ZJSpellInfo_ShowOnParty", EEex_Options_Option.new({
+	["default"]  = 1,
+	["type"]     = EEex_Options_ToggleType.new(),
+	["accessor"] = EEex_Options_ClampedAccessor.new({ ["min"] = 0, ["max"] = 1 }),
+	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Spell Info Module: Show On Party" }),
+}))
+
+EEex_Options_AddTab("ZJBattleSense_Options_TRANSLATION_SpellInfo_TabTitle", function() return {
+	{
+		EEex_Options_DisplayEntry.new({
+			["optionID"]    = "ZJSpellInfo_Enable",
+			["label"]       = "ZJBattleSense_Options_TRANSLATION_SpellInfo_Enable",
+			["description"] = "ZJBattleSense_Options_TRANSLATION_SpellInfo_Enable_Description",
+			["widget"]      = EEex_Options_ToggleWidget.new(),
+		}),
+		EEex_Options_DisplayEntry.new({
+			["optionID"]    = "ZJSpellInfo_FontPoint",
+			["label"]       = "ZJBattleSense_Options_TRANSLATION_SpellInfo_FontPoint",
+			["description"] = "ZJBattleSense_Options_TRANSLATION_SpellInfo_FontPoint_Description",
+			["widget"]      = EEex_Options_EditWidget.new({
+				["maxCharacters"] = 2,
+				["number"]        = true,
+			}),
+		}),
+		EEex_Options_DisplayEntry.new({
+			["optionID"]    = "ZJSpellInfo_SaveDisplayType",
+			["label"]       = "ZJBattleSense_Options_TRANSLATION_SpellInfo_SaveDisplayType",
+			["description"] = "ZJBattleSense_Options_TRANSLATION_SpellInfo_SaveDisplayType_Description",
+			["widget"]      = EEex_Options_HorizontalMultiToggleWidget.new({
+				["toggles"] = {
+					{
+						["label"] = "ZJBattleSense_Options_TRANSLATION_SpellInfo_SaveDisplayType_Roll",
+						["data"] = { ["toggleValue"] = 0 },
+					},
+					{
+						["label"] = "ZJBattleSense_Options_TRANSLATION_SpellInfo_SaveDisplayType_Percentage",
+						["data"] = { ["toggleValue"] = 1 },
+					},
+					{
+						["label"] = "ZJBattleSense_Options_TRANSLATION_SpellInfo_SaveDisplayType_Both",
+						["data"] = { ["toggleValue"] = 2 },
+					},
+				},
+			}),
+		}),
+		EEex_Options_DisplayEntry.new({
+			["optionID"]    = "ZJSpellInfo_ShowMagicResistance",
+			["label"]       = "ZJBattleSense_Options_TRANSLATION_SpellInfo_ShowMagicResistance",
+			["description"] = "ZJBattleSense_Options_TRANSLATION_SpellInfo_ShowMagicResistance_Description",
+			["widget"]      = EEex_Options_ToggleWidget.new(),
+		}),
+		EEex_Options_DisplayEntry.new({
+			["optionID"]    = "ZJSpellInfo_ShowSavingThrows",
+			["label"]       = "ZJBattleSense_Options_TRANSLATION_SpellInfo_ShowSavingThrows",
+			["description"] = "ZJBattleSense_Options_TRANSLATION_SpellInfo_ShowSavingThrows_Description",
+			["widget"]      = EEex_Options_ToggleWidget.new(),
+		}),
+		EEex_Options_DisplayEntry.new({
+			["optionID"]    = "ZJSpellInfo_ShowDamage",
+			["label"]       = "ZJBattleSense_Options_TRANSLATION_SpellInfo_ShowDamage",
+			["description"] = "ZJBattleSense_Options_TRANSLATION_SpellInfo_ShowDamage_Description",
+			["widget"]      = EEex_Options_ToggleWidget.new(),
+		}),
+		EEex_Options_DisplayEntry.new({
+			["optionID"]    = "ZJSpellInfo_ShowImmunities",
+			["label"]       = "ZJBattleSense_Options_TRANSLATION_SpellInfo_ShowImmunities",
+			["description"] = "ZJBattleSense_Options_TRANSLATION_SpellInfo_ShowImmunities_Description",
+			["widget"]      = EEex_Options_ToggleWidget.new(),
+		}),
+		EEex_Options_DisplayEntry.new({
+			["optionID"]    = "ZJSpellInfo_ShowOnParty",
+			["label"]       = "ZJBattleSense_Options_TRANSLATION_SpellInfo_ShowOnParty",
+			["description"] = "ZJBattleSense_Options_TRANSLATION_SpellInfo_ShowOnParty_Description",
+			["widget"]      = EEex_Options_ToggleWidget.new(),
+		}),
+	},
+} end)
+
+---------------
+-- Constants --
+---------------
+
+ZJSpellInfo_Private_RedColorStr   = "^0xFF2B4BFF"
+ZJSpellInfo_Private_GreenColorStr = "^0xFF40E040"
+ZJSpellInfo_Private_GreyColorStr  = "^0xFFA0A0A0"
+
+-- Effect target types that land on the creature that was clicked, (not on the caster or the caster's party)
+ZJSpellInfo_Private_TargetsCreature = {
+	[2] = true, -- Preset target
+	[4] = true, -- Everyone
+	[5] = true, -- Everyone except party
+	[7] = true, -- Target group
+	[8] = true, -- Everyone except self
+}
+
+-- Opcodes that cast another spell on the target. Their resource is followed, so a wand that casts a spell, or a spell
+-- that casts its effects through a sub-spell, (like Chant), is read the same way as the spell itself.
+ZJSpellInfo_Private_CastSpellOpcodes = {
+	[146] = true, -- Cast spell
+	[148] = true, -- Cast spell at point
+	[326] = true, -- Apply effects list
+}
+
+-- The opcodes worth naming in an immunity, and that can be limited to a level range by their dice fields
+ZJSpellInfo_Private_OpcodeNames = {
+	[  3] = "berserk",        [  5] = "charm",          [ 13] = "instant death",  [ 24] = "fear",
+	[ 25] = "poison",         [ 38] = "silence",        [ 39] = "sleep",          [ 40] = "slow",
+	[ 45] = "stun",           [ 55] = "instant death",  [ 74] = "blindness",      [ 76] = "feeblemind",
+	[ 78] = "disease",        [ 80] = "deafness",       [109] = "hold",           [128] = "confusion",
+	[134] = "petrification",  [135] = "polymorph",      [154] = "entangle",       [157] = "web",
+	[158] = "grease",         [175] = "hold",           [185] = "hold",           [209] = "instant death",
+	[211] = "imprisonment",   [213] = "maze",           [216] = "level drain",    [238] = "disintegration",
+}
+
+ZJSpellInfo_Private_SchoolNames = {
+	[1] = "Abjuration", [2] = "Conjuration", [3] = "Divination", [4] = "Enchantment",
+	[5] = "Illusion",   [6] = "Evocation",   [7] = "Necromancy", [8] = "Alteration",
+}
+
+-- { saving throw bit, translation key, stat field }
+ZJSpellInfo_Private_SaveTypes = {
+	{ 0x01, "Spell",     "m_nSaveVSSpell"  },
+	{ 0x02, "Breath",    "m_nSaveVSBreath" },
+	{ 0x04, "Death",     "m_nSaveVSDeath"  },
+	{ 0x08, "Wand",      "m_nSaveVSWands"  },
+	{ 0x10, "Polymorph", "m_nSaveVSPoly"   },
+}
+
+-- op12 damage type, (the high word of the second parameter) => { name, resistance stat field }
+ZJSpellInfo_Private_DamageTypes = {
+	[0x0]   = { "crushing",     "m_nResistCrushing"    },
+	[0x1]   = { "acid",         "m_nResistAcid"        },
+	[0x2]   = { "cold",         "m_nResistCold"        },
+	[0x4]   = { "electricity",  "m_nResistElectricity" },
+	[0x8]   = { "fire",         "m_nResistFire"        },
+	[0x10]  = { "piercing",     "m_nResistPiercing"    },
+	[0x20]  = { "poison",       nil                    },
+	[0x40]  = { "magic",        nil                    },
+	[0x80]  = { "missile",      "m_nResistMissile"     },
+	[0x100] = { "slashing",     "m_nResistSlashing"    },
+	[0x200] = { "magic fire",   "m_nResistMagicFire"   },
+	[0x400] = { "magic cold",   "m_nResistMagicCold"   },
+	[0x800] = { "stunning",     nil                    },
+}
+
+-- SPLPROT.2DA stats above 0x100 that aren't plain creature stats => a function returning the creature's value
+ZJSpellInfo_Private_SplprotSpecialStats = {
+	[0x10a] = function(sprite) return sprite.m_typeAI.m_EnemyAlly end,
+	[0x10b] = function(sprite) return sprite.m_typeAI.m_General   end,
+	[0x10c] = function(sprite) return sprite.m_typeAI.m_Race      end,
+	[0x10d] = function(sprite) return sprite.m_typeAI.m_Class     end,
+}
+
+-- SPLPROT.2DA relations that are simple comparisons, (the bitwise ones are left out, they decide nothing here)
+ZJSpellInfo_Private_SplprotRelations = {
+	[0] = function(a, b) return a <= b end,
+	[1] = function(a, b) return a == b end,
+	[2] = function(a, b) return a <  b end,
+	[3] = function(a, b) return a >  b end,
+	[4] = function(a, b) return a >= b end,
+	[5] = function(a, b) return a ~= b end,
+}
+
+-------------
+-- Globals --
+-------------
+
+ZJSpellInfo_Private_Enabled       = false -- Set by the "Enabled" option, once the file has loaded
+ZJSpellInfo_Private_ErrorReported = false
+ZJSpellInfo_Private_Menu_IsOpen = false
+ZJSpellInfo_Private_Menu_Text   = ""
+ZJSpellInfo_Private_Menu_TextUD = nil -- uiItem
+ZJSpellInfo_Private_Splprot     = nil -- C2DArray, loaded the first time it is needed
+ZJSpellInfo_Private_NameCache   = {}  -- [resref] = display name ("" if none)
+
+-------------
+-- Reading --
+-------------
+
+function ZJSpellInfo_Private_T(key)
+	return uiStrings["ZJBattleSense_TRANSLATION_SpellInfo_"..key] or key
+end
+
+function ZJSpellInfo_Private_FetchString(strref)
+	if strref == nil or strref == -1 or strref == 0xFFFFFFFF then return "" end
+	return Infinity_FetchString(strref) or ""
+end
+
+function ZJSpellInfo_Private_ReadResref(address)
+	local chars = {}
+	for i = 0, 7 do
+		local byte = EEex_ReadU8(address + i)
+		if byte == 0 then break end
+		chars[#chars + 1] = string.char(byte)
+	end
+	return table.concat(chars):upper()
+end
+
+-- Returns the display name of the spell / item `resref`, or "" if it has none. A sub-spell without a name of its own
+-- borrows its parent's, (the same resref without the letters at the end, SPPR203D -> SPPR203).
+function ZJSpellInfo_Private_GetSourceName(resref)
+
+	local cached = ZJSpellInfo_Private_NameCache[resref]
+	if cached ~= nil then return cached end
+
+	local lookup = function(toLookup)
+		local spellHeader = EEex_Resource_Demand(toLookup, "SPL")
+		if spellHeader ~= nil then
+			local name = ZJSpellInfo_Private_FetchString(spellHeader.genericName)
+			if name ~= "" then return name end
+		end
+		local itemHeader = EEex_Resource_Demand(toLookup, "ITM")
+		if itemHeader ~= nil then
+			local name = ZJSpellInfo_Private_FetchString(itemHeader.identifiedName)
+			if name == "" then name = ZJSpellInfo_Private_FetchString(itemHeader.genericName) end
+			return name
+		end
+		return ""
+	end
+
+	local name = lookup(resref)
+	if name == "" then
+		local parentResref = resref:match("^(.-%d)%a+$")
+		if parentResref ~= nil then name = lookup(parentResref) end
+	end
+
+	ZJSpellInfo_Private_NameCache[resref] = name
+	return name
+end
+
+-- Returns the name of the spell / item `resref` that a protection comes from, or "" if it isn't worth naming.
+-- A creature's built-in immunities come from hidden items it can't drop, (a skeleton's "Ring"); naming those
+-- would suggest it wears something that protects it.
+function ZJSpellInfo_Private_GetProtectionSourceName(resref)
+	if EEex_Resource_Demand(resref, "SPL") == nil then
+		local itemHeader = EEex_Resource_Demand(resref, "ITM")
+		if itemHeader ~= nil and (EEex_BAnd(itemHeader.itemFlags, 0x4) == 0 -- BIT2 = droppable
+			or ZJSpellInfo_Private_FetchString(itemHeader.identifiedName) == "")
+		then
+			return ""
+		end
+	end
+	return ZJSpellInfo_Private_GetSourceName(resref)
+end
+
+-- Appends the effects of the ability at `abilityAddress`, (an SPL or ITM ability, both keep their effect count at
+-- 0x1E and their first effect index at 0x20), to `effects`. `origin` is what the effects are blocked by: the spell's
+-- resref, level, school and secondary type.
+function ZJSpellInfo_Private_ReadAbilityEffects(headerAddress, abilityAddress, origin, effects, depth, caster)
+
+	local effectsAddress = headerAddress + EEex_ReadU32(headerAddress + 0x6A)
+	local count = EEex_ReadU16(abilityAddress + 0x1E)
+	local first = EEex_ReadU16(abilityAddress + 0x20)
+
+	for i = first, first + count - 1 do
+
+		local address = effectsAddress + 0x30 * i
+
+		local effect = {
+			["opcode"]     = EEex_ReadU16(address),
+			["target"]     = EEex_ReadU8(address + 0x2),
+			["param1"]     = EEex_Read32(address + 0x4),
+			["param2"]     = EEex_ReadU32(address + 0x8),
+			["resist"]     = EEex_ReadU8(address + 0xD),
+			["res"]        = ZJSpellInfo_Private_ReadResref(address + 0x14),
+			["numDice"]    = EEex_ReadU32(address + 0x1C),
+			["diceSize"]   = EEex_ReadU32(address + 0x20),
+			["saveType"]   = EEex_ReadU32(address + 0x24),
+			["saveMod"]    = EEex_Read32(address + 0x28),
+			["origin"]     = origin,
+		}
+
+		if ZJSpellInfo_Private_TargetsCreature[effect.target] then
+
+			table.insert(effects, effect)
+
+			-- Follow a spell cast on the target into its own effects, one level deep is enough for wands and sub-spells
+			if ZJSpellInfo_Private_CastSpellOpcodes[effect.opcode] and depth < 2 and effect.res ~= "" then
+				ZJSpellInfo_Private_ReadSpell(effect.res, caster, effects, depth + 1)
+			end
+		end
+	end
+end
+
+-- Appends the effects that the spell `resref` has for `caster`'s level to `effects`. Returns the spell's header, or nil.
+function ZJSpellInfo_Private_ReadSpell(resref, caster, effects, depth)
+
+	local spellHeader = EEex_Resource_Demand(resref, "SPL")
+	if spellHeader == nil then return nil end
+
+	local casterLevel = math.max(caster:getCasterLevelForSpell(resref, true), 1)
+	local ability = spellHeader:getAbilityForLevel(casterLevel) or spellHeader:getAbility(0)
+	if ability == nil then return nil end
+
+	local headerAddress = EEex_UDToPtr(spellHeader)
+
+	local origin = {
+		["resref"]        = resref,
+		["level"]         = EEex_ReadU32(headerAddress + 0x34),
+		["school"]        = EEex_ReadU8(headerAddress + 0x25),
+		["secondaryType"] = EEex_ReadU8(headerAddress + 0x27),
+	}
+
+	ZJSpellInfo_Private_ReadAbilityEffects(headerAddress, EEex_UDToPtr(ability), origin, effects, depth, caster)
+	return spellHeader
+end
+
+-- Returns the name of what `caster` is about to use and its effects on a target, or nil if it isn't a spell / item ability
+function ZJSpellInfo_Private_ReadUsed(caster)
+
+	local abilityId = caster.m_currentUseButton.m_abilityId
+	local effects = {}
+	local resref = abilityId.m_res:get():upper()
+
+	-- The item in the slot the button names, (a quick item button names the item's own resref, which is never a spell)
+	local item, itemResref = nil, ""
+	local itemNum = abilityId.m_itemNum
+	if itemNum >= 0 then
+		local ok, slotItem = pcall(function() return caster.m_equipment.m_items:get(itemNum) end)
+		if ok and slotItem ~= nil then
+			item = slotItem
+			itemResref = slotItem.cResRef:get():upper()
+		end
+	end
+
+	-- A spell, (from the spellbook, a special ability, an innate)
+	if resref ~= "" and resref ~= itemResref and ZJSpellInfo_Private_ReadSpell(resref, caster, effects, 0) ~= nil then
+		local name = ZJSpellInfo_Private_GetSourceName(resref)
+		return name ~= "" and name or resref, effects
+	end
+
+	-- An item ability, (a wand, a scroll, a potion thrown at someone)
+	if item == nil or itemResref == "" then return nil end
+	local itemHeader = EEex_Resource_Demand(itemResref, "ITM")
+	if itemHeader == nil then return nil end
+
+	local abilityNum = abilityId.m_abilityNum
+	if abilityNum < 0 or abilityNum >= itemHeader.abilityCount then return nil end
+
+	local headerAddress = EEex_UDToPtr(itemHeader)
+	local abilityAddress = headerAddress + itemHeader.abilityOffset + 0x38 * abilityNum
+
+	local origin = { ["resref"] = itemResref, ["level"] = 0, ["school"] = 0, ["secondaryType"] = 0 }
+	ZJSpellInfo_Private_ReadAbilityEffects(headerAddress, abilityAddress, origin, effects, 0, caster)
+
+	local name = ZJSpellInfo_Private_FetchString(itemHeader.identifiedName)
+	if name == "" then name = ZJSpellInfo_Private_FetchString(itemHeader.genericName) end
+	return name, effects
+end
+
+------------
+-- Checks --
+------------
+
+-- Returns whether `sprite` matches row `row` of SPLPROT.2DA, (`value` is used where the row's VALUE is -1),
+-- the row's label, e.g. "race=elf", and false if the check can't be worked out here
+function ZJSpellInfo_Private_CheckSplprot(sprite, row, value)
+
+	if ZJSpellInfo_Private_Splprot == nil then
+		ZJSpellInfo_Private_Splprot = EEex_Resource_Load2DA("SPLPROT")
+	end
+
+	local array = ZJSpellInfo_Private_Splprot
+	local stat = tonumber(array:getAtPoint(0, row))
+	local tableValue = tonumber(array:getAtPoint(1, row))
+	local relation = tonumber(array:getAtPoint(2, row))
+	if stat == nil or tableValue == nil or relation == nil then return nil end
+
+	if tableValue ~= -1 then value = tableValue end
+
+	local compare = ZJSpellInfo_Private_SplprotRelations[relation]
+	if compare == nil then return nil end
+
+	local spriteValue
+	if stat < 0x100 then
+		spriteValue = sprite:getStat(stat)
+	else
+		local getter = ZJSpellInfo_Private_SplprotSpecialStats[stat]
+		if getter == nil then return nil end
+		spriteValue = getter(sprite)
+	end
+
+	local label = EEex_Resource_Get2DARowLabel(array, row) or ""
+	label = label:gsub("^%d+_", ""):gsub("_", " "):lower()
+
+	return compare(spriteValue, value), label
+end
+
+-- Returns why `target` ignores `effect`, or nil
+function ZJSpellInfo_Private_FindBlocker(target, effect)
+
+	local opcode = effect.opcode
+	local origin = effect.origin
+	local opcodeName = ZJSpellInfo_Private_OpcodeNames[opcode]
+
+	-- Effects can be limited to a level range by their dice fields, (Sleep only affects creatures up to level 4)
+	if opcodeName ~= nil then
+		local level = target:getActiveStats().m_nLevel1
+		local maxLevel = effect.numDice
+		local minLevel = effect.diceSize
+		if maxLevel > 0 and level > maxLevel then
+			return string.format(ZJSpellInfo_Private_T("AboveLevel"), opcodeName, level, maxLevel)
+		end
+		if minLevel > 0 and level < minLevel then
+			return string.format(ZJSpellInfo_Private_T("BelowLevel"), opcodeName, level, minLevel)
+		end
+	end
+
+	local reason
+
+	local scan = function(list)
+		EEex_Utility_IterateCPtrList(list, function(protection)
+
+			local protectionOpcode = protection.m_effectId
+
+			if protectionOpcode == 101 then -- Immunity to effect
+				if opcodeName ~= nil and protection.m_dWFlags == opcode then
+					reason = string.format(ZJSpellInfo_Private_T("ImmuneTo"), opcodeName)
+				end
+			elseif protectionOpcode == 102 then -- Immunity to spell level
+				if origin.level > 0 and protection.m_effectAmount == origin.level then
+					reason = string.format(ZJSpellInfo_Private_T("ImmuneToLevel"), origin.level)
+				end
+			elseif protectionOpcode == 204 then -- Protection from spell school
+				if origin.school > 0 and protection.m_dWFlags == origin.school then
+					local schoolName = ZJSpellInfo_Private_SchoolNames[origin.school] or "?"
+					reason = string.format(ZJSpellInfo_Private_T("ImmuneToSchool"), schoolName)
+				end
+			elseif protectionOpcode == 205 then -- Protection from spell type
+				if origin.secondaryType > 0 and protection.m_dWFlags == origin.secondaryType then
+					reason = ZJSpellInfo_Private_T("ImmuneToType")
+				end
+			elseif protectionOpcode == 206 then -- Protection from spell
+				if protection.m_res:get():upper() == origin.resref then
+					reason = ZJSpellInfo_Private_T("ProtectedFromSpell")
+				end
+			end
+
+			if reason ~= nil then
+				local sourceResref = protection.m_sourceRes:get()
+				if sourceResref ~= "" then
+					local sourceName = ZJSpellInfo_Private_GetProtectionSourceName(sourceResref:upper())
+					if sourceName ~= "" then reason = string.format("%s (%s)", reason, sourceName) end
+				end
+				return true -- Break EEex_Utility_IterateCPtrList
+			end
+		end)
+	end
+
+	scan(target.m_equipedEffectList)
+	if reason == nil then scan(target.m_timedEffectList) end
+
+	return reason
+end
+
+-- Returns the lines that describe `effects` against `target`
+function ZJSpellInfo_Private_Describe(target, effects)
+
+	local lines = {}
+	local red, green, grey = ZJSpellInfo_Private_RedColorStr, ZJSpellInfo_Private_GreenColorStr, ZJSpellInfo_Private_GreyColorStr
+	local stats = target:getActiveStats()
+
+	-- The spell's own exclusions, (op324: "the target is immune to this spell if it matches SPLPROT row X")
+	local excluded = {} -- [spell resref] = reason
+	for _, effect in ipairs(effects) do
+		if effect.opcode == 324 and excluded[effect.origin.resref] == nil then
+			local ok, matches, label = pcall(ZJSpellInfo_Private_CheckSplprot, target, effect.param2, effect.param1)
+			if ok and matches then
+				local protectedResref = effect.res ~= "" and effect.res or effect.origin.resref
+				excluded[protectedResref] = string.format(ZJSpellInfo_Private_T("Excludes"), label)
+			end
+		end
+	end
+
+	-- Magic resistance only stops the effects that can be resisted, (resistance field 1 / 2)
+	local resistible, anyEffect = false, false
+	for _, effect in ipairs(effects) do
+		if effect.opcode ~= 324 then
+			anyEffect = true
+			if effect.resist == 1 or effect.resist == 2 then resistible = true end
+		end
+	end
+
+	local magicResistance = stats.m_nResistMagic
+	if not anyEffect or ZJSpellInfo_Private_ShowMagicResistance:get() == 0 then
+		-- Nothing lands on the target, (a spell aimed at a point / the caster)
+	elseif not resistible then
+		table.insert(lines, string.format("%s: %d%% %s(%s)^-", ZJSpellInfo_Private_T("MagicResistance"),
+			magicResistance, grey, ZJSpellInfo_Private_T("Bypassed")))
+	else
+		table.insert(lines, string.format("%s: %s%d%%^-", ZJSpellInfo_Private_T("MagicResistance"),
+			magicResistance > 0 and red or "", magicResistance))
+	end
+
+	-- Saving throws: the target saves when its d20 roll plus the save bonus reaches its save
+	local seenSaves = {}
+	local saveDisplayType = ZJSpellInfo_Private_SaveDisplayType:get()
+	for _, effect in ipairs(ZJSpellInfo_Private_ShowSavingThrows:get() ~= 0 and effects or {}) do
+		for _, saveType in ipairs(ZJSpellInfo_Private_SaveTypes) do
+			local bit = saveType[1]
+			if EEex_BAnd(effect.saveType, bit) ~= 0 and not seenSaves[bit] then
+				seenSaves[bit] = true
+
+				local need = stats[saveType[3]] - effect.saveMod
+				local saveStr
+				if need <= 1 then
+					saveStr = red..ZJSpellInfo_Private_T("AlwaysSaves").."^-"
+				elseif need > 20 then
+					saveStr = green..ZJSpellInfo_Private_T("CannotSave").."^-"
+				elseif saveDisplayType == 0 then
+					saveStr = string.format(ZJSpellInfo_Private_T("SavesOnRoll"), need)
+				elseif saveDisplayType == 1 then
+					saveStr = string.format(ZJSpellInfo_Private_T("SavesChance"), (21 - need) * 5)
+				else
+					saveStr = string.format(ZJSpellInfo_Private_T("SavesOn"), need, (21 - need) * 5)
+				end
+
+				local modStr = effect.saveMod ~= 0 and string.format(" %s(%+d)^-", grey, effect.saveMod) or ""
+				table.insert(lines, string.format("%s %s%s: %s", ZJSpellInfo_Private_T("SaveVs"),
+					ZJSpellInfo_Private_T("Save"..saveType[2]), modStr, saveStr))
+			end
+		end
+	end
+
+	-- Damage, per element, with the target's resistance to it
+	local damageOrder, damageByType = {}, {}
+	for _, effect in ipairs(ZJSpellInfo_Private_ShowDamage:get() ~= 0 and effects or {}) do
+		if effect.opcode == 12 then
+			local damageType = EEex_RShift(effect.param2, 16)
+			local amountStr = ""
+			if effect.numDice > 0 and effect.diceSize > 0 then
+				amountStr = string.format("%dD%d", effect.numDice, effect.diceSize)
+				if effect.param1 ~= 0 then amountStr = amountStr..string.format("%+d", effect.param1) end
+			elseif effect.param1 ~= 0 then
+				amountStr = tostring(effect.param1)
+			end
+
+			local entry = damageByType[damageType]
+			if entry == nil then
+				entry = { ["amounts"] = {}, ["seen"] = {}, ["count"] = 0 }
+				damageByType[damageType] = entry
+				table.insert(damageOrder, damageType)
+			end
+			entry.count = entry.count + 1
+			if amountStr ~= "" and not entry.seen[amountStr] then
+				entry.seen[amountStr] = true
+				table.insert(entry.amounts, amountStr)
+			end
+		end
+	end
+
+	for _, damageType in ipairs(damageOrder) do
+		local entry = damageByType[damageType]
+		local typeInfo = ZJSpellInfo_Private_DamageTypes[damageType] or { "damage", nil }
+		local amountStr = table.concat(entry.amounts, "/")
+		if entry.count > #entry.amounts and entry.count > 1 then
+			amountStr = string.format("%s x%d", amountStr, entry.count)
+		end
+
+		local resistStr = ""
+		if typeInfo[2] ~= nil then
+			local resistance = math.min(stats[typeInfo[2]], 100)
+			if resistance >= 100 then
+				resistStr = string.format(" %s%s^-", red, ZJSpellInfo_Private_T("Immune"))
+			elseif resistance > 0 then
+				resistStr = string.format(" %s-%d%%^-", red, resistance)
+			elseif resistance < 0 then
+				resistStr = string.format(" %s+%d%%^-", green, -resistance)
+			end
+		end
+
+		table.insert(lines, string.format("%s: %s%s", string.format(ZJSpellInfo_Private_T("Damage"), typeInfo[1]),
+			amountStr, resistStr))
+	end
+
+	-- Why the target would be unaffected, one line per reason
+	if ZJSpellInfo_Private_ShowImmunities:get() == 0 then return lines end
+
+	local reasons, seenReasons = {}, {}
+	local addReason = function(reason)
+		if reason ~= nil and not seenReasons[reason] then
+			seenReasons[reason] = true
+			table.insert(reasons, reason)
+		end
+	end
+
+	for _, reason in pairs(excluded) do
+		addReason(reason)
+	end
+
+	for _, effect in ipairs(effects) do
+		if excluded[effect.origin.resref] == nil and (ZJSpellInfo_Private_OpcodeNames[effect.opcode] or effect.opcode == 12) then
+			local ok, reason = pcall(ZJSpellInfo_Private_FindBlocker, target, effect)
+			if ok then addReason(reason) end
+		end
+	end
+
+	-- The spell / sub-spell itself can be blocked by level, school, type or name
+	local seenOrigins = {}
+	for _, effect in ipairs(effects) do
+		local origin = effect.origin
+		if not seenOrigins[origin.resref] and excluded[origin.resref] == nil then
+			seenOrigins[origin.resref] = true
+			local ok, reason = pcall(ZJSpellInfo_Private_FindBlocker, target,
+				{ ["opcode"] = -1, ["origin"] = origin, ["numDice"] = 0, ["diceSize"] = 0 })
+			if ok then addReason(reason) end
+		end
+	end
+
+	for _, reason in ipairs(reasons) do
+		table.insert(lines, red..reason.."^-")
+	end
+
+	return lines
+end
+
+-- Returns the popup's text for `caster` using what it is about to use on `target`, or nil if there is nothing to show
+function ZJSpellInfo_Private_BuildText(caster, target)
+
+	local name, effects = ZJSpellInfo_Private_ReadUsed(caster)
+	if name == nil then return nil end
+
+	local title = string.format(ZJSpellInfo_Private_T("Title"), name, target:getName())
+	local lines = ZJSpellInfo_Private_Describe(target, effects)
+	table.insert(lines, 1, title)
+	return table.concat(lines, "\n")
+end
+
+----------
+-- Menu --
+----------
+
+-- The cursor's hotspot and size, (in menu coordinates), so the popup can go beside the cursor image
+function ZJSpellInfo_Private_GetCursorRenderData()
+
+	local vidMode = EngineGlobals.g_pBaldurChitin.cVideo.pCurrentMode
+	local cursorCell = vidMode.pPointerVidCell
+	if cursorCell == nil then return end
+
+	local centerX, centerY = cursorCell:GetCurrentCenterPoint()
+	local w, h = cursorCell:GetCurrentFrameSize()
+	return EEex_Menu_ScaleX(centerX), EEex_Menu_ScaleY(centerY), EEex_Menu_ScaleX(w), EEex_Menu_ScaleY(h)
+end
+
+function ZJSpellInfo_Private_Layout()
+
+	local fontPoint = ZJSpellInfo_Private_FontPoint:get()
+	local style = styles["normal"]
+	local text = ZJSpellInfo_Private_Menu_Text
+
+	ZJSpellInfo_Private_Menu_TextUD.text.point = fontPoint
+
+	local textW = 0
+	for line in (text.."\n"):gmatch("(.-)\n") do
+		textW = math.max(textW, (EEex_Menu_GetTextWidthHeight(line, style.font, fontPoint, style.useFontZoom)))
+	end
+	textW = textW + 2 -- Room for rounding, so the engine doesn't wrap a line that just fits
+
+	local _, textH = EEex_Menu_GetTextWidthHeight(text, style.font, fontPoint, style.useFontZoom, textW)
+
+	local pad = 12
+	local backgroundW = textW + pad * 2
+	local backgroundH = textH + pad * 2
+
+	-- Beside the cursor, like the attack popup
+	local cursorX, cursorY = EEex_Menu_GetMousePos()
+	local cursorCenterX, cursorCenterY, cursorW = ZJSpellInfo_Private_GetCursorRenderData()
+	cursorCenterX, cursorCenterY, cursorW = cursorCenterX or 0, cursorCenterY or 0, cursorW or 0
+
+	local cursorRenderX = cursorX - cursorCenterX
+	local backgroundX = cursorRenderX + cursorW + 5
+	local backgroundY = cursorY - cursorCenterY
+
+	local screenW, screenH = Infinity_GetScreenSize()
+	if backgroundX + backgroundW > screenW then
+		backgroundX = math.max(0, cursorRenderX - backgroundW - 5)
+	end
+	if backgroundY + backgroundH > screenH then
+		backgroundY = math.max(0, screenH - backgroundH)
+	end
+
+	Infinity_SetOffset("ZJSpellInfo_Menu", backgroundX, backgroundY)
+	Infinity_SetArea("ZJSpellInfo_Menu_BackgroundRect", 0, 0, backgroundW, backgroundH)
+	Infinity_SetArea("ZJSpellInfo_Menu_Text", pad, pad, textW, textH)
+end
+
+-- @bubb_doc { ZJSpellInfo_SetOpen }
+-- @summary: Opens / closes the spell info popup.
+function ZJSpellInfo_SetOpen(open)
+	if open then
+		if not ZJSpellInfo_Private_Menu_IsOpen then
+			Infinity_PushMenu("ZJSpellInfo_Menu")
+			ZJSpellInfo_Private_Menu_IsOpen = true
+		end
+	elseif ZJSpellInfo_Private_Menu_IsOpen then
+		Infinity_PopMenu("ZJSpellInfo_Menu")
+		ZJSpellInfo_Private_Menu_IsOpen = false
+	end
+end
+
+-- @bubb_doc { ZJSpellInfo_SetEnabled }
+-- @summary: Temporarily turns the popup on / off. To persist this, change the ``ZJSpellInfo_Enable`` option instead.
+function ZJSpellInfo_SetEnabled(enabled)
+	ZJSpellInfo_Private_Enabled = enabled
+	if not enabled then ZJSpellInfo_SetOpen(false) end
+end
+
+-- @bubb_doc { ZJSpellInfo_IsOpen }
+-- @summary: Whether the popup is showing. The Attack Info module stays out of its way while it is.
+function ZJSpellInfo_IsOpen()
+	return ZJSpellInfo_Private_Menu_IsOpen
+end
+
+-- The text of the popup for the creature under the cursor, or nil if it shouldn't be showing
+function ZJSpellInfo_Private_GetText()
+
+	if not ZJSpellInfo_Private_Enabled then return nil end
+
+	-- Only on the world screen, while a spell / item is waiting for a target
+	if e:GetActiveEngine() ~= worldScreen then return nil end
+	if EngineGlobals.g_pBaldurChitin.m_pObjectGame.m_nState ~= 1 then return nil end
+
+	local target = EEex_GameObject_GetUnderCursor()
+	if not EEex_GameObject_IsSprite(target) then return nil end
+
+	-- PC, FAMILIAR, ALLY, CONTROLLED, CHARMED, ... up to GOODCUTOFF, (EA.IDS)
+	if ZJSpellInfo_Private_ShowOnParty:get() == 0 then
+		local ea = target.m_typeAI.m_EnemyAlly
+		if ea >= 2 and ea <= 30 then return nil end
+	end
+
+	-- The selected creature that is about to use something
+	local caster = nil
+	EEex_Sprite_IterateSelected(function(sprite)
+		if caster == nil then caster = sprite end
+	end)
+	if caster == nil then return nil end
+
+	return ZJSpellInfo_Private_BuildText(caster, target)
+end
+
+function ZJSpellInfo_Private_DoTick()
+
+	local text = ZJSpellInfo_Private_GetText()
+
+	if text == nil then
+		ZJSpellInfo_SetOpen(false)
+		return
+	end
+
+	ZJSpellInfo_Private_Menu_Text = text
+	ZJSpellInfo_SetOpen(true)
+	ZJSpellInfo_Private_Layout()
+end
+
+-- Called every frame by the ticker menu
+function ZJSpellInfo_Private_Tick()
+
+	local ok, err = pcall(ZJSpellInfo_Private_DoTick)
+
+	if not ok then
+		pcall(ZJSpellInfo_SetOpen, false)
+		-- This runs every frame, don't flood the log
+		if not ZJSpellInfo_Private_ErrorReported then
+			ZJSpellInfo_Private_ErrorReported = true
+			print("[Battle Sense] Spell Info: "..tostring(err))
+		end
+	end
+end
+
+---------------
+-- Listeners --
+---------------
+
+function ZJSpellInfo_Private_PushTicker()
+	if not Infinity_IsMenuOnStack("ZJSpellInfo_Menu_Ticker") then
+		Infinity_PushMenu("ZJSpellInfo_Menu_Ticker")
+	end
+end
+
+EEex_Menu_AddMainFileLoadedListener(function()
+	EEex_Menu_LoadFile("ZJSplInf")
+	ZJSpellInfo_Private_Menu_IsOpen = false
+	ZJSpellInfo_Private_Menu_TextUD = EEex_Menu_GetItem("ZJSpellInfo_Menu_Text")
+end)
+
+-- The ticker is always open while a game is running
+EEex_GameState_AddInitializedListener(ZJSpellInfo_Private_PushTicker)
+EEex_Menu_AddAfterMainFileReloadedListener(ZJSpellInfo_Private_PushTicker)
+
+EEex.RegisterSlicedRect("ZJSpellInfo_BackgroundRect", {
+	["topLeft"]     = {  0,  0, 32, 32 },
+	["top"]         = { 16,  0, 32, 32 },
+	["topRight"]    = { 32,  0, 32, 32 },
+	["right"]       = { 32, 16, 32, 32 },
+	["bottomRight"] = { 32, 32, 32, 32 },
+	["bottom"]      = { 16, 32, 32, 32 },
+	["bottomLeft"]  = {  0, 32, 32, 32 },
+	["left"]        = {  0, 16, 32, 32 },
+	["center"]      = { 16, 16, 32, 32 },
+	["dimensions"]  = { 64, 64 },
+	["resref"]      = "X-OPTBOX",
+	["flags"]       = 0,
+})
+
+function ZJSpellInfo_Private_Background_Render(item)
+	EEex.DrawSlicedRect("ZJSpellInfo_BackgroundRect", { item:getArea() }, 255 * 0.85)
+end
+
+EEex_Menu_AddBeforeUIItemRenderListener("ZJSpellInfo_Menu_BackgroundRect", ZJSpellInfo_Private_Background_Render)
+
+-- The creature's own tooltip would sit under the popup
+EEex_Utility_NewScope(function()
+	local old = EEex_Sprite_Hook_CheckSuppressTooltip
+	EEex_Sprite_Hook_CheckSuppressTooltip = function()
+		return ZJSpellInfo_Private_Menu_IsOpen or old()
+	end
+end)
