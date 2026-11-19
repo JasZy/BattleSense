@@ -33,14 +33,17 @@ ZJBattleSense_Modules = {
 -- The order the modules are started in
 ZJBattleSense_Private_ModuleOrder = { "ZJAtkInf", "ZJCmbLog", "ZJItmInf", "ZJSplInf", "ZJTimer" }
 
--- Two of the modules are extended versions of a module that ships with EEex. Running both versions
--- at once would draw everything twice, so the EEex version is switched off:
+-- Three of the modules are extended versions of a module that ships with EEex, (the Combat Log one only with the EEex
+-- fork Battle Sense started in). Running both versions at once would draw / print everything twice, so the EEex
+-- version is switched off when it is there:
 --
 --   "option" - The EEex option that enables its version. It is turned off, which EEex applies on the next launch.
---   "tick"   - The function that drives EEex's version. It is emptied, which silences it until that next launch.
+--   "tick"   - The function that drives EEex's version, (or that all of its output goes through). It is emptied,
+--              which silences it until that next launch.
 --
 ZJBattleSense_Private_Replaces = {
 	["ZJAtkInf"] = { ["option"] = "EEex_Module_AttackInfo", ["tick"] = "B3AttackInfo_Private_Menu_Ticker_Tick" },
+	["ZJCmbLog"] = { ["option"] = "EEex_Module_CombatLog",  ["tick"] = "B3CombatLog_Private_Say"               },
 	["ZJTimer"]  = { ["option"] = "EEex_Module_Timer",      ["tick"] = "B3Timer_Private_Menu_Tick"             },
 }
 
