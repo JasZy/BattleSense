@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Battle Sense forum post</title>
+<style>
+  body { font-family: Arial, sans-serif; font-size: 15px; line-height: 1.5; max-width: 820px; margin: 24px auto; padding: 0 16px; color: #000; background: #fff; }
+  .note { background: #fff6d6; border: 1px solid #e0c060; padding: 10px 14px; margin-bottom: 28px; font-size: 13px; }
+  .img { color: #b00000; font-weight: bold; }
+</style>
+</head>
+<body>
+
+<div class="note">
+<b>How to use:</b> the title line below goes in the forum's title field. Select everything from "Baldur's Gate hides…" down to the end (or Ctrl+A and delete this yellow box after pasting), copy, and paste into the forum editor: headings, bold, lists and links come along. Then replace every red <span class="img">[image: …]</span> line with the uploaded screenshot from your Pictures folder.
+</div>
+
+<p><b>Title:</b> Battle Sense – see what is really happening in a fight (EEex, looking for beta testers)</p>
+
+<hr>
+
+<p>Baldur's Gate hides most of what decides a fight. You see a swing and a number in the log, but not what your fighter needed to roll, how far the enemy mage is from finishing a spell, or why your Sleep did nothing to half the room. For a long time none of it made sense to me, so I built the tools to show it.</p>
+
+<p><b>Battle Sense</b> is a WeiDU mod, built on <a href="https://github.com/Bubb13/EEex">EEex</a>, that puts that information on screen. It doesn't change any rule; every number it shows is one the game already calculates and keeps hidden.</p>
+
+<h2>Why this isn't a release (yet)</h2>
+
+<p>I made Battle Sense for myself, for the way I like to play: I would rather see everything and have the challenge come from somewhere else than have a fight be hard because I can't tell what is going on.</p>
+
+<p>Up until now I have only tested it in my own game, in the first part of Baldur's Gate 1. That is too little to call it a release: later on there are spells, items and creatures it hasn't met yet, and BG2:EE, EET and IWD:EE haven't been tried at all.</p>
+
+<p>If you are interested, or willing to help test it, please let me know and I will provide the download. More about that at the end of this post.</p>
+
+<p>It has five components, and you can install any combination of them:</p>
+
+<ol>
+<li><b>Attack Info</b> – who can hit whom, and for how much, when you hover a creature</li>
+<li><b>Timer</b> – casting, attack round and other timers beside the party portraits</li>
+<li><b>Combat Log</b> – extra log lines that explain failed saves, immunities and effects ending</li>
+<li><b>Item Info</b> – what an item would change for your character, in stores, containers and the quick loot bar</li>
+<li><b>Spell Info</b> – what a spell will do to the creature you are about to target</li>
+</ol>
+
+<p>Every component has its own tab under Options &gt; EEex Options ("Battle Sense: ..."), where each part of it can be switched on or off.</p>
+
+<hr>
+
+<h2>1. Attack Info</h2>
+
+<p>Hover the attack cursor over a creature and a popup opens with two panels.</p>
+
+<p class="img">[image: Attack Info with Resistances.jpg]</p>
+
+<p><b>The right panel is what you can do to the creature.</b> For each selected party member:</p>
+
+<ul>
+<li>an icon for the damage type of their weapon</li>
+<li>the roll they need to hit, (or the chance as a percentage)</li>
+<li>the damage of a hit, with the creature's resistance behind it: the skeleton above takes half from Haakon's sword, and only a tenth from Montaron's arrows</li>
+<li>extra damage the weapon applies on a hit, such as fire or cold, with the creature's resistance to that element</li>
+<li>whether the creature is immune to the weapon: the row turns red and says "Immune"</li>
+</ul>
+
+<p class="img">[image: Attack Info with Immunities.jpg]</p>
+
+<p><i>Xzar's quarterstaff does nothing to a werewolf.</i></p>
+
+<p><b>The left panel is what the creature can do to you:</b> the roll it needs to hit each of your characters, and in the header its own damage and damage type.</p>
+
+<p><b>The header</b> also shows the creature's stoneskins or mirror images, and the spells affecting it with the time they have left, (turns, rounds). While it casts, the spell's name and a casting bar appear there.</p>
+
+<p class="img">[image: Attack Info with Mirror images.jpg]</p>
+
+<p><i>Tarnesh, three mirror images up and already casting Horror; the bar under Xzar's name shows who it is aimed at.</i></p>
+
+<p><b>Timer bars.</b> Under your characters' names, bars show how far along they are: orange for the attack round, with a tick for every attack roll, and cyan for spell casting. A character using a wand or another item shows that item instead of a weapon.</p>
+
+<p class="img">[image: Attack Info with Item.jpg]</p>
+
+<p><b>Hovering over a friend</b> opens a compact form that lists who that character is fighting. Hold Left Ctrl or Left Alt to open the popup over any creature without the attack cursor.</p>
+
+<h2>2. Timer</h2>
+
+<p>Bars beside the party portraits that show what each character is in the middle of:</p>
+
+<ul>
+<li><b>Casting</b> (cyan): the time before the character can cast or use an item again, with a marker where the spell is released</li>
+<li><b>Attack round</b> (orange): with a marker for every attack roll. With a half attack, (3/2, 5/2), the last marker only shows in the rounds where that attack is made</li>
+<li><b>Modal action</b> (red) and <b>contingency</b> (green)</li>
+<li><b>Resistance rings</b>: a ring for every element the character resists, and for magic resistance; the green part is the percentage</li>
+</ul>
+
+<p class="img">[image: Timer bars while Fighting 1x.jpg]</p>
+
+<p><i>Mid-fight: Montaron's attack round, Haakon between rounds with a marker for each of his attacks, and Xzar starting a spell. The rings show their resistances.</i></p>
+
+<p class="img">[image: Cast timer 3x.jpg]</p>
+
+<p><i>Three casters, each at a different point of their spell.</i></p>
+
+<h2>3. Combat Log</h2>
+
+<p>Extra lines in the combat log that explain what the game leaves out:</p>
+
+<ul>
+<li><b>Spells and conditions ending:</b> "Imoen- Haste wore off" when the duration ran out, "Imoen- Stoneskin ended" when it was dispelled or used up</li>
+<li><b>Failed saves, with the roll that was needed</b></li>
+<li><b>Why a spell did nothing:</b> "Skeleton- Unaffected by Sleep: immune to sleep"</li>
+<li><b>Why a weapon is ineffective:</b> "Minsc- Long Sword is ineffective against Werewolf: it requires a +1 weapon or better"</li>
+</ul>
+
+<p class="img">[image: Combat Log Failed Save.jpg]</p>
+
+<p>By default, lines are only printed when your party is involved, so the log stays readable and you learn nothing about creatures you can't see.</p>
+
+<h2>4. Item Info</h2>
+
+<p>Hover an item in a store, an opened container or the quick loot bar, and a popup shows its properties. If a character is selected, it also lists how their stats would change if they equipped it, in green for better and red for worse: armor class, THAC0, saves, ability scores, resistances, and for a weapon its damage, speed and the character's proficiency in it.</p>
+
+<p class="img">[image: Store Weapon Popup.jpg]</p>
+
+<p>For a potion, the popup shows what drinking it would do to that character: hit points, ability scores, the effects it gives and how long they last. This also works on the quick item slots of the action bar.</p>
+
+<p class="img">[image: Quick Bar Popup.jpg]</p>
+
+<h2>5. Spell Info</h2>
+
+<p>Pick a spell, wand, scroll or throwable potion, then hover the creature you want to target. Before you click, a popup shows what it will do:</p>
+
+<ul>
+<li><b>Magic resistance</b>, or that the spell ignores it</li>
+<li><b>Saving throws</b>: which save, the spell's bonus or penalty, and the roll the creature needs</li>
+<li><b>Damage</b> per element, with the creature's resistance to each</li>
+<li><b>Why it would be unaffected</b>: an immunity, (naming the item or spell it comes from), the spell's own exclusions, or a level limit, (Sleep only affects creatures up to level 4)</li>
+</ul>
+
+<p class="img">[image: Spell Info.jpg]</p>
+<p class="img">[image: Spell Popup with Save.jpg]</p>
+<p class="img">[image: Spell Popup Immune.jpg]</p>
+
+<p><i>Command won't work on Dorotea, who is an elf.</i></p>
+
+<hr>
+
+<h2>Beta testing</h2>
+
+<p><b>Requires:</b> EEex v1.3.1, installed before Battle Sense.<br>
+<b>Should work on:</b> BG:EE, BG2:EE, EET and IWD:EE. So far I have only tested it in the first part of BG:EE, so the rest of the saga and the other games are exactly where testers would help.</p>
+
+<p>Good to know before you install:</p>
+
+<ul>
+<li><b>Attack Info and Timer replace EEex's own modules of the same name.</b> They started from Bubb's modules, and Battle Sense switches the EEex ones off so nothing is drawn twice.</li>
+<li><b>The Combat Log component adds a hidden effect to every creature,</b> which is how it sees spells being blocked. That effect is stored in your saves, so keep the component installed for saves made with it.</li>
+<li><b>Everything is read-only.</b> Battle Sense never changes a roll, a spell or an item. It only adds files with the ZJ prefix to the override folder.</li>
+<li><b>English only.</b></li>
+</ul>
+
+<p>If you are interested or willing to test, let me know here or send me a message, and I will provide the download. In return, I'd love to hear:</p>
+
+<ul>
+<li>which game you play, and which other mods you have installed</li>
+<li>anything that looks wrong: a number that doesn't match what happens, a popup that doesn't open, or text that runs off the screen</li>
+<li>any line in the combat log that starts with "[Battle Sense]": that is an error, and a screenshot of it tells me exactly where to look</li>
+</ul>
+
+<h2>Credits</h2>
+
+<p>Battle Sense is built on <a href="https://github.com/Bubb13/EEex">EEex</a> by Bubb, and the Attack Info and Timer components started from his modules of the same name. Thank you, Bubb, for making all of this possible.</p>
+
+</body>
+</html>
