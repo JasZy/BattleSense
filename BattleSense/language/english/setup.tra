@@ -9,8 +9,8 @@
 @30 = ~Combat Log: Explain effects ending, failed saves, immunities and ineffective weapons (adds a hidden effect to creatures, which is stored in save games)~
 @40 = ~Item Info: Show the properties of an item, and how equipping it would change the selected character's stats, when hovering it in a store, a container or the quick loot bar~
 @50 = ~Spell Info: Show what a spell, wand or scroll will do to a creature, (magic resistance, saving throws, damage, immunities), when hovering it while the spell waits for a target~
-@60 = ~Ability Info: Show what one more point in an ability would change, (to-hit, armor class, hit points, spells, ...), when hovering it on the abilities screen of character creation~
-@70 = ~Proficiency Info: Show what one more proficiency point would change, (to-hit, damage, speed, attacks per round, fighting style bonuses), when hovering it at character creation and level up~
+@60 = ~Ability Info: Show what the ability scores give, (to-hit, armor class, hit points, spells, ...), in the help text of the abilities screen of character creation~
+@70 = ~Proficiency Info: Show what the points of the last clicked or changed weapon proficiency and fighting style give, (to-hit, damage, speed, attacks per round, style bonuses), in the help text of the proficiencies screen at character creation and level up~
 
 // Error messages
 @1000 = ~Game not supported. Battle Sense requires BG:EE, BG2:EE, EET or IWD:EE.~

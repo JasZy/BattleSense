@@ -1,20 +1,25 @@
 --[[
 +--------------------------------------------------------------------------------------------------+
-| ZJProficiencyInfo - What one more proficiency point would do, on the proficiencies screen        |
+| ZJProficiencyInfo - What the proficiency points give, on the proficiencies screen                |
 +--------------------------------------------------------------------------------------------------+
-|   Hovering a proficiency on the proficiencies screen, (character creation and level up), or its  |
-|   + / - buttons, opens a popup beside it with what one more point in it would change:            |
+|   Adds two rows to the top of the help text of the proficiencies screen, (character creation and |
+|   level up): the last weapon proficiency, and the last fighting style, that was clicked or       |
+|   changed. A row shows what the points give now, (values of 0 are left out):                     |
 |                                                                                                  |
-|     * A weapon: to-hit and damage bonus and speed factor, (WSPECIAL.2DA, or the class's penalty  |
-|       for having no points), and extra attacks per round, (WSPATCK.2DA, at the character's       |
-|       level)                                                                                     |
-|     * A fighting style: the bonuses of its STYLBONU.2DA row, (damage, to-hit, armor class,       |
-|       speed factor, critical hit range)                                                          |
+|     Large Sword: 2 points: To-hit bonus +1, Damage bonus +2                                      |
+|     Two Weapon Style: 0 points: Main hand to-hit bonus -4, Off-hand to-hit bonus -8              |
 |                                                                                                  |
-|   The values come from the game's own tables, so mods that change them are followed.            |
+|     * A weapon: the to-hit and damage bonus and speed factor, (WSPECIAL.2DA, or the class's      |
+|       penalty without points), and the extra attacks per round the points add at the character's |
+|       level, (WSPATCK.2DA)                                                                       |
+|     * A fighting style: the bonuses of its STYLBONU.2DA row                                      |
 |                                                                                                  |
-|   Nothing in UI.menu is changed: the list is found by the table it shows, (chargen.proficiency), |
-|   and the popup is injected into the screen as templates, (see ZJPrfInf.menu).                   |
+|   Changes are found by comparing the points in the screen's list from one frame to the next, so  |
+|   nothing depends on where things are on the screen. The values come from the game's own tables, |
+|   so mods that change proficiencies or fighting styles are followed.                             |
+|                                                                                                  |
+|   Nothing in UI.menu is changed: the screen's help text comes from proficiencyOrGeneralHelp(),   |
+|   which is wrapped every time the UI loads.                                                      |
 +--------------------------------------------------------------------------------------------------+
 --]]
 
@@ -30,13 +35,6 @@ EEex_Options_Register("ZJProficiencyInfo_Enable", EEex_Options_Option.new({
 	["onChange"] = function(self, oldValue) ZJProficiencyInfo_SetEnabled(self:get() ~= 0) end,
 }))
 
-ZJProficiencyInfo_Private_FontPoint = EEex_Options_Register("ZJProficiencyInfo_FontPoint", EEex_Options_Option.new({
-	["default"]  = 11,
-	["type"]     = EEex_Options_EditType.new(),
-	["accessor"] = EEex_Options_ClampedAccessor.new({ ["min"] = 1, ["max"] = 99 }),
-	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Proficiency Info Module: Font Point" }),
-}))
-
 EEex_Options_AddTab("ZJBattleSense_Options_TRANSLATION_ProficiencyInfo_TabTitle", function() return {
 	{
 		EEex_Options_DisplayEntry.new({
@@ -44,15 +42,6 @@ EEex_Options_AddTab("ZJBattleSense_Options_TRANSLATION_ProficiencyInfo_TabTitle"
 			["label"]       = "ZJBattleSense_Options_TRANSLATION_ProficiencyInfo_Enable",
 			["description"] = "ZJBattleSense_Options_TRANSLATION_ProficiencyInfo_Enable_Description",
 			["widget"]      = EEex_Options_ToggleWidget.new(),
-		}),
-		EEex_Options_DisplayEntry.new({
-			["optionID"]    = "ZJProficiencyInfo_FontPoint",
-			["label"]       = "ZJBattleSense_Options_TRANSLATION_ProficiencyInfo_FontPoint",
-			["description"] = "ZJBattleSense_Options_TRANSLATION_ProficiencyInfo_FontPoint_Description",
-			["widget"]      = EEex_Options_EditWidget.new({
-				["maxCharacters"] = 2,
-				["number"]        = true,
-			}),
 		}),
 	},
 } end)
@@ -64,16 +53,7 @@ EEex_Options_AddTab("ZJBattleSense_Options_TRANSLATION_ProficiencyInfo_TabTitle"
 ZJProficiencyInfo_Private_Enabled = false
 ZJProficiencyInfo_Private_ErrorReported = false
 
--- The engine's proficiencies screen, used by both character creation and level up
-ZJProficiencyInfo_Private_MenuName = "CHARGEN_PROFICIENCIES"
-
--- The most points a proficiency can hold, (the five pips on the screen)
-ZJProficiencyInfo_Private_MaxPoints = 5
-
 ZJProficiencyInfo_Private_TitleColorStr  = "^0xFF64D7FF"
-ZJProficiencyInfo_Private_DimColorStr    = "^0xFFA0A0A0"
-ZJProficiencyInfo_Private_BetterColorStr = "^0xFF40E040"
-ZJProficiencyInfo_Private_WorseColorStr  = "^0xFF2B4BFF"
 ZJProficiencyInfo_Private_ColorEndStr    = "^-"
 
 -- The fighting style proficiencies, (WEAPPROF.2DA ID / STATS.IDS), => their STYLBONU.2DA row prefix
@@ -120,13 +100,10 @@ ZJProficiencyInfo_Private_WarriorLevelIndex = {
 -- General --
 -------------
 
--- Temporarily changes the enable state of the proficiency popup.
+-- Temporarily changes whether the overview is shown.
 -- To persist this change, instead modify the "ZJProficiencyInfo_Enable" option.
 function ZJProficiencyInfo_SetEnabled(enabled)
 	ZJProficiencyInfo_Private_Enabled = enabled
-	if not enabled then
-		ZJProficiencyInfo_Private_Menu_SetOpen(false)
-	end
 end
 
 function ZJProficiencyInfo_Private_T(key)
@@ -166,14 +143,26 @@ function ZJProficiencyInfo_Private_GetClassAndLevel()
 	local sprite = EEex_GameObject_Get(createChar.m_nGameSprite)
 	if sprite == nil then return nil end
 
-	local class = sprite.m_typeAI.m_Class
+	-- The engine keeps three copies of a creature's type, a character being created may only have its class in some of them
+	local class = nil
+	for _, typeAI in ipairs({ sprite.m_typeAI, sprite.m_liveTypeAI, sprite.m_startTypeAI }) do
+		if typeAI.m_Class ~= 0 then
+			class = typeAI.m_Class
+			break
+		end
+	end
+
+	-- A character being created may not have its level in its derived stats yet
 	local levelIndex = ZJProficiencyInfo_Private_WarriorLevelIndex[class] or 1
-	local stats = sprite.m_derivedStats
+	local derived, base = sprite.m_derivedStats, sprite.m_baseStats
+	local level
+	if levelIndex == 2 then
+		level = math.max(derived.m_nLevel2, base.m_level2)
+	else
+		level = math.max(derived.m_nLevel1, base.m_level1)
+	end
 
-	local level = stats.m_nLevel1
-	if levelIndex == 2 then level = stats.m_nLevel2 end
-
-	return class, level
+	return class, math.max(level, 1)
 end
 
 -----------
@@ -222,14 +211,15 @@ function ZJProficiencyInfo_Private_GetSpecializationRow(points)
 end
 
 -- Returns what `points` in the proficiency `id` give a character of `class` at `level`, as a list of
--- { key, label, value, format, lowerIsBetter }, where format is "signed" or "attacks"
+-- { label, value, format }, where format is "signed" or "attacks". Values of 0 are left out.
 function ZJProficiencyInfo_Private_GetStats(id, points, class, level)
 
 	local T = ZJProficiencyInfo_Private_T
 	local stats = {}
 
-	local add = function(key, value, format, lowerIsBetter)
-		table.insert(stats, { ["key"] = key, ["label"] = T("Stat_"..key), ["value"] = value, ["format"] = format, ["lowerIsBetter"] = lowerIsBetter })
+	local add = function(key, value, format)
+		if value == 0 then return end
+		table.insert(stats, { ["label"] = T("Stat_"..key), ["value"] = value, ["format"] = format or "signed" })
 	end
 
 	local style = ZJProficiencyInfo_Private_Styles[id]
@@ -240,14 +230,26 @@ function ZJProficiencyInfo_Private_GetStats(id, points, class, level)
 		local get = function(column) return ZJProficiencyInfo_Private_Get("STYLBONU", column, row) end
 
 		-- The THAC0 columns lower THAC0, (a positive number is a penalty), shown here as a to-hit bonus
-		add("MainHandToHit",   -get("THAC0_RIGHT"),  "signed")
-		add("OffHandToHit",    -get("THAC0_LEFT"),   "signed")
-		add("MainHandDamage",  get("DAMAGE_RIGHT"),  "signed")
-		add("OffHandDamage",   get("DAMAGE_LEFT"),   "signed")
-		add("ArmorClass",      get("AC_BASE"),       "signed", true)
-		add("ArmorClassMissile", get("AC_MISSILE"),  "signed", true)
-		add("SpeedFactor",     get("SPEED"),         "signed", true)
-		add("CriticalRange",   get("CRITICALROLL"),  "signed")
+		add("MainHandToHit",     -get("THAC0_RIGHT"))
+		add("OffHandToHit",      -get("THAC0_LEFT"))
+		add("MainHandDamage",    get("DAMAGE_RIGHT"))
+		add("OffHandDamage",     get("DAMAGE_LEFT"))
+
+		-- AC_MISSILE comes on top of AC_BASE against missiles, (e.g. -2 and +2: -2 in melee, nothing against missiles)
+		local armorClass = get("AC_BASE")
+		local armorClassMissile = armorClass + get("AC_MISSILE")
+		if armorClassMissile == armorClass then
+			add("ArmorClass", armorClass)
+		else
+			table.insert(stats, {
+				["label"]  = T("Stat_ArmorClass"),
+				["value"]  = string.format("%+d, "..T("AgainstMissiles"), armorClass, armorClassMissile),
+				["format"] = "text",
+			})
+		end
+
+		add("SpeedFactor",       get("SPEED"))
+		add("CriticalRange",     get("CRITICALROLL"))
 
 	else
 
@@ -259,15 +261,15 @@ function ZJProficiencyInfo_Private_GetStats(id, points, class, level)
 			hit, damage, speed = row[1], row[2], row[3]
 		end
 
-		add("ToHit",       hit,    "signed")
-		add("Damage",      damage, "signed")
-		add("SpeedFactor", speed,  "signed", true)
+		add("ToHit",       hit)
+		add("Damage",      damage)
+		add("SpeedFactor", speed)
 
-		-- WSPATCK.2DA goes by level, (and holds the extra attacks warriors get from their level), only the difference shows
+		-- WSPATCK.2DA also holds the extra attacks warriors get from their level, only what the points add is listed
 		local attacks = ZJProficiencyInfo_Private_GetExtraAttacks(points, level)
-		if attacks ~= nil then
-			add("ExtraAttacks", attacks, "attacks")
-			stats[#stats].label = string.format(stats[#stats].label, level)
+		local baseAttacks = ZJProficiencyInfo_Private_GetExtraAttacks(0, level)
+		if attacks ~= nil and baseAttacks ~= nil then
+			add("ExtraAttacks", attacks - baseAttacks, "attacks")
 		end
 	end
 
@@ -276,326 +278,177 @@ end
 
 function ZJProficiencyInfo_Private_FormatValue(value, format)
 	if format == "attacks" then return ZJProficiencyInfo_Private_FormatHalfAttacks(value) end
+	if format == "text" then return tostring(value) end
 	return string.format("%+d", value)
 end
 
-function ZJProficiencyInfo_Private_ColorChange(text, better)
-	return (better and ZJProficiencyInfo_Private_BetterColorStr or ZJProficiencyInfo_Private_WorseColorStr)..text..ZJProficiencyInfo_Private_ColorEndStr
+---------------------
+-- Change tracking --
+---------------------
+
+-- The screen gets two rows: the last weapon proficiency and the last fighting style that was clicked or changed
+ZJProficiencyInfo_Private_Points    = nil -- [proficiency id] = its points the last time they were looked at
+ZJProficiencyInfo_Private_Selected  = nil -- The row of the list that was selected the last time it was looked at
+ZJProficiencyInfo_Private_LastShown = {}  -- ["weapon" / "style"] = the id of the proficiency shown for that kind
+
+-- Forgets everything, (the screen was opened: for a new character, or a new level up)
+function ZJProficiencyInfo_Private_ResetTracking()
+	ZJProficiencyInfo_Private_Points = nil
+	ZJProficiencyInfo_Private_Selected = nil
+	ZJProficiencyInfo_Private_LastShown = {}
 end
 
--- The lines for the stats that differ between `oldStats` and `newStats`, (both from ZJProficiencyInfo_Private_GetStats())
-function ZJProficiencyInfo_Private_GetChangeLines(oldStats, newStats)
+function ZJProficiencyInfo_Private_GetKind(id)
+	return ZJProficiencyInfo_Private_Styles[tonumber(id)] ~= nil and "style" or "weapon"
+end
 
-	local lines = {}
+-- Compares the points of every proficiency to the last time, and the selected row: a proficiency whose points changed,
+-- or that was clicked, becomes the one shown for its kind. Only the values of the list are looked at, so this doesn't
+-- care where anything is on the screen, or how the points were changed.
+function ZJProficiencyInfo_Private_TrackChanges()
 
-	for i, old in ipairs(oldStats) do
+	local proficiencies = chargen.proficiency
+	local lastShown = ZJProficiencyInfo_Private_LastShown
+	local firstLook = ZJProficiencyInfo_Private_Points == nil
 
-		local new = newStats[i]
+	if firstLook then ZJProficiencyInfo_Private_Points = {} end
 
-		if new ~= nil and old.value ~= new.value then
-
-			local change = new.value - old.value
-			local better = (change < 0) == (old.lowerIsBetter == true)
-
-			local newText = string.format("%s (%s)", ZJProficiencyInfo_Private_FormatValue(new.value, old.format),
-				ZJProficiencyInfo_Private_FormatValue(change, old.format))
-
-			table.insert(lines, string.format("%s: %s -> %s", old.label, ZJProficiencyInfo_Private_FormatValue(old.value, old.format),
-				ZJProficiencyInfo_Private_ColorChange(newText, better)))
+	for _, rowEntry in ipairs(proficiencies) do
+		local id = rowEntry.id
+		local points = tonumber(rowEntry.value)
+		if id ~= nil and points ~= nil then
+			local old = ZJProficiencyInfo_Private_Points[id]
+			if not firstLook and old ~= nil and old ~= points then
+				lastShown[ZJProficiencyInfo_Private_GetKind(id)] = id
+			end
+			ZJProficiencyInfo_Private_Points[id] = points
 		end
 	end
 
-	return lines
+	-- A clicked proficiency is shown, (clicking + / - also selects the row)
+	local selected = currentChargenProficiency
+	if selected ~= ZJProficiencyInfo_Private_Selected then
+		ZJProficiencyInfo_Private_Selected = selected
+		local rowEntry = proficiencies[selected]
+		if type(rowEntry) == "table" and rowEntry.id ~= nil then
+			lastShown[ZJProficiencyInfo_Private_GetKind(rowEntry.id)] = rowEntry.id
+		end
+	end
 end
 
--- Whether the screen's own + button of `row` would add a point, (the engine provides plusButtonClickable()), or nil if
--- that can't be told
-function ZJProficiencyInfo_Private_CanAddPoint(row)
-	if type(plusButtonClickable) ~= "function" then return nil end
-	local ok, clickable = pcall(plusButtonClickable, row)
-	if not ok then return nil end
-	return clickable == true
-end
+----------
+-- Text --
+----------
 
--- The popup's text for the proficiency in row `row` of chargen.proficiency
-function ZJProficiencyInfo_Private_BuildText(row, rowEntry)
+-- The row for the proficiency `shownID`, or nil if it isn't in the list, with what its points give now:
+--
+--   Large Sword: 2 points: To-hit bonus +1, Damage bonus +2
+function ZJProficiencyInfo_Private_GetRow(shownID, class, level)
 
-	local T = ZJProficiencyInfo_Private_T
+	local rowEntry = nil
+	for _, entry in ipairs(chargen.proficiency) do
+		if entry.id == shownID then
+			rowEntry = entry
+			break
+		end
+	end
+	if rowEntry == nil then return nil end
 
 	local id = tonumber(rowEntry.id)
 	local points = tonumber(rowEntry.value)
 	if id == nil or points == nil then return nil end
 
+	local T = ZJProficiencyInfo_Private_T
+
 	local name = ""
 	if type(rowEntry.name) == "number" then
-		local ok, str = pcall(Infinity_FetchString, rowEntry.name)
-		if ok and type(str) == "string" then name = str end
+		local okName, str = pcall(Infinity_FetchString, rowEntry.name)
+		if okName and type(str) == "string" then name = str end
 	end
+
+	local title = string.format(T("Title"), name, points)
+
+	local values = {}
+	for _, stat in ipairs(ZJProficiencyInfo_Private_GetStats(id, points, class, level)) do
+		table.insert(values, stat.label.." "..ZJProficiencyInfo_Private_FormatValue(stat.value, stat.format))
+	end
+
+	local text = #values > 0 and table.concat(values, ", ") or T("NoBonus")
+	return ZJProficiencyInfo_Private_TitleColorStr..title..ZJProficiencyInfo_Private_ColorEndStr..": "..text
+end
+
+-- The rows for the last weapon proficiency and the last fighting style that was clicked or changed, or nil
+function ZJProficiencyInfo_Private_GetText()
+
+	if type(chargen) ~= "table" or type(chargen.proficiency) ~= "table" then return nil end
+
+	ZJProficiencyInfo_Private_TrackChanges()
 
 	local okClass, class, level = pcall(ZJProficiencyInfo_Private_GetClassAndLevel)
 	if not okClass then class, level = nil, nil end
 
-	local parts = {}
-	local title = function(text)
-		table.insert(parts, ZJProficiencyInfo_Private_TitleColorStr..text..ZJProficiencyInfo_Private_ColorEndStr)
-	end
-	local dim = function(text)
-		table.insert(parts, ZJProficiencyInfo_Private_DimColorStr..text..ZJProficiencyInfo_Private_ColorEndStr)
-	end
-
-	if points >= ZJProficiencyInfo_Private_MaxPoints then
-		title(string.format(T("Title"), name, points))
-		dim(T("AtMaximum"))
-		return table.concat(parts, "\n")
-	end
-
-	title(string.format(T("TitleChange"), name, points, points + 1))
-
-	local lines = ZJProficiencyInfo_Private_GetChangeLines(
-		ZJProficiencyInfo_Private_GetStats(id, points, class, level),
-		ZJProficiencyInfo_Private_GetStats(id, points + 1, class, level))
-
-	if #lines == 0 then
-		dim(T("NoChange"))
-	else
-		table.insert(parts, table.concat(lines, "\n"))
-	end
-
-	-- The screen greys out the + button when no point can go here, say why if it is the points
-	if ZJProficiencyInfo_Private_CanAddPoint(row) == false then
-		local slots = type(chargen) == "table" and tonumber(chargen.extraProficiencySlots) or nil
-		dim(slots == 0 and T("NoPointsLeft") or T("NotAllowed"))
-	end
-
-	return table.concat(parts, "\n")
-end
-
------------
--- Popup --
------------
-
-ZJProficiencyInfo_Private_List = nil -- uiItem, the proficiencies list, found the first time it is needed after the UI loads
-
--- The list of the proficiencies screen that shows chargen.proficiency
-function ZJProficiencyInfo_Private_GetList()
-
-	if ZJProficiencyInfo_Private_List ~= nil then return ZJProficiencyInfo_Private_List end
-	if type(chargen) ~= "table" or type(chargen.proficiency) ~= "table" then return nil end
-
-	local menu = EEex_Menu_Find(ZJProficiencyInfo_Private_MenuName)
-	if menu == nil then return nil end
-
-	local item = menu.items
-	while item do
-		if item.type == uiItemType.ITEM_LIST and item.list.table ~= 0 then
-			local tableFunc = EEex_GetLuaRegistryIndex(item.list.table)
-			local ok, listTable = pcall(tableFunc)
-			if ok and rawequal(listTable, chargen.proficiency) then
-				ZJProficiencyInfo_Private_List = item
-				return item
-			end
-		end
-		item = item.next
-	end
-
-	return nil
-end
-
--- Returns { row, entry, area } for the row of the proficiencies list under the cursor, or nil
-function ZJProficiencyInfo_Private_FindHoveredProficiency()
-
-	local listItem = ZJProficiencyInfo_Private_GetList()
-	if listItem == nil then return nil end
-
-	-- The engine replaces chargen.proficiency when the screen opens, the list keeps showing the new table
-	local tableFunc = EEex_GetLuaRegistryIndex(listItem.list.table)
-	local ok, listTable = pcall(tableFunc)
-	if not ok or type(listTable) ~= "table" then return nil end
-
-	local rowHeight = listItem.list.rowheight
-	if rowHeight <= 0 then return nil end
-
-	local x, y, w, h = listItem:getArea()
-	if not EEex_Menu_IsCursorWithinRect(x, y, w, h) then return nil end
-
-	-- The scrollbar moves the rows up by making their top negative
-	local _, mouseY = EEex_Menu_GetMousePos()
-	local row = math.floor((mouseY - y - listItem.scrollbar.top) / rowHeight) + 1
-
-	local rowEntry = listTable[row]
-	if type(rowEntry) ~= "table" or rowEntry.id == nil then return nil end
-
-	return {
-		["row"]   = row,
-		["entry"] = rowEntry,
-		["area"]  = { x, y + listItem.scrollbar.top + (row - 1) * rowHeight, w, rowHeight },
-	}
-end
-
-ZJProficiencyInfo_Private_Menu_IsOpen   = false
-ZJProficiencyInfo_Private_Menu_Text     = ""
-ZJProficiencyInfo_Private_Menu_Key      = nil -- What the popup was last built for
-ZJProficiencyInfo_Private_Menu_TextItem = nil -- uiItem, the injected text label
-ZJProficiencyInfo_Private_Menu_Area     = nil -- { x, y, w, h } of the popup, in screen coordinates
-
--- The popup is drawn by the templates injected into the proficiencies screen, so opening / closing it is only a flag
-function ZJProficiencyInfo_Private_Menu_SetOpen(open)
-	ZJProficiencyInfo_Private_Menu_IsOpen = open
-	if not open then
-		ZJProficiencyInfo_Private_Menu_Key = nil
-	end
-end
-
-function ZJProficiencyInfo_Private_StripColors(text)
-	return (text:gsub("%^0x%x%x%x%x%x%x%x%x", ""):gsub("%^%-", ""))
-end
-
--- Places the popup beside the hovered row, inside the proficiencies screen
-function ZJProficiencyInfo_Private_Layout(hovered)
-
-	local fontPoint = ZJProficiencyInfo_Private_FontPoint:get()
-	local style = styles["normal"]
-
-	local pad = 10
-	local gap = 8 -- Between the popup and the list
-	local wrapWidth = fontPoint * 32
-
-	local text = ZJProficiencyInfo_Private_Menu_Text
-	local textW, textH = EEex_Menu_GetTextWidthHeight(ZJProficiencyInfo_Private_StripColors(text), style.font, fontPoint, style.useFontZoom, wrapWidth)
-	textW = math.min(math.ceil(textW), wrapWidth)
-	textH = math.ceil(textH)
-
-	local width = textW + pad * 2
-	local height = textH + pad * 2
-
-	local textItem = ZJProficiencyInfo_Private_Menu_TextItem
-	if textItem ~= nil then
-		textItem.text.point = fontPoint
-	end
-
-	local menuX, menuY, menuW, menuH = EEex_Menu_GetArea(ZJProficiencyInfo_Private_MenuName)
-	local area = hovered.area
-
-	-- To the right of the list, level with the row. Kept inside the screen, (the menu's items are placed relative to it).
-	local x = area[1] + area[3] + gap
-	local y = area[2]
-
-	if menuW > 0 and x + width > menuX + menuW then
-		x = area[1] - gap - width
-	end
-	if menuH > 0 then
-		y = math.max(menuY, math.min(y, menuY + menuH - height))
-	end
-
-	x, y = math.floor(x), math.floor(y)
-
-	ZJProficiencyInfo_Private_Menu_Area = { x, y, width, height }
-	Infinity_SetArea("ZJProficiencyInfo_Menu_Text", x - menuX + pad, y - menuY + pad, wrapWidth, textH)
-end
-
-function ZJProficiencyInfo_Private_DoTick()
-
-	if not ZJProficiencyInfo_Private_Enabled then
-		ZJProficiencyInfo_Private_Menu_SetOpen(false)
-		return
-	end
-
-	local hovered = ZJProficiencyInfo_Private_FindHoveredProficiency()
-
-	if hovered == nil then
-		ZJProficiencyInfo_Private_Menu_SetOpen(false)
-		return
-	end
-
-	-- Points spent elsewhere can grey out this row's + button, so the points left are part of what the text is built for
-	local slots = type(chargen) == "table" and tostring(chargen.extraProficiencySlots) or ""
-	local key = string.format("%d|%s|%s|%s", hovered.row, tostring(hovered.entry.id), tostring(hovered.entry.value), slots)
-
-	if key ~= ZJProficiencyInfo_Private_Menu_Key then
-		local text = ZJProficiencyInfo_Private_BuildText(hovered.row, hovered.entry)
-		if text == nil then
-			ZJProficiencyInfo_Private_Menu_SetOpen(false)
-			return
-		end
-		ZJProficiencyInfo_Private_Menu_Text = text
-		ZJProficiencyInfo_Private_Menu_Key = key
-	end
-
-	ZJProficiencyInfo_Private_Layout(hovered)
-	ZJProficiencyInfo_Private_Menu_IsOpen = true
-
-	EEex.DrawSlicedRect("ZJProficiencyInfo_BackgroundRect", ZJProficiencyInfo_Private_Menu_Area, 255 * 0.92)
-end
-
--- The ticker template's "enabled". The engine asks it right before it would draw the template, which is in front of the
--- rest of the proficiencies screen, so the popup's background is drawn from here, right before the text template.
-function ZJProficiencyInfo_Private_Tick()
-
-	local ok, err = pcall(ZJProficiencyInfo_Private_DoTick)
-
-	if not ok then
-		pcall(ZJProficiencyInfo_Private_Menu_SetOpen, false)
-		-- This runs every frame, don't flood the log
-		if not ZJProficiencyInfo_Private_ErrorReported then
-			ZJProficiencyInfo_Private_ErrorReported = true
-			print("[Battle Sense] Proficiency Info: "..tostring(err))
+	local rows = {}
+	for _, kind in ipairs({ "weapon", "style" }) do
+		local shown = ZJProficiencyInfo_Private_LastShown[kind]
+		if shown ~= nil then
+			local row = ZJProficiencyInfo_Private_GetRow(shown, class, level)
+			if row ~= nil then table.insert(rows, row) end
 		end
 	end
 
-	return false
+	if #rows == 0 then return nil end
+	return table.concat(rows, "\n")
 end
 
 ---------------
 -- Listeners --
 ---------------
 
--- Adds the popup's templates to the end of the proficiencies screen, so they are drawn in front of it. A menu pushed on
--- top of the screen would be closed by its Done / Back buttons, (a bare Infinity_PopMenu()), in place of the screen.
-function ZJProficiencyInfo_Private_Inject()
+ZJProficiencyInfo_Private_HelpWrapper = nil
 
-	local menuName = ZJProficiencyInfo_Private_MenuName
-	local menu = EEex_Menu_Find(menuName)
-	if menu == nil then return end
+-- The proficiencies screen shows proficiencyOrGeneralHelp() as its help text, (the description of the selected
+-- proficiency). UI.menu defines it each time it loads, so it is wrapped again every time.
+function ZJProficiencyInfo_Private_WrapHelp()
 
-	local inject = function(templateName, x, y, w, h)
-		local oldAnimationID = currentAnimationID
-		currentAnimationID = 1
-		EEex_Menu_InjectTemplate(menuName, templateName, x, y, w, h)
-		currentAnimationID = oldAnimationID
+	local original = proficiencyOrGeneralHelp
+	if type(original) ~= "function" or original == ZJProficiencyInfo_Private_HelpWrapper then return end
+
+	ZJProficiencyInfo_Private_HelpWrapper = function(...)
+
+		local help = original(...)
+		if not ZJProficiencyInfo_Private_Enabled then return help end
+
+		local ok, text = pcall(ZJProficiencyInfo_Private_GetText)
+
+		if not ok then
+			if not ZJProficiencyInfo_Private_ErrorReported then
+				ZJProficiencyInfo_Private_ErrorReported = true
+				print("[Battle Sense] Proficiency Info: "..tostring(text))
+			end
+			return help
+		end
+
+		if text == nil then return help end
+		if help == nil or help == "" then return text end
+		return text.."\n\n"..tostring(help)
 	end
 
-	-- The ticker covers the screen, (the engine might skip an item without an area), its "enabled" is always false
-	local _, _, menuW, menuH = EEex_Menu_GetUIMenuArea(menu)
-	inject("ZJProficiencyInfo_Menu_TEMPLATE_Ticker", 0, 0, math.max(menuW, 1), math.max(menuH, 1))
-	inject("ZJProficiencyInfo_Menu_TEMPLATE_Text", 0, 0, 1, 1)
-
-	-- Gives the text template a name, so Infinity_SetArea() can move it
-	EEex_Menu_StoreTemplateInstance(menuName, "ZJProficiencyInfo_Menu_TEMPLATE_Text", 1, "ZJProficiencyInfo_Menu_Text")
-	ZJProficiencyInfo_Private_Menu_TextItem = EEex_Menu_GetItem("ZJProficiencyInfo_Menu_Text")
+	proficiencyOrGeneralHelp = ZJProficiencyInfo_Private_HelpWrapper
 end
 
 EEex_Menu_AddMainFileLoadedListener(function()
 
-	EEex_Menu_LoadFile("ZJPrfInf")
+	ZJProficiencyInfo_Private_WrapHelp()
+	ZJProficiencyInfo_Private_ResetTracking()
 
-	ZJProficiencyInfo_Private_List = nil
-	ZJProficiencyInfo_Private_Menu_TextItem = nil
-	ZJProficiencyInfo_Private_Menu_SetOpen(false)
+	-- Start over every time the screen opens, (its own onOpen still runs first)
+	local menu = EEex_Menu_Find("CHARGEN_PROFICIENCIES")
+	if menu == nil then return end
 
-	ZJProficiencyInfo_Private_Inject()
+	local oldOnOpen = EEex_Menu_GetItemFunction(menu.reference_onOpen) or function() end
+	EEex_Menu_SetItemFunction(menu.reference_onOpen, function()
+		local toReturn = oldOnOpen()
+		ZJProficiencyInfo_Private_ResetTracking()
+		return toReturn
+	end)
 end)
-
-EEex.RegisterSlicedRect("ZJProficiencyInfo_BackgroundRect", {
-	["topLeft"]     = {  0,  0, 32, 32 },
-	["top"]         = { 16,  0, 32, 32 },
-	["topRight"]    = { 32,  0, 32, 32 },
-	["right"]       = { 32, 16, 32, 32 },
-	["bottomRight"] = { 32, 32, 32, 32 },
-	["bottom"]      = { 16, 32, 32, 32 },
-	["bottomLeft"]  = {  0, 32, 32, 32 },
-	["left"]        = {  0, 16, 32, 32 },
-	["center"]      = { 16, 16, 32, 32 },
-	["dimensions"]  = { 64, 64 },
-	["resref"]      = "X-OPTBOX",
-	["flags"]       = 0,
-})

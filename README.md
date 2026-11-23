@@ -70,25 +70,25 @@ Pick a spell, wand, scroll or throwable potion, (from the spellbook or a quick i
 
 ### Ability Info
 
-On the abilities screen of character creation, hover an ability, (or its + / - buttons), to open a popup with what one more point in it would change for the character's class:
+On the abilities screen of character creation, the top of the help text lists what each of the character's current scores gives a character of its class:
 
 - Strength: to-hit and damage bonus, weight allowance, bend bars / lift gates
 - Dexterity: armor class, missile to-hit bonus, and thieving skills
-- Constitution: hit points per level
+- Constitution: hit points per level, hours before fatigue
 - Intelligence: chance to learn spells and spells known per level, (wizards and bards), and lore
 - Wisdom: bonus priest spells, (priests, paladins and rangers), and lore
 - Charisma: store prices
 
-For example `Strength 16 -> 17`, `To-hit bonus: +0 -> +1 (+1)`, `Weight allowance: 150 -> 170 (+20)`. Most scores only change something every few points; when the next point changes nothing, the popup says at which score the next change comes, and what it is.
+For example `Strength 16` with `To-hit bonus +0, Damage bonus +1, Weight allowance 150, Bend bars / lift gates 16%`. The overview follows the scores as you reroll them or change them with the + / - buttons.
 
 ### Proficiency Info
 
-On the proficiencies screen, (character creation and level up), hover a proficiency, (or its + / - buttons), to open a popup with what one more point in it would change:
+On the proficiencies screen, (character creation and level up), the top of the help text gets two rows: the last weapon proficiency, and the last fighting style, that you clicked or changed. A row shows what the points give now, (values of 0 are left out):
 
-- A weapon: to-hit and damage bonus, speed factor, and extra attacks per round at the character's level, (for the first point, that's losing the class's penalty for a weapon it has no proficiency in)
+- A weapon: to-hit and damage bonus, speed factor, and the extra attacks per round the points add at the character's level, (with no points: the class's to-hit penalty for using it)
 - A fighting style: main hand / off-hand to-hit and damage, armor class, speed factor and critical hit range
 
-For example `Long Swords: 1 -> 2 points`, `To-hit bonus: +0 -> +1 (+1)`, `Extra attacks per round, (at level 1): +0 -> +1/2 (+1/2)`. The values come from the game's tables, so mods that change proficiencies or fighting styles are followed.
+For example `Large Sword: 2 points: To-hit bonus +1, Damage bonus +2, Extra attacks per round +1/2`. The values come from the game's tables, so mods that change proficiencies or fighting styles are followed.
 
 ## Installation
 
