@@ -1,0 +1,34 @@
+
+-- Never opened. It only holds the templates that ZJProficiencyInfo injects into the proficiencies screen, (character
+-- creation and level up, see ZJProficiencyInfo_Private_Inject()). A menu pushed on top of that screen would be closed by
+-- its Done / Back buttons, (they call Infinity_PopMenu() without a name), in place of the screen itself.
+menu
+{
+	name "ZJProficiencyInfo_Menu"
+	ignoreesc
+
+	-- Evaluated every frame while the proficiencies screen is open: works out the row under the cursor, lays out the
+	-- popup, and draws its background. Always returns false, so it draws nothing of its own.
+	template
+	{
+		label
+		{
+			enabled "ZJProficiencyInfo_Private_Tick()"
+		}
+		name "ZJProficiencyInfo_Menu_TEMPLATE_Ticker"
+	}
+
+	-- The popup's text, (area set in ZJProficiencyInfo_Private_Layout())
+	template
+	{
+		label
+		{
+			enabled "ZJProficiencyInfo_Private_Menu_IsOpen"
+			text style "normal"
+			text lua "ZJProficiencyInfo_Private_Menu_Text"
+			text align left top
+			text color 255 255 255 255
+		}
+		name "ZJProficiencyInfo_Menu_TEMPLATE_Text"
+	}
+}

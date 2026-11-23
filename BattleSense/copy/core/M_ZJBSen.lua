@@ -27,12 +27,13 @@ ZJBattleSense_Modules = {
 	["ZJAtkInf"] = false,
 	["ZJCmbLog"] = false,
 	["ZJItmInf"] = false,
+	["ZJPrfInf"] = false,
 	["ZJSplInf"] = false,
 	["ZJTimer"]  = false,
 }
 
 -- The order the modules are started in
-ZJBattleSense_Private_ModuleOrder = { "ZJAblInf", "ZJAtkInf", "ZJCmbLog", "ZJItmInf", "ZJSplInf", "ZJTimer" }
+ZJBattleSense_Private_ModuleOrder = { "ZJAblInf", "ZJAtkInf", "ZJCmbLog", "ZJItmInf", "ZJPrfInf", "ZJSplInf", "ZJTimer" }
 
 -- Three of the modules are extended versions of a module that ships with EEex, (the Combat Log one only with the EEex
 -- fork Battle Sense started in). Running both versions at once would draw / print everything twice, so the EEex

@@ -614,3 +614,44 @@ uiStrings["ZJBattleSense_TRANSLATION_AbilityInfo_Stat_MaxSpellsPerLevel"] = "Spe
 uiStrings["ZJBattleSense_TRANSLATION_AbilityInfo_Stat_Lore"]              = "Lore"
 uiStrings["ZJBattleSense_TRANSLATION_AbilityInfo_Stat_BonusPriestSpells"] = "Bonus priest spells, (per level)"
 uiStrings["ZJBattleSense_TRANSLATION_AbilityInfo_Stat_StorePrices"]       = "Store prices"
+
+----------------------
+-- Proficiency Info --
+----------------------
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_ProficiencyInfo_TabTitle"] = "Battle Sense: Proficiency Info"
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_ProficiencyInfo_Enable"] = "Enabled"
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_ProficiencyInfo_Enable_Description"] = [[
+Enables the proficiency popup.
+
+The proficiency popup opens when hovering the cursor over a proficiency, (or its + / - buttons), on the proficiencies screen of character creation and level up, and lists what one more point in it would change.
+
+For a weapon: the to-hit and damage bonus, the speed factor, and the extra attacks per round, (at the character's level). For a fighting style: its damage, to-hit, armor class, speed factor and critical hit bonuses.
+]]
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_ProficiencyInfo_FontPoint"] = "Font Point"
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_ProficiencyInfo_FontPoint_Description"] = [[
+The point (size) of the font used to display the proficiency popup.
+]]
+
+uiStrings["ZJBattleSense_TRANSLATION_ProficiencyInfo_Title"]        = "%s: %d points"
+uiStrings["ZJBattleSense_TRANSLATION_ProficiencyInfo_TitleChange"]  = "%s: %d -> %d points"
+uiStrings["ZJBattleSense_TRANSLATION_ProficiencyInfo_AtMaximum"]    = "Already at the maximum"
+uiStrings["ZJBattleSense_TRANSLATION_ProficiencyInfo_NoChange"]     = "Nothing changes with this point"
+uiStrings["ZJBattleSense_TRANSLATION_ProficiencyInfo_NoPointsLeft"] = "No proficiency points left to spend"
+uiStrings["ZJBattleSense_TRANSLATION_ProficiencyInfo_NotAllowed"]   = "Can't put another point here now, (the class or level limit)"
+
+uiStrings["ZJBattleSense_TRANSLATION_ProficiencyInfo_Stat_ToHit"]             = "To-hit bonus"
+uiStrings["ZJBattleSense_TRANSLATION_ProficiencyInfo_Stat_Damage"]            = "Damage bonus"
+uiStrings["ZJBattleSense_TRANSLATION_ProficiencyInfo_Stat_SpeedFactor"]       = "Speed factor"
+uiStrings["ZJBattleSense_TRANSLATION_ProficiencyInfo_Stat_ExtraAttacks"]      = "Extra attacks per round, (at level %d)"
+uiStrings["ZJBattleSense_TRANSLATION_ProficiencyInfo_Stat_MainHandToHit"]     = "Main hand to-hit bonus"
+uiStrings["ZJBattleSense_TRANSLATION_ProficiencyInfo_Stat_OffHandToHit"]      = "Off-hand to-hit bonus"
+uiStrings["ZJBattleSense_TRANSLATION_ProficiencyInfo_Stat_MainHandDamage"]    = "Main hand damage bonus"
+uiStrings["ZJBattleSense_TRANSLATION_ProficiencyInfo_Stat_OffHandDamage"]     = "Off-hand damage bonus"
+uiStrings["ZJBattleSense_TRANSLATION_ProficiencyInfo_Stat_ArmorClass"]        = "Armor Class modifier"
+uiStrings["ZJBattleSense_TRANSLATION_ProficiencyInfo_Stat_ArmorClassMissile"] = "Armor Class modifier vs. missiles"
+uiStrings["ZJBattleSense_TRANSLATION_ProficiencyInfo_Stat_CriticalRange"]     = "Critical hit range"

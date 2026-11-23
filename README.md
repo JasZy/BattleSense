@@ -81,6 +81,15 @@ On the abilities screen of character creation, hover an ability, (or its + / - b
 
 For example `Strength 16 -> 17`, `To-hit bonus: +0 -> +1 (+1)`, `Weight allowance: 150 -> 170 (+20)`. Most scores only change something every few points; when the next point changes nothing, the popup says at which score the next change comes, and what it is.
 
+### Proficiency Info
+
+On the proficiencies screen, (character creation and level up), hover a proficiency, (or its + / - buttons), to open a popup with what one more point in it would change:
+
+- A weapon: to-hit and damage bonus, speed factor, and extra attacks per round at the character's level, (for the first point, that's losing the class's penalty for a weapon it has no proficiency in)
+- A fighting style: main hand / off-hand to-hit and damage, armor class, speed factor and critical hit range
+
+For example `Long Swords: 1 -> 2 points`, `To-hit bonus: +0 -> +1 (+1)`, `Extra attacks per round, (at level 1): +0 -> +1/2 (+1/2)`. The values come from the game's tables, so mods that change proficiencies or fighting styles are followed.
+
 ## Installation
 
 1. Install EEex.
