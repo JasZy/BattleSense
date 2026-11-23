@@ -68,6 +68,19 @@ Pick a spell, wand, scroll or throwable potion, (from the spellbook or a quick i
 - The spell's damage per element, with the creature's resistance to each
 - Why it would be unaffected: immunities, (e.g. an undead's immunity to sleep), the spell's own exclusions, (Sleep doesn't affect elves), and level limits
 
+### Ability Info
+
+On the abilities screen of character creation, hover an ability, (or its + / - buttons), to open a popup with what one more point in it would change for the character's class:
+
+- Strength: to-hit and damage bonus, weight allowance, bend bars / lift gates
+- Dexterity: armor class, missile to-hit bonus, and thieving skills
+- Constitution: hit points per level
+- Intelligence: chance to learn spells and spells known per level, (wizards and bards), and lore
+- Wisdom: bonus priest spells, (priests, paladins and rangers), and lore
+- Charisma: store prices
+
+For example `Strength 16 -> 17`, `To-hit bonus: +0 -> +1 (+1)`, `Weight allowance: 150 -> 170 (+20)`. Most scores only change something every few points; when the next point changes nothing, the popup says at which score the next change comes, and what it is.
+
 ## Installation
 
 1. Install EEex.

@@ -565,3 +565,52 @@ uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Style_TWOHANDED"]      = "Two-hand
 uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Style_SWORDANDSHIELD"] = "Sword and shield"
 uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Style_SINGLEWEAPON"]   = "Single weapon"
 uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Style_TWOWEAPON"]      = "Two weapons"
+
+------------------
+-- Ability Info --
+------------------
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_AbilityInfo_TabTitle"] = "Battle Sense: Ability Info"
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_AbilityInfo_Enable"] = "Enabled"
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_AbilityInfo_Enable_Description"] = [[
+Enables the ability popup.
+
+The ability popup opens when hovering the cursor over an ability, (or its + / - buttons), on the abilities screen of character creation, and lists what one more point in that ability would change: to-hit and damage bonus, armor class, hit points per level, chance to learn spells, bonus priest spells, lore, store prices, ...
+
+Lines that only matter to some classes, (spells, thieving skills), are only listed for those classes. If the next point changes nothing, the popup says at which score the next change comes.
+]]
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_AbilityInfo_FontPoint"] = "Font Point"
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_AbilityInfo_FontPoint_Description"] = [[
+The point (size) of the font used to display the ability popup.
+]]
+
+uiStrings["ZJBattleSense_TRANSLATION_AbilityInfo_AtMaximum"]           = "Already at the maximum"
+uiStrings["ZJBattleSense_TRANSLATION_AbilityInfo_NoChange"]            = "Nothing changes up to the maximum"
+uiStrings["ZJBattleSense_TRANSLATION_AbilityInfo_NoChangeUntil"]       = "Nothing changes at %d, the next change is at %d:"
+uiStrings["ZJBattleSense_TRANSLATION_AbilityInfo_ExceptionalStrength"] = "Not counted: the exceptional strength, (18/01 - 18/00), warriors can have at 18"
+
+uiStrings["ZJBattleSense_TRANSLATION_AbilityInfo_Stat_ToHit"]             = "To-hit bonus"
+uiStrings["ZJBattleSense_TRANSLATION_AbilityInfo_Stat_Damage"]            = "Damage bonus"
+uiStrings["ZJBattleSense_TRANSLATION_AbilityInfo_Stat_WeightAllowance"]   = "Weight allowance"
+uiStrings["ZJBattleSense_TRANSLATION_AbilityInfo_Stat_BendBars"]          = "Bend bars / lift gates"
+uiStrings["ZJBattleSense_TRANSLATION_AbilityInfo_Stat_ArmorClass"]        = "Armor Class modifier"
+uiStrings["ZJBattleSense_TRANSLATION_AbilityInfo_Stat_Missile"]           = "Missile to-hit bonus"
+uiStrings["ZJBattleSense_TRANSLATION_AbilityInfo_Stat_PICK_POCKETS"]      = "Pick Pockets"
+uiStrings["ZJBattleSense_TRANSLATION_AbilityInfo_Stat_OPEN_LOCKS"]        = "Open Locks"
+uiStrings["ZJBattleSense_TRANSLATION_AbilityInfo_Stat_FIND_TRAPS"]        = "Find Traps"
+uiStrings["ZJBattleSense_TRANSLATION_AbilityInfo_Stat_MOVE_SILENTLY"]     = "Move Silently"
+uiStrings["ZJBattleSense_TRANSLATION_AbilityInfo_Stat_HIDE_IN_SHADOWS"]   = "Hide in Shadows"
+uiStrings["ZJBattleSense_TRANSLATION_AbilityInfo_Stat_DETECT_ILLUSION"]   = "Detect Illusion"
+uiStrings["ZJBattleSense_TRANSLATION_AbilityInfo_Stat_SET_TRAPS"]         = "Set Traps"
+uiStrings["ZJBattleSense_TRANSLATION_AbilityInfo_Stat_HitPointsPerLevel"] = "Hit points per level"
+uiStrings["ZJBattleSense_TRANSLATION_AbilityInfo_Stat_MinimumRoll"]       = "Lowest hit point roll"
+uiStrings["ZJBattleSense_TRANSLATION_AbilityInfo_Stat_FatigueBonus"]      = "Hours before fatigue"
+uiStrings["ZJBattleSense_TRANSLATION_AbilityInfo_Stat_LearnSpell"]        = "Chance to learn spells"
+uiStrings["ZJBattleSense_TRANSLATION_AbilityInfo_Stat_MaxSpellsPerLevel"] = "Spells known per level"
+uiStrings["ZJBattleSense_TRANSLATION_AbilityInfo_Stat_Lore"]              = "Lore"
+uiStrings["ZJBattleSense_TRANSLATION_AbilityInfo_Stat_BonusPriestSpells"] = "Bonus priest spells, (per level)"
+uiStrings["ZJBattleSense_TRANSLATION_AbilityInfo_Stat_StorePrices"]       = "Store prices"

@@ -101,3 +101,15 @@ REQUIRE_PREDICATE MOD_IS_INSTALLED ~EEex.tp2~ 1 @1001 // Battle Sense requires E
 	LAF ZJ_BATTLESENSE_INSTALL_CORE END
 	COPY ~BattleSense/copy/spellinfo~ ~override~
 	LAF ZJ_BATTLESENSE_ENABLE_MODULE STR_VAR module = ~ZJSplInf~ END
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Ability Info: What one more point in an ability would change, on the character creation screen      //
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+BEGIN @60 LABEL ~ZJ-BattleSense-Ability-Info~ DESIGNATED 60
+REQUIRE_PREDICATE GAME_IS ~bgee bg2ee eet iwdee~ @1000 // Game not supported.
+REQUIRE_PREDICATE MOD_IS_INSTALLED ~EEex.tp2~ 1 @1001 // Battle Sense requires EEex to be installed first.
+
+	LAF ZJ_BATTLESENSE_INSTALL_CORE END
+	COPY ~BattleSense/copy/abilityinfo~ ~override~
+	LAF ZJ_BATTLESENSE_ENABLE_MODULE STR_VAR module = ~ZJAblInf~ END

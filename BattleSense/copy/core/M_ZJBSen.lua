@@ -23,6 +23,7 @@ if not EEex_Active then return end
 -- The installer turns a module on by changing its "false" to "true". Do not edit by hand,
 -- uninstalling the component restores this file.
 ZJBattleSense_Modules = {
+	["ZJAblInf"] = false,
 	["ZJAtkInf"] = false,
 	["ZJCmbLog"] = false,
 	["ZJItmInf"] = false,
@@ -31,7 +32,7 @@ ZJBattleSense_Modules = {
 }
 
 -- The order the modules are started in
-ZJBattleSense_Private_ModuleOrder = { "ZJAtkInf", "ZJCmbLog", "ZJItmInf", "ZJSplInf", "ZJTimer" }
+ZJBattleSense_Private_ModuleOrder = { "ZJAblInf", "ZJAtkInf", "ZJCmbLog", "ZJItmInf", "ZJSplInf", "ZJTimer" }
 
 -- Three of the modules are extended versions of a module that ships with EEex, (the Combat Log one only with the EEex
 -- fork Battle Sense started in). Running both versions at once would draw / print everything twice, so the EEex
