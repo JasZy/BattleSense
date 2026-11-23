@@ -372,7 +372,8 @@ function ZJAttackInfo_Private_GetWeaponHitChance(sourceSprite, targetSprite, lef
 	return hitChance, isImmune, reasoning, damageStr, okDisplay and handDisplay or nil
 end
 
--- ITM ability damage type => the icon(s) that show it, (ZJATKDMG.BAM: frame = icon * 3 + variant).
+-- ITM ability damage type => the icon(s) that show it, (ZJATKDMG.BAM: frame = icon * 4 + variant, the variants are
+-- 0 = green, 1 = red, 2 = dimmed red, 3 = dimmed green; the green ones face the other way).
 --   0 = sword (slashing), 1 = mace (crushing), 2 = spear (piercing), 3 = bow (missile), 4 = slingshot (sling ammunition), 5 = fist
 -- The file also has: 6 = spell, 7 = item
 ZJAttackInfo_Private_DamageTypeIcons = {
@@ -1453,7 +1454,7 @@ function ZJAttackInfo_Private_Layout(selectedSprites, targetSprite, compact)
 	local handIconGapW = 3
 
 	-- Extra fields in each list entry: what is behind the damage of each hand, (see ZJAttackInfo_Private_GetHandDisplay()),
-	-- with `variant` added: the color of the damage type icons, 0 = green, 1 = red, 2 = grey
+	-- with `variant` added: the color of the damage type icons, 0 = green, 1 = red, 2 = dimmed red, 3 = dimmed green
 	local handDisplayEntryIndexes = { [mainHandColumnIndex] = 8, [offHandColumnIndex] = 9 }
 
 	local panels = ZJAttackInfo_Private_Menu_Panels
@@ -1766,7 +1767,7 @@ function ZJAttackInfo_Private_Layout(selectedSprites, targetSprite, compact)
 		-- Stores the icons and extra damage of a hand in a list entry. `dim` => greyed out, like the row's text
 		local setHandDisplay = function(entry, columnIndex, handDisplay, dim)
 			if handDisplay == nil then return end
-			handDisplay.variant = dim and 2 or (reverse and 0 or 1)
+			handDisplay.variant = reverse and (dim and 3 or 0) or (dim and 2 or 1)
 			if dim and handDisplay.extraText ~= "" then
 				handDisplay.extraText = dimColorStr..handDisplay.extraText
 			end
@@ -2724,7 +2725,7 @@ function ZJAttackInfo_Private_Menu_InfoList_RowIcon(infoListTable, rowNumber)
 	local entry = infoListTable[rowNumber]
 	local icon = entry and entry[4]
 	if not icon then return nil end
-	return icon * 3 -- The green variant
+	return icon * 4 -- The green variant
 end
 
 -- The frame in ZJATKDMG.BAM of an icon in front of the roll of a hand, nil if that slot isn't used
@@ -2733,7 +2734,7 @@ function ZJAttackInfo_Private_Menu_InfoList_TypeIcon(infoListTable, rowNumber, h
 	local handDisplay = entry and entry[handEntryIndex]
 	local icon = handDisplay and handDisplay.typeIcons[slot]
 	if icon == nil then return nil end
-	return icon * 3 + handDisplay.variant
+	return icon * 4 + handDisplay.variant
 end
 
 -- The extra damage behind the damage of a hand

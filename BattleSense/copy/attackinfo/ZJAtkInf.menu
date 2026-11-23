@@ -57,7 +57,7 @@ menu
 		enabled "ZJAttackInfo_Private_Menu_TargetAttack[1].icons[1] ~= nil"
 		area 0 0 -1 -1
 		bam "ZJATKDMG"
-		frame lua "(ZJAttackInfo_Private_Menu_TargetAttack[1].icons[1] or 0) * 3"
+		frame lua "(ZJAttackInfo_Private_Menu_TargetAttack[1].icons[1] or 0) * 4"
 		scaleToClip
 	}
 
@@ -67,7 +67,7 @@ menu
 		enabled "ZJAttackInfo_Private_Menu_TargetAttack[1].icons[2] ~= nil"
 		area 0 0 -1 -1
 		bam "ZJATKDMG"
-		frame lua "(ZJAttackInfo_Private_Menu_TargetAttack[1].icons[2] or 0) * 3"
+		frame lua "(ZJAttackInfo_Private_Menu_TargetAttack[1].icons[2] or 0) * 4"
 		scaleToClip
 	}
 
@@ -115,7 +115,7 @@ menu
 		enabled "ZJAttackInfo_Private_Menu_TargetAttack[2].icons[1] ~= nil"
 		area 0 0 -1 -1
 		bam "ZJATKDMG"
-		frame lua "(ZJAttackInfo_Private_Menu_TargetAttack[2].icons[1] or 0) * 3"
+		frame lua "(ZJAttackInfo_Private_Menu_TargetAttack[2].icons[1] or 0) * 4"
 		scaleToClip
 	}
 
@@ -125,7 +125,7 @@ menu
 		enabled "ZJAttackInfo_Private_Menu_TargetAttack[2].icons[2] ~= nil"
 		area 0 0 -1 -1
 		bam "ZJATKDMG"
-		frame lua "(ZJAttackInfo_Private_Menu_TargetAttack[2].icons[2] or 0) * 3"
+		frame lua "(ZJAttackInfo_Private_Menu_TargetAttack[2].icons[2] or 0) * 4"
 		scaleToClip
 	}
 
