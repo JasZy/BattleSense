@@ -438,7 +438,7 @@ function ZJAttackInfo_Private_GetWeaponHitChance(sourceSprite, targetSprite, lef
 end
 
 -- ITM ability damage type => the icon(s) that show it, (ZJATKDMG.BAM: frame = icon * 3 + variant).
---   0 = sword (slashing), 1 = club (crushing), 2 = spear (piercing), 3 = bow (missile), 4 = slingshot (sling ammunition), 5 = fist
+--   0 = sword (slashing), 1 = mace (crushing), 2 = spear (piercing), 3 = bow (missile), 4 = slingshot (sling ammunition), 5 = fist
 -- The file also has: 6 = spell, 7 = item
 ZJAttackInfo_Private_DamageTypeIcons = {
 	[1] = { 2 },
