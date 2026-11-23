@@ -86,18 +86,6 @@ uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_ReverseKeybind_Descripti
 A second keybind that opens the attack information popup, exactly like "Open Keybind".
 ]]
 
-uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_ShowColumnHeaders"] = "Show Column Headers"
-
-uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_ShowColumnHeaders_Description"] = [[
-Determines whether the first line of the popup's information list is used to display column headers.
-]]
-
-uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_HideUnusedOffhandHeader"] = "Hide Unused Offhand Header"
-
-uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_HideUnusedOffhandHeader_Description"] = [[
-Determines whether a panel's offhand column header is hidden when that panel has zero entries to display in that column.
-]]
-
 -----------
 -- Timer --
 -----------
@@ -260,10 +248,6 @@ uiStrings["ZJBattleSense_TRANSLATION_SpellInfo_ProtectedFromSpell"] = "Protected
 uiStrings["ZJBattleSense_TRANSLATION_SpellInfo_Excludes"]           = "Unaffected: the spell excludes %s"
 
 uiStrings["ZJBattleSense_TRANSLATION_AttackInfo_Immune"] = "Immune"
-
-uiStrings["ZJBattleSense_TRANSLATION_AttackInfo_Mainhand"] = "Main"
-
-uiStrings["ZJBattleSense_TRANSLATION_AttackInfo_Offhand"] = "Offhand"
 
 uiStrings["ZJBattleSense_TRANSLATION_AttackInfo_Stoneskins"] = "Stoneskins"
 

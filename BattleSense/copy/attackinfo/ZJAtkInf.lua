@@ -62,20 +62,6 @@ EEex_Options_Register("ZJAttackInfo_ReverseKeybind", EEex_Options_Option.new({
 	["storage"]  = EEex_Options_KeybindLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Attack Info Module: Reverse Keybind" }),
 }))
 
-ZJAttackInfo_Private_ShowColumnHeaders = EEex_Options_Register("ZJAttackInfo_ShowColumnHeaders", EEex_Options_Option.new({
-	["default"]  = 1,
-	["type"]     = EEex_Options_ToggleType.new(),
-	["accessor"] = EEex_Options_ClampedAccessor.new({ ["min"] = 0, ["max"] = 1 }),
-	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Attack Info Module: Show Column Headers" }),
-}))
-
-ZJAttackInfo_Private_HideUnusedOffhandHeader = EEex_Options_Register("ZJAttackInfo_HideUnusedOffhandHeader", EEex_Options_Option.new({
-	["default"]  = 1,
-	["type"]     = EEex_Options_ToggleType.new(),
-	["accessor"] = EEex_Options_ClampedAccessor.new({ ["min"] = 0, ["max"] = 1 }),
-	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Attack Info Module: Hide Unused Offhand Header" }),
-}))
-
 ZJAttackInfo_Private_ShowSpellEffects = EEex_Options_Register("ZJAttackInfo_ShowSpellEffects", EEex_Options_Option.new({
 	["default"]  = 1,
 	["type"]     = EEex_Options_ToggleType.new(),
@@ -197,20 +183,6 @@ EEex_Options_AddTab("ZJBattleSense_Options_TRANSLATION_AttackInfo_TabTitle", fun
 			["label"]       = "ZJBattleSense_Options_TRANSLATION_AttackInfo_ReverseKeybind",
 			["description"] = "ZJBattleSense_Options_TRANSLATION_AttackInfo_ReverseKeybind_Description",
 			["widget"]      = EEex_Options_KeybindWidget.new(),
-		}),
-		EEex_Options_DisplayEntry.new({
-			["optionID"]    = "ZJAttackInfo_ShowColumnHeaders",
-			["label"]       = "ZJBattleSense_Options_TRANSLATION_AttackInfo_ShowColumnHeaders",
-			["description"] = "ZJBattleSense_Options_TRANSLATION_AttackInfo_ShowColumnHeaders_Description",
-			["widget"]      = EEex_Options_ToggleWidget.new(),
-			["subOptions"]  = {
-				EEex_Options_DisplayEntry.new({
-					["optionID"]    = "ZJAttackInfo_HideUnusedOffhandHeader",
-					["label"]       = "ZJBattleSense_Options_TRANSLATION_AttackInfo_HideUnusedOffhandHeader",
-					["description"] = "ZJBattleSense_Options_TRANSLATION_AttackInfo_HideUnusedOffhandHeader_Description",
-					["widget"]      = EEex_Options_ToggleWidget.new(),
-				}),
-			}
 		}),
 		EEex_Options_DisplayEntry.new({
 			["optionID"]    = "ZJAttackInfo_ShowSpellEffects",
@@ -1415,9 +1387,6 @@ function ZJAttackInfo_Private_Layout(selectedSprites, targetSprite, compact)
 	local fontPoint                     = ZJAttackInfo_Private_FontPoint:get()
 	local hitDisplayType                = ZJAttackInfo_Private_HitDisplayType:get()
 	local immuneDisplayType             = ZJAttackInfo_Private_ImmunityDisplayType:get()
-	-- The compact popup can have nothing to list, in which case it only has its headers and the target's bars
-	local showColumnHeaders             = ZJAttackInfo_Private_ShowColumnHeaders:get() ~= 0 and selectedSprites[1] ~= nil
-	local hideUnusedOffhandHeader       = ZJAttackInfo_Private_HideUnusedOffhandHeader:get() ~= 0
 	local showRowTimers                 = ZJAttackInfo_Private_ShowRowTimers:get() ~= 0
 
 	------------------------------
@@ -1812,7 +1781,7 @@ function ZJAttackInfo_Private_Layout(selectedSprites, targetSprite, compact)
 		build.extraWidths     = { [mainHandColumnIndex] = 0, [offHandColumnIndex] = 0 }
 		build.extraIconCounts = { [mainHandColumnIndex] = 0, [offHandColumnIndex] = 0 }
 
-		-- The widest text that isn't a roll, (a spell / item name, "Immune", a column header): it starts where the rolls
+		-- The widest text that isn't a roll, (a spell / item name, "Immune"): it starts where the rolls
 		-- do, and runs over the sub-columns behind them
 		build.spanWidths = { [mainHandColumnIndex] = 0, [offHandColumnIndex] = 0 }
 
@@ -1893,8 +1862,6 @@ function ZJAttackInfo_Private_Layout(selectedSprites, targetSprite, compact)
 			return infoListTableEntry
 		end
 
-		local hadOffhand = false
-
 		-- Both panels have a row for every listed sprite, in the same order, so a sprite is on the same row in both
 		for spriteIndex, selectedSprite in ipairs(selectedSprites) do
 
@@ -1967,8 +1934,6 @@ function ZJAttackInfo_Private_Layout(selectedSprites, targetSprite, compact)
 
 						leftHandString, leftHandRollString, leftHandDamageString, leftHandSpans = formatChanceStr(
 							leftHandChance, leftHandIneffective, not reverse and leftHandDamage or nil, dim)
-
-						hadOffhand = true
 					end
 
 					-- What is behind the damage is left out with it: in the left panel, and where "Immune" replaces it
@@ -2043,21 +2008,6 @@ function ZJAttackInfo_Private_Layout(selectedSprites, targetSprite, compact)
 			end
 
 			table.insert(build.entries, entry)
-		end
-
-		if showColumnHeaders then
-
-			local mainhandHeader = string.format(" %s", uiStrings["ZJBattleSense_TRANSLATION_AttackInfo_Mainhand"])
-			local offhandHeader = ""
-
-			if not hideUnusedOffhandHeader or hadOffhand then
-				offhandHeader = string.format(" %s", uiStrings["ZJBattleSense_TRANSLATION_AttackInfo_Offhand"])
-			end
-
-			measureHand(mainHandColumnIndex, mainhandHeader, "", true, nil)
-			measureHand(offHandColumnIndex, offhandHeader, "", true, nil)
-
-			table.insert(build.entries, 1, calculate({"", mainhandHeader, offhandHeader}))
 		end
 
 		-- A hand's column has to fit the widest of each of its sub-columns next to each other, which can be on different
@@ -2592,15 +2542,13 @@ function ZJAttackInfo_Private_Layout(selectedSprites, targetSprite, compact)
 		hideBar(targetBarStates[barName])
 	end
 
-	local headerRowCount = showColumnHeaders and 1 or 0
-
 	-- The bars belong to the target, so they are in the left panel, which lists its attacks
 	local targetBarX = builds[1].panelX
 	local targetBarY, targetBarW, targetBarStepH, targetBarStepGap, targetBarStepMarkerW
 
 	if targetBarsSpriteIndex ~= nil then
 		-- Below the name of the sprite the target is attacking, laid out like the row bars of the right panel
-		local rowY = infoListY + (headerRowCount + targetBarsSpriteIndex - 1) * rowHeight
+		local rowY = infoListY + (targetBarsSpriteIndex - 1) * rowHeight
 		targetBarY = rowY + textRowHeight + rowBarsPadTop
 		targetBarW = math.max(builds[1].columnWidths[nameColumnIndex] - spaceW, 1)
 		targetBarStepH, targetBarStepGap, targetBarStepMarkerW = rowBarH, rowBarGap, rowBarMarkerW
@@ -2645,7 +2593,7 @@ function ZJAttackInfo_Private_Layout(selectedSprites, targetSprite, compact)
 
 			rowBarSet = rowBarSet + 1
 
-			local rowY = infoListY + (headerRowCount + spriteIndex - 1) * rowHeight
+			local rowY = infoListY + (spriteIndex - 1) * rowHeight
 			local rowBarY = rowY + textRowHeight + rowBarsPadTop
 
 			for _, rowBar in ipairs(rowBars) do
