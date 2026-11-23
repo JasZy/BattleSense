@@ -419,7 +419,9 @@ end
 --
 -- The creature saves when its d20 roll plus the effect's save bonus reaches its save, (the same sum Spell Info shows
 -- before casting). The roll itself isn't shown: the one the engine keeps on the creature has often been rerolled by
--- the time the effect turns up in the list, and the engine's own "Save vs. Death : 12" line includes the save bonus.
+-- the time the effect turns up in the list. The engine's own "Save vs. Death : 12" line is a different thing: it is
+-- only printed when the creature *makes* its save, and shows the roll plus the save bonus, (CGameEffect::CheckSave
+-- saves when roll + bonuses >= save).
 function ZJCombatLog_Private_DescribeSaveNeed(sprite, group)
 
 	local saveType = group.saveType
