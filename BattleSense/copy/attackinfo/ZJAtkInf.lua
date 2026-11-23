@@ -1,4 +1,7 @@
 
+-- The bar colors, (shared with Timer)
+Infinity_DoFile("ZJBarCol")
+
 -------------
 -- Options --
 -------------
@@ -69,39 +72,11 @@ ZJAttackInfo_Private_ShowSpellEffects = EEex_Options_Register("ZJAttackInfo_Show
 	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Attack Info Module: Show Spell Effects" }),
 }))
 
-ZJAttackInfo_Private_ShowTargetAttackTimer = EEex_Options_Register("ZJAttackInfo_ShowTargetAttackTimer", EEex_Options_Option.new({
-	["default"]  = 1,
-	["type"]     = EEex_Options_ToggleType.new(),
-	["accessor"] = EEex_Options_ClampedAccessor.new({ ["min"] = 0, ["max"] = 1 }),
-	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Attack Info Module: Show Target Attack Timer" }),
-}))
-
 ZJAttackInfo_Private_CompactForAllies = EEex_Options_Register("ZJAttackInfo_CompactForAllies", EEex_Options_Option.new({
 	["default"]  = 1,
 	["type"]     = EEex_Options_ToggleType.new(),
 	["accessor"] = EEex_Options_ClampedAccessor.new({ ["min"] = 0, ["max"] = 1 }),
 	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Attack Info Module: Compact For Allies" }),
-}))
-
-ZJAttackInfo_Private_ShowTargetCastTimer = EEex_Options_Register("ZJAttackInfo_ShowTargetCastTimer", EEex_Options_Option.new({
-	["default"]  = 1,
-	["type"]     = EEex_Options_ToggleType.new(),
-	["accessor"] = EEex_Options_ClampedAccessor.new({ ["min"] = 0, ["max"] = 1 }),
-	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Attack Info Module: Show Target Cast Timer" }),
-}))
-
-ZJAttackInfo_Private_ShowTargetContingencyTimer = EEex_Options_Register("ZJAttackInfo_ShowTargetContingencyTimer", EEex_Options_Option.new({
-	["default"]  = 1,
-	["type"]     = EEex_Options_ToggleType.new(),
-	["accessor"] = EEex_Options_ClampedAccessor.new({ ["min"] = 0, ["max"] = 1 }),
-	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Attack Info Module: Show Target Contingency Timer" }),
-}))
-
-ZJAttackInfo_Private_ShowTargetModalTimer = EEex_Options_Register("ZJAttackInfo_ShowTargetModalTimer", EEex_Options_Option.new({
-	["default"]  = 1,
-	["type"]     = EEex_Options_ToggleType.new(),
-	["accessor"] = EEex_Options_ClampedAccessor.new({ ["min"] = 0, ["max"] = 1 }),
-	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Attack Info Module: Show Target Modal Timer" }),
 }))
 
 ZJAttackInfo_Private_ShowRowTimers = EEex_Options_Register("ZJAttackInfo_ShowRowTimers", EEex_Options_Option.new({
@@ -202,30 +177,18 @@ EEex_Options_AddTab("ZJBattleSense_Options_TRANSLATION_AttackInfo_TabTitle", fun
 			["description"] = "ZJBattleSense_Options_TRANSLATION_AttackInfo_ShowRowTimers_Description",
 			["widget"]      = EEex_Options_ToggleWidget.new(),
 		}),
-		EEex_Options_DisplayEntry.new({
-			["optionID"]    = "ZJAttackInfo_ShowTargetAttackTimer",
-			["label"]       = "ZJBattleSense_Options_TRANSLATION_AttackInfo_ShowTargetAttackTimer",
-			["description"] = "ZJBattleSense_Options_TRANSLATION_AttackInfo_ShowTargetAttackTimer_Description",
-			["widget"]      = EEex_Options_ToggleWidget.new(),
-		}),
-		EEex_Options_DisplayEntry.new({
-			["optionID"]    = "ZJAttackInfo_ShowTargetCastTimer",
-			["label"]       = "ZJBattleSense_Options_TRANSLATION_AttackInfo_ShowTargetCastTimer",
-			["description"] = "ZJBattleSense_Options_TRANSLATION_AttackInfo_ShowTargetCastTimer_Description",
-			["widget"]      = EEex_Options_ToggleWidget.new(),
-		}),
-		EEex_Options_DisplayEntry.new({
-			["optionID"]    = "ZJAttackInfo_ShowTargetContingencyTimer",
-			["label"]       = "ZJBattleSense_Options_TRANSLATION_AttackInfo_ShowTargetContingencyTimer",
-			["description"] = "ZJBattleSense_Options_TRANSLATION_AttackInfo_ShowTargetContingencyTimer_Description",
-			["widget"]      = EEex_Options_ToggleWidget.new(),
-		}),
-		EEex_Options_DisplayEntry.new({
-			["optionID"]    = "ZJAttackInfo_ShowTargetModalTimer",
-			["label"]       = "ZJBattleSense_Options_TRANSLATION_AttackInfo_ShowTargetModalTimer",
-			["description"] = "ZJBattleSense_Options_TRANSLATION_AttackInfo_ShowTargetModalTimer_Description",
-			["widget"]      = EEex_Options_ToggleWidget.new(),
-		}),
+		ZJBarColors_DisplayEntry("Attack",
+			"ZJBattleSense_Options_TRANSLATION_AttackInfo_AttackBar",
+			"ZJBattleSense_Options_TRANSLATION_AttackInfo_AttackBar_Description"),
+		ZJBarColors_DisplayEntry("Cast",
+			"ZJBattleSense_Options_TRANSLATION_AttackInfo_CastBar",
+			"ZJBattleSense_Options_TRANSLATION_AttackInfo_CastBar_Description"),
+		ZJBarColors_DisplayEntry("Contingency",
+			"ZJBattleSense_Options_TRANSLATION_AttackInfo_ContingencyBar",
+			"ZJBattleSense_Options_TRANSLATION_AttackInfo_ContingencyBar_Description"),
+		ZJBarColors_DisplayEntry("Modal",
+			"ZJBattleSense_Options_TRANSLATION_AttackInfo_ModalBar",
+			"ZJBattleSense_Options_TRANSLATION_AttackInfo_ModalBar_Description"),
 	},
 } end)
 
@@ -1170,9 +1133,10 @@ ZJAttackInfo_Private_TargetBarMaxMarkers = {
 ZJAttackInfo_Private_MaxRowBars = 8
 ZJAttackInfo_Private_RowBarNames = { "Attack", "Cast" }
 
--- Where `sprite` is in its attack round, the ticks are its attack rolls. Returns nil if the sprite isn't attacking.
+-- Where `sprite` is in its attack round, the ticks are its attack rolls. Returns nil if the sprite isn't attacking,
+-- or the attack bar's color is Off.
 function ZJAttackInfo_Private_GetAttackBar(sprite)
-	if not sprite:zjIsAttacking() then return nil end
+	if not ZJBarColors_IsShown("Attack") or not sprite:zjIsAttacking() then return nil end
 	return {
 		["name"]       = "Attack",
 		["percentage"] = sprite:zjGetAttackTimerPercentage(),
@@ -1181,8 +1145,9 @@ function ZJAttackInfo_Private_GetAttackBar(sprite)
 end
 
 -- The spell / item cooldown of `sprite`, the tick is where the spell being cast is released.
--- Returns nil if the cooldown isn't running.
+-- Returns nil if the cooldown isn't running, or the cast bar's color is Off.
 function ZJAttackInfo_Private_GetCastBar(sprite)
+	if not ZJBarColors_IsShown("Cast") then return nil end
 	local percentage = sprite:getCastTimerPercentage()
 	if percentage <= 0 then return nil end
 	local releaseTimer = sprite:zjGetCastReleaseTimer()
@@ -1213,16 +1178,11 @@ function ZJAttackInfo_Private_GetTargetBars(sprite)
 
 	local bars = {}
 
-	if ZJAttackInfo_Private_ShowTargetAttackTimer:get() ~= 0 then
-		bars[#bars + 1] = ZJAttackInfo_Private_GetAttackBar(sprite)
-	end
-
-	if ZJAttackInfo_Private_ShowTargetCastTimer:get() ~= 0 then
-		bars[#bars + 1] = ZJAttackInfo_Private_GetCastBar(sprite)
-	end
+	bars[#bars + 1] = ZJAttackInfo_Private_GetAttackBar(sprite)
+	bars[#bars + 1] = ZJAttackInfo_Private_GetCastBar(sprite)
 
 	-- The interval of the sprite's modal action
-	if ZJAttackInfo_Private_ShowTargetModalTimer:get() ~= 0 and sprite:getModalState() ~= 0 then
+	if ZJBarColors_IsShown("Modal") and sprite:getModalState() ~= 0 then
 		table.insert(bars, {
 			["name"]       = "Modal",
 			["percentage"] = sprite:getModalTimerPercentage(),
@@ -1231,7 +1191,7 @@ function ZJAttackInfo_Private_GetTargetBars(sprite)
 	end
 
 	-- The interval at which the sprite's contingency conditions are checked
-	if ZJAttackInfo_Private_ShowTargetContingencyTimer:get() ~= 0 and sprite:getActiveStats().m_cContingencyList.m_nCount > 0 then
+	if ZJBarColors_IsShown("Contingency") and sprite:getActiveStats().m_cContingencyList.m_nCount > 0 then
 		table.insert(bars, {
 			["name"]       = "Contingency",
 			["percentage"] = sprite:getContingencyTimerPercentage(),

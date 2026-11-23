@@ -19,6 +19,7 @@ ALWAYS
 		END ELSE BEGIN
 			COPY ~BattleSense/copy/core/ZJ-en_US.lua~ ~override~
 			     ~BattleSense/copy/core/ZJSprite.lua~ ~override~
+			     ~BattleSense/copy/core/ZJBarCol.lua~ ~override~
 		END
 	END
 

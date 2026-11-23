@@ -28,8 +28,9 @@ menu
 		label
 		{
 			enabled "ZJTimer_Private_Menu_TEMPLATE_TimerModal_Enabled()"
-			bam "ZJTMODAL"
+			bam "ZJTBAR"
 			scaleToClip
+			sequence lua "ZJBarColors_Sequence('Modal')"
 			frame lua "ZJTimer_Private_Menu_TEMPLATE_TimerModal_Frame()"
 		}
 		name "ZJTimer_Menu_TEMPLATE_TimerModal"
@@ -40,8 +41,9 @@ menu
 		label
 		{
 			enabled "ZJTimer_Private_Menu_TEMPLATE_TimerContingency_Enabled()"
-			bam "ZJTCONTI"
+			bam "ZJTBAR"
 			scaleToClip
+			sequence lua "ZJBarColors_Sequence('Contingency')"
 			frame lua "ZJTimer_Private_Menu_TEMPLATE_TimerContingency_Frame()"
 		}
 		name "ZJTimer_Menu_TEMPLATE_TimerContingency"
@@ -52,8 +54,9 @@ menu
 		label
 		{
 			enabled "ZJTimer_Private_Menu_TEMPLATE_TimerCast_Enabled()"
-			bam "ZJTAURA"
+			bam "ZJTBAR"
 			scaleToClip
+			sequence lua "ZJBarColors_Sequence('Cast')"
 			frame lua "ZJTimer_Private_Menu_TEMPLATE_TimerCast_Frame()"
 		}
 		name "ZJTimer_Menu_TEMPLATE_TimerCast"
@@ -75,8 +78,9 @@ menu
 		label
 		{
 			enabled "ZJTimer_Private_Menu_TEMPLATE_TimerAttack_Enabled()"
-			bam "ZJTATTCK"
+			bam "ZJTBAR"
 			scaleToClip
+			sequence lua "ZJBarColors_Sequence('Attack')"
 			frame lua "ZJTimer_Private_Menu_TEMPLATE_TimerAttack_Frame()"
 		}
 		name "ZJTimer_Menu_TEMPLATE_TimerAttack"

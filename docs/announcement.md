@@ -65,6 +65,8 @@ Bars beside the party portraits that show what each character is in the middle o
 - **Modal action** (red) and **contingency** (green)
 - **Resistance rings**: a ring for every element the character resists, and for magic resistance; the green part is the percentage
 
+Each bar's color can be changed in the options, or set to Off to hide the bar. The Attack Info popup's bars use the same colors.
+
 `[image: Timer bars while Fighting 1x.jpg]`
 
 *Mid-fight: Montaron's attack round, Haakon between rounds with a marker for each of his attacks, and Xzar starting a spell. The rings show their resistances.*

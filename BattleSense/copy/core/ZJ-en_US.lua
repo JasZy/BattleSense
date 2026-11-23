@@ -90,38 +90,57 @@ A second keybind that opens the attack information popup, exactly like "Open Key
 -- Timer --
 -----------
 
-uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_ShowTargetAttackTimer"] = "Show Target Attack Timer"
+-- The colors a timer bar can have, (ZJBarCol.lua)
+uiStrings["ZJBattleSense_TRANSLATION_BarColor_Off"]    = "Off"
+uiStrings["ZJBattleSense_TRANSLATION_BarColor_Red"]    = "Red"
+uiStrings["ZJBattleSense_TRANSLATION_BarColor_Orange"] = "Orange"
+uiStrings["ZJBattleSense_TRANSLATION_BarColor_Yellow"] = "Yellow"
+uiStrings["ZJBattleSense_TRANSLATION_BarColor_Green"]  = "Green"
+uiStrings["ZJBattleSense_TRANSLATION_BarColor_Cyan"]   = "Cyan"
+uiStrings["ZJBattleSense_TRANSLATION_BarColor_Blue"]   = "Blue"
+uiStrings["ZJBattleSense_TRANSLATION_BarColor_Purple"] = "Purple"
+uiStrings["ZJBattleSense_TRANSLATION_BarColor_Pink"]   = "Pink"
 
-uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_ShowTargetAttackTimer_Description"] = [[
-Adds an orange bar to the left panel while the creature under the cursor is attacking.
+uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_AttackBar"] = "Attack Timer"
 
-This indicator displays how far the creature is through its attack round. The white ticks mark the points in the round where it makes its attack rolls.
+uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_AttackBar_Description"] = [[
+The color of the attack bar, which the left panel shows while the creature under the cursor is attacking. Click to pick the next color, "Off" hides the bar.
+
+This indicator displays how far the creature is through its attack round. The white ticks mark the points in the round where it makes its attack rolls. The right panel's row timers use the same bar.
+
+The color is shared with the attack timer beside the party portraits, (Battle Sense: Timer).
 ]]
 
-uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_ShowTargetCastTimer"] = "Show Target Cast Timer"
+uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_CastBar"] = "Cast Timer"
 
-uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_ShowTargetCastTimer_Description"] = [[
-Adds a cyan bar to the left panel while the creature under the cursor is casting a spell or is waiting to be able to use spells / items again.
+uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_CastBar_Description"] = [[
+The color of the cast bar, which the left panel shows while the creature under the cursor is casting a spell or is waiting to be able to use spells / items again. Click to pick the next color, "Off" hides the bar.
 
-This indicator displays the creature's cooldown for using spells / items. While a spell is being cast, a white tick marks the point where it is released.
+This indicator displays the creature's cooldown for using spells / items. While a spell is being cast, a white tick marks the point where it is released. The right panel's row timers use the same bar.
+
+The color is shared with the cast timer beside the party portraits, (Battle Sense: Timer).
 ]]
 
-uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_ShowTargetContingencyTimer"] = "Show Target Contingency Timer"
+uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_ContingencyBar"] = "Contingency Timer"
 
-uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_ShowTargetContingencyTimer_Description"] = [[
-Adds a green bar to the left panel while the creature under the cursor has contingency effects.
+uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_ContingencyBar_Description"] = [[
+The color of the contingency bar, which the left panel shows while the creature under the cursor has contingency effects. Click to pick the next color, "Off" hides the bar.
 
 This indicator displays the interval at which the creature's contingency conditions are checked.
 
 Note that some mods add contingency effects behind-the-scenes to implement certain behaviors - this may cause the contingency indicator to appear unexpectedly.
+
+The color is shared with the contingency timer beside the party portraits, (Battle Sense: Timer).
 ]]
 
-uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_ShowTargetModalTimer"] = "Show Target Modal Timer"
+uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_ModalBar"] = "Modal Timer"
 
-uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_ShowTargetModalTimer_Description"] = [[
-Adds a red bar to the left panel while the creature under the cursor is using a modal action.
+uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_ModalBar_Description"] = [[
+The color of the modal bar, which the left panel shows while the creature under the cursor is using a modal action. Click to pick the next color, "Off" hides the bar.
 
 This indicator displays the interval of the creature's modal action: bard song, turn undead, etc.
+
+The color is shared with the modal timer beside the party portraits, (Battle Sense: Timer).
 ]]
 
 uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_ShowRowTimers"] = "Show Row Timers"
@@ -129,9 +148,11 @@ uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_ShowRowTimers"] = "Show 
 uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_ShowRowTimers_Description"] = [[
 Adds timer bars below the names in the right panel, for every listed creature that is attacking the creature under the cursor.
 
-The orange bar is displayed while the creature is attacking, and shows how far it is through its attack round. The white ticks mark its attack rolls.
+The attack bar is displayed while the creature is attacking, and shows how far it is through its attack round. The white ticks mark its attack rolls.
 
-The cyan bar is displayed while the creature is casting a spell or is waiting to be able to use spells / items again. While a spell is being cast, a white tick marks the point where it is released.
+The cast bar is displayed while the creature is casting a spell or is waiting to be able to use spells / items again. While a spell is being cast, a white tick marks the point where it is released.
+
+The bars have the colors set by "Attack Timer" and "Cast Timer", and a bar whose color is "Off" isn't shown here either.
 ]]
 
 -----------------
@@ -277,12 +298,14 @@ uiStrings["ZJBattleSense_Options_TRANSLATION_Timer_HugPortraits_Description"] = 
 Removes the gap between timer bars and their respective portrait.
 ]]
 
-uiStrings["ZJBattleSense_Options_TRANSLATION_Timer_ShowCastTimer"] = "Show Cast Timer"
+uiStrings["ZJBattleSense_Options_TRANSLATION_Timer_CastBar"] = "Cast Timer"
 
-uiStrings["ZJBattleSense_Options_TRANSLATION_Timer_ShowCastTimer_Description"] = [[
-Enables a cyan bar next to party member portraits.
+uiStrings["ZJBattleSense_Options_TRANSLATION_Timer_CastBar_Description"] = [[
+The color of the cast bar next to party member portraits. Click to pick the next color, "Off" hides the bar.
 
 This indicator displays the cooldown for using spells / items.
+
+The color is shared with the attack info popup's cast timer, (Battle Sense: Attack Info).
 ]]
 
 uiStrings["ZJBattleSense_Options_TRANSLATION_Timer_ShowCastMarker"] = "Show Cast Marker"
@@ -293,30 +316,36 @@ Adds a white tick to the cast timer at the point where the spell being cast is r
 The tick is only shown while a party member is casting a spell.
 ]]
 
-uiStrings["ZJBattleSense_Options_TRANSLATION_Timer_ShowContingencyTimer"] = "Show Contingency Timer"
+uiStrings["ZJBattleSense_Options_TRANSLATION_Timer_ContingencyBar"] = "Contingency Timer"
 
-uiStrings["ZJBattleSense_Options_TRANSLATION_Timer_ShowContingencyTimer_Description"] = [[
-Enables a green bar next to party member portraits.
+uiStrings["ZJBattleSense_Options_TRANSLATION_Timer_ContingencyBar_Description"] = [[
+The color of the contingency bar next to party member portraits. Click to pick the next color, "Off" hides the bar.
 
 This indicator displays the interval at which contingency conditions are checked.
 
 Note that some mods add contingency effects behind-the-scenes to implement certain behaviors - this may cause the contingency indicator to appear unexpectedly.
+
+The color is shared with the attack info popup's contingency timer, (Battle Sense: Attack Info).
 ]]
 
-uiStrings["ZJBattleSense_Options_TRANSLATION_Timer_ShowModalTimer"] = "Show Modal Timer"
+uiStrings["ZJBattleSense_Options_TRANSLATION_Timer_ModalBar"] = "Modal Timer"
 
-uiStrings["ZJBattleSense_Options_TRANSLATION_Timer_ShowModalTimer_Description"] = [[
-Enables a red bar next to party member portraits.
+uiStrings["ZJBattleSense_Options_TRANSLATION_Timer_ModalBar_Description"] = [[
+The color of the modal bar next to party member portraits. Click to pick the next color, "Off" hides the bar.
 
 This indicator displays the interval of modal actions: find traps, turn undead, etc.
+
+The color is shared with the attack info popup's modal timer, (Battle Sense: Attack Info).
 ]]
 
-uiStrings["ZJBattleSense_Options_TRANSLATION_Timer_ShowAttackTimer"] = "Show Attack Timer"
+uiStrings["ZJBattleSense_Options_TRANSLATION_Timer_AttackBar"] = "Attack Timer"
 
-uiStrings["ZJBattleSense_Options_TRANSLATION_Timer_ShowAttackTimer_Description"] = [[
-Enables an orange bar next to party member portraits.
+uiStrings["ZJBattleSense_Options_TRANSLATION_Timer_AttackBar_Description"] = [[
+The color of the attack bar next to party member portraits. Click to pick the next color, "Off" hides the bar.
 
 This indicator displays how far a party member is through their attack round.
+
+The color is shared with the attack info popup's attack timer, (Battle Sense: Attack Info).
 ]]
 
 uiStrings["ZJBattleSense_Options_TRANSLATION_Timer_ShowAttackMarkers"] = "Show Attack Markers"

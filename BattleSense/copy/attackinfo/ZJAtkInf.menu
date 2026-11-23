@@ -623,7 +623,7 @@ menu
 		name "ZJAttackInfo_Menu_TargetCastBarFill"
 		enabled "ZJAttackInfo_Private_Menu_TargetBars.Cast.fill"
 		area 0 0 -1 -1
-		fill 0 220 220 255
+		fill lua "ZJBarColors_Fill('Cast')"
 	}
 
 	label
@@ -648,7 +648,7 @@ menu
 		name "ZJAttackInfo_Menu_TargetContingencyBarFill"
 		enabled "ZJAttackInfo_Private_Menu_TargetBars.Contingency.fill"
 		area 0 0 -1 -1
-		fill 0 200 0 255
+		fill lua "ZJBarColors_Fill('Contingency')"
 	}
 
 	-- Modal timer
@@ -665,7 +665,7 @@ menu
 		name "ZJAttackInfo_Menu_TargetModalBarFill"
 		enabled "ZJAttackInfo_Private_Menu_TargetBars.Modal.fill"
 		area 0 0 -1 -1
-		fill 220 0 0 255
+		fill lua "ZJBarColors_Fill('Modal')"
 	}
 
 	-- Attack timer
@@ -682,7 +682,7 @@ menu
 		name "ZJAttackInfo_Menu_TargetAttackBarFill"
 		enabled "ZJAttackInfo_Private_Menu_TargetBars.Attack.fill"
 		area 0 0 -1 -1
-		fill 255 140 0 255
+		fill lua "ZJBarColors_Fill('Attack')"
 	}
 
 	label
@@ -742,7 +742,7 @@ menu
 		name "ZJAttackInfo_Menu_Row1CastBarFill"
 		enabled "ZJAttackInfo_Private_Menu_RowBars[1].Cast.fill"
 		area 0 0 -1 -1
-		fill 0 220 220 255
+		fill lua "ZJBarColors_Fill('Cast')"
 	}
 
 	label
@@ -767,7 +767,7 @@ menu
 		name "ZJAttackInfo_Menu_Row1AttackBarFill"
 		enabled "ZJAttackInfo_Private_Menu_RowBars[1].Attack.fill"
 		area 0 0 -1 -1
-		fill 255 140 0 255
+		fill lua "ZJBarColors_Fill('Attack')"
 	}
 
 	label
@@ -824,7 +824,7 @@ menu
 		name "ZJAttackInfo_Menu_Row2CastBarFill"
 		enabled "ZJAttackInfo_Private_Menu_RowBars[2].Cast.fill"
 		area 0 0 -1 -1
-		fill 0 220 220 255
+		fill lua "ZJBarColors_Fill('Cast')"
 	}
 
 	label
@@ -849,7 +849,7 @@ menu
 		name "ZJAttackInfo_Menu_Row2AttackBarFill"
 		enabled "ZJAttackInfo_Private_Menu_RowBars[2].Attack.fill"
 		area 0 0 -1 -1
-		fill 255 140 0 255
+		fill lua "ZJBarColors_Fill('Attack')"
 	}
 
 	label
@@ -906,7 +906,7 @@ menu
 		name "ZJAttackInfo_Menu_Row3CastBarFill"
 		enabled "ZJAttackInfo_Private_Menu_RowBars[3].Cast.fill"
 		area 0 0 -1 -1
-		fill 0 220 220 255
+		fill lua "ZJBarColors_Fill('Cast')"
 	}
 
 	label
@@ -931,7 +931,7 @@ menu
 		name "ZJAttackInfo_Menu_Row3AttackBarFill"
 		enabled "ZJAttackInfo_Private_Menu_RowBars[3].Attack.fill"
 		area 0 0 -1 -1
-		fill 255 140 0 255
+		fill lua "ZJBarColors_Fill('Attack')"
 	}
 
 	label
@@ -988,7 +988,7 @@ menu
 		name "ZJAttackInfo_Menu_Row4CastBarFill"
 		enabled "ZJAttackInfo_Private_Menu_RowBars[4].Cast.fill"
 		area 0 0 -1 -1
-		fill 0 220 220 255
+		fill lua "ZJBarColors_Fill('Cast')"
 	}
 
 	label
@@ -1013,7 +1013,7 @@ menu
 		name "ZJAttackInfo_Menu_Row4AttackBarFill"
 		enabled "ZJAttackInfo_Private_Menu_RowBars[4].Attack.fill"
 		area 0 0 -1 -1
-		fill 255 140 0 255
+		fill lua "ZJBarColors_Fill('Attack')"
 	}
 
 	label
@@ -1070,7 +1070,7 @@ menu
 		name "ZJAttackInfo_Menu_Row5CastBarFill"
 		enabled "ZJAttackInfo_Private_Menu_RowBars[5].Cast.fill"
 		area 0 0 -1 -1
-		fill 0 220 220 255
+		fill lua "ZJBarColors_Fill('Cast')"
 	}
 
 	label
@@ -1095,7 +1095,7 @@ menu
 		name "ZJAttackInfo_Menu_Row5AttackBarFill"
 		enabled "ZJAttackInfo_Private_Menu_RowBars[5].Attack.fill"
 		area 0 0 -1 -1
-		fill 255 140 0 255
+		fill lua "ZJBarColors_Fill('Attack')"
 	}
 
 	label
@@ -1152,7 +1152,7 @@ menu
 		name "ZJAttackInfo_Menu_Row6CastBarFill"
 		enabled "ZJAttackInfo_Private_Menu_RowBars[6].Cast.fill"
 		area 0 0 -1 -1
-		fill 0 220 220 255
+		fill lua "ZJBarColors_Fill('Cast')"
 	}
 
 	label
@@ -1177,7 +1177,7 @@ menu
 		name "ZJAttackInfo_Menu_Row6AttackBarFill"
 		enabled "ZJAttackInfo_Private_Menu_RowBars[6].Attack.fill"
 		area 0 0 -1 -1
-		fill 255 140 0 255
+		fill lua "ZJBarColors_Fill('Attack')"
 	}
 
 	label
@@ -1234,7 +1234,7 @@ menu
 		name "ZJAttackInfo_Menu_Row7CastBarFill"
 		enabled "ZJAttackInfo_Private_Menu_RowBars[7].Cast.fill"
 		area 0 0 -1 -1
-		fill 0 220 220 255
+		fill lua "ZJBarColors_Fill('Cast')"
 	}
 
 	label
@@ -1259,7 +1259,7 @@ menu
 		name "ZJAttackInfo_Menu_Row7AttackBarFill"
 		enabled "ZJAttackInfo_Private_Menu_RowBars[7].Attack.fill"
 		area 0 0 -1 -1
-		fill 255 140 0 255
+		fill lua "ZJBarColors_Fill('Attack')"
 	}
 
 	label
@@ -1316,7 +1316,7 @@ menu
 		name "ZJAttackInfo_Menu_Row8CastBarFill"
 		enabled "ZJAttackInfo_Private_Menu_RowBars[8].Cast.fill"
 		area 0 0 -1 -1
-		fill 0 220 220 255
+		fill lua "ZJBarColors_Fill('Cast')"
 	}
 
 	label
@@ -1341,7 +1341,7 @@ menu
 		name "ZJAttackInfo_Menu_Row8AttackBarFill"
 		enabled "ZJAttackInfo_Private_Menu_RowBars[8].Attack.fill"
 		area 0 0 -1 -1
-		fill 255 140 0 255
+		fill lua "ZJBarColors_Fill('Attack')"
 	}
 
 	label

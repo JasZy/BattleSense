@@ -1,4 +1,7 @@
 
+-- The bar colors, (shared with Attack Info)
+Infinity_DoFile("ZJBarCol")
+
 -------------
 -- Options --
 -------------
@@ -18,39 +21,11 @@ ZJTimer_Private_HugPortraits =EEex_Options_Register("ZJTimer_HugPortraits", EEex
 	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Timer Module: Hug Portraits" }),
 }))
 
-ZJTimer_Private_ShowCastTimer = EEex_Options_Register("ZJTimer_ShowCastTimer", EEex_Options_Option.new({
-	["default"]  = 1,
-	["type"]     = EEex_Options_ToggleType.new(),
-	["accessor"] = EEex_Options_ClampedAccessor.new({ ["min"] = 0, ["max"] = 1 }),
-	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Timer Module: Show Cast" }),
-}))
-
-ZJTimer_Private_ShowContingencyTimer = EEex_Options_Register("ZJTimer_ShowContingencyTimer", EEex_Options_Option.new({
-	["default"]  = 1,
-	["type"]     = EEex_Options_ToggleType.new(),
-	["accessor"] = EEex_Options_ClampedAccessor.new({ ["min"] = 0, ["max"] = 1 }),
-	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Timer Module: Show Contingency" }),
-}))
-
-ZJTimer_Private_ShowModalTimer = EEex_Options_Register("ZJTimer_ShowModalTimer", EEex_Options_Option.new({
-	["default"]  = 1,
-	["type"]     = EEex_Options_ToggleType.new(),
-	["accessor"] = EEex_Options_ClampedAccessor.new({ ["min"] = 0, ["max"] = 1 }),
-	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Timer Module: Show Modal" }),
-}))
-
 ZJTimer_Private_ShowCastMarker = EEex_Options_Register("ZJTimer_ShowCastMarker", EEex_Options_Option.new({
 	["default"]  = 1,
 	["type"]     = EEex_Options_ToggleType.new(),
 	["accessor"] = EEex_Options_ClampedAccessor.new({ ["min"] = 0, ["max"] = 1 }),
 	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Timer Module: Show Cast Marker" }),
-}))
-
-ZJTimer_Private_ShowAttackTimer = EEex_Options_Register("ZJTimer_ShowAttackTimer", EEex_Options_Option.new({
-	["default"]  = 1,
-	["type"]     = EEex_Options_ToggleType.new(),
-	["accessor"] = EEex_Options_ClampedAccessor.new({ ["min"] = 0, ["max"] = 1 }),
-	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Timer Module: Show Attack" }),
 }))
 
 ZJTimer_Private_ShowAttackMarkers = EEex_Options_Register("ZJTimer_ShowAttackMarkers", EEex_Options_Option.new({
@@ -81,36 +56,24 @@ EEex_Options_AddTab("ZJBattleSense_Options_TRANSLATION_Timer_TabTitle", function
 			["description"] = "ZJBattleSense_Options_TRANSLATION_Timer_HugPortraits_Description",
 			["widget"]      = EEex_Options_ToggleWidget.new(),
 		}),
-		EEex_Options_DisplayEntry.new({
-			["optionID"]    = "ZJTimer_ShowCastTimer",
-			["label"]       = "ZJBattleSense_Options_TRANSLATION_Timer_ShowCastTimer",
-			["description"] = "ZJBattleSense_Options_TRANSLATION_Timer_ShowCastTimer_Description",
-			["widget"]      = EEex_Options_ToggleWidget.new(),
-		}),
+		ZJBarColors_DisplayEntry("Cast",
+			"ZJBattleSense_Options_TRANSLATION_Timer_CastBar",
+			"ZJBattleSense_Options_TRANSLATION_Timer_CastBar_Description"),
 		EEex_Options_DisplayEntry.new({
 			["optionID"]    = "ZJTimer_ShowCastMarker",
 			["label"]       = "ZJBattleSense_Options_TRANSLATION_Timer_ShowCastMarker",
 			["description"] = "ZJBattleSense_Options_TRANSLATION_Timer_ShowCastMarker_Description",
 			["widget"]      = EEex_Options_ToggleWidget.new(),
 		}),
-		EEex_Options_DisplayEntry.new({
-			["optionID"]    = "ZJTimer_ShowContingencyTimer",
-			["label"]       = "ZJBattleSense_Options_TRANSLATION_Timer_ShowContingencyTimer",
-			["description"] = "ZJBattleSense_Options_TRANSLATION_Timer_ShowContingencyTimer_Description",
-			["widget"]      = EEex_Options_ToggleWidget.new(),
-		}),
-		EEex_Options_DisplayEntry.new({
-			["optionID"]    = "ZJTimer_ShowModalTimer",
-			["label"]       = "ZJBattleSense_Options_TRANSLATION_Timer_ShowModalTimer",
-			["description"] = "ZJBattleSense_Options_TRANSLATION_Timer_ShowModalTimer_Description",
-			["widget"]      = EEex_Options_ToggleWidget.new(),
-		}),
-		EEex_Options_DisplayEntry.new({
-			["optionID"]    = "ZJTimer_ShowAttackTimer",
-			["label"]       = "ZJBattleSense_Options_TRANSLATION_Timer_ShowAttackTimer",
-			["description"] = "ZJBattleSense_Options_TRANSLATION_Timer_ShowAttackTimer_Description",
-			["widget"]      = EEex_Options_ToggleWidget.new(),
-		}),
+		ZJBarColors_DisplayEntry("Contingency",
+			"ZJBattleSense_Options_TRANSLATION_Timer_ContingencyBar",
+			"ZJBattleSense_Options_TRANSLATION_Timer_ContingencyBar_Description"),
+		ZJBarColors_DisplayEntry("Modal",
+			"ZJBattleSense_Options_TRANSLATION_Timer_ModalBar",
+			"ZJBattleSense_Options_TRANSLATION_Timer_ModalBar_Description"),
+		ZJBarColors_DisplayEntry("Attack",
+			"ZJBattleSense_Options_TRANSLATION_Timer_AttackBar",
+			"ZJBattleSense_Options_TRANSLATION_Timer_AttackBar_Description"),
 		EEex_Options_DisplayEntry.new({
 			["optionID"]    = "ZJTimer_ShowAttackMarkers",
 			["label"]       = "ZJBattleSense_Options_TRANSLATION_Timer_ShowAttackMarkers",
@@ -483,10 +446,10 @@ function ZJTimer_Private_Menu_Tick()
 				end
 			end
 
-			updateTimerBar( "ZJTimer_Menu_TEMPLATE_TimerCast",        ZJTimer_Private_ShowCastTimer:get()        == 1 and sprite:getCastTimerPercentage() > 0                     )
-			updateTimerBar( "ZJTimer_Menu_TEMPLATE_TimerContingency", ZJTimer_Private_ShowContingencyTimer:get() == 1 and sprite:getActiveStats().m_cContingencyList.m_nCount > 0 )
-			updateTimerBar( "ZJTimer_Menu_TEMPLATE_TimerModal",       ZJTimer_Private_ShowModalTimer:get()       == 1 and sprite:getModalState() ~= 0                             )
-			updateTimerBar( "ZJTimer_Menu_TEMPLATE_TimerAttack",      ZJTimer_Private_ShowAttackTimer:get()      == 1 and sprite:zjIsAttacking()                                    )
+			updateTimerBar( "ZJTimer_Menu_TEMPLATE_TimerCast",        ZJBarColors_IsShown("Cast")        and sprite:getCastTimerPercentage() > 0                     )
+			updateTimerBar( "ZJTimer_Menu_TEMPLATE_TimerContingency", ZJBarColors_IsShown("Contingency") and sprite:getActiveStats().m_cContingencyList.m_nCount > 0 )
+			updateTimerBar( "ZJTimer_Menu_TEMPLATE_TimerModal",       ZJBarColors_IsShown("Modal")       and sprite:getModalState() ~= 0                             )
+			updateTimerBar( "ZJTimer_Menu_TEMPLATE_TimerAttack",      ZJBarColors_IsShown("Attack")      and sprite:zjIsAttacking()                                  )
 
 			for _, castEntry in ipairs(portraitEntry["ZJTimer_Menu_TEMPLATE_TimerCast"]) do
 				ZJTimer_Private_UpdateCastMarker(sprite, castEntry)
