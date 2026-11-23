@@ -1,11 +1,26 @@
-# [MOD] Battle Sense v0.1.0 – see what is really happening in a fight (requires EEex)
+# Battle Sense – see what is really happening in a fight (EEex, looking for beta testers)
 
-Baldur's Gate hides most of what decides a fight. You see a swing and a number in the log, but not what your fighter needed to roll, how far the enemy mage is from finishing a spell, or why your Sleep did nothing to half the room. For a long time it made no sense to me what was happening, so I built the tools to show it.
+Baldur's Gate hides most of what decides a fight. You see a swing and a number in the log, but not what your fighter needed to roll, how far the enemy mage is from finishing a spell, or why your Sleep did nothing to half the room. For a long time none of it made sense to me, so I built the tools to show it.
 
-**Battle Sense** is a WeiDU mod for BG:EE, BG2:EE, EET and IWD:EE that puts that information on screen. It has three components, and you can install any combination of them.
+**Battle Sense** is a WeiDU mod, built on [EEex](https://github.com/Bubb13/EEex), that puts that information on screen. It doesn't change any rule; every number it shows is one the game already calculates and keeps hidden.
 
-**Download:** `<GitHub release link>`
-**Requires:** [EEex](https://github.com/Bubb13/EEex) v1.3.1, installed first
+## Why this isn't a release (yet)
+
+I made Battle Sense for myself, for the way I like to play: I would rather see everything and have the challenge come from somewhere else than have a fight be hard because I can't tell what is going on.
+
+Up until now I have only tested it in my own game, in the first part of Baldur's Gate 1. That is too little to call it a release: later on there are spells, items and creatures it hasn't met yet, and BG2:EE, EET and IWD:EE haven't been tried at all.
+
+If you are interested, or willing to help test it, please let me know and I will provide the download. More about that at the end of this post.
+
+It has five components, and you can install any combination of them:
+
+1. **Attack Info** – who can hit whom, and for how much, when you hover a creature
+2. **Timer** – casting, attack round and other timers beside the party portraits
+3. **Combat Log** – extra log lines that explain failed saves, immunities and effects ending
+4. **Item Info** – what an item would change for your character, in stores, containers and the quick loot bar
+5. **Spell Info** – what a spell will do to the creature you are about to target
+
+Every component has its own tab under Options > EEex Options ("Battle Sense: ..."), where each part of it can be switched on or off.
 
 ---
 
@@ -13,82 +28,109 @@ Baldur's Gate hides most of what decides a fight. You see a swing and a number i
 
 Hover the attack cursor over a creature and a popup opens with two panels.
 
-![Attack Info popup](images/attack-info.png)
+`[image: Attack Info with Resistances.jpg]`
 
-**The left panel is what the creature can do to you.** For each selected party member it shows the roll the creature needs to hit them. In the screenshot, Hairtooth hits Edwin on a 3 or better but needs a 19 against Haakon.
+**The right panel is what you can do to the creature.** For each selected party member:
 
-**The right panel is what you can do to the creature.** For each selected party member it shows:
+- an icon for the damage type of their weapon
+- the roll they need to hit, (or the chance as a percentage)
+- the damage of a hit, with the creature's resistance behind it: the skeleton above takes half from Haakon's sword, and only a tenth from Montaron's arrows
+- extra damage the weapon applies on a hit, such as fire or cold, with the creature's resistance to that element
+- whether the creature is immune to the weapon: the row turns red and says `Immune`
 
-- an icon for the damage type of their weapon (slashing, piercing, crushing, missile)
-- the roll they need to hit, or the chance to hit as a percentage if you prefer that
-- the damage of a hit, with the creature's resistance to that damage type shown behind it: `-50%` means it only takes half, `+25%` means it takes a quarter more
-- extra damage the weapon applies on a hit, such as fire or poison, each with the creature's resistance to that element
-- whether the creature is immune to the weapon altogether: the row turns red and says `Immune` where the resistance would be, or you can have it shown as text only
+`[image: Attack Info with Immunities.jpg]`
 
-Below the creature's name, the left panel's header shows what the creature itself attacks with: its damage, damage type and any extra on-hit damage. The right panel's header lists how many stoneskins or mirror images it has left, and the spells affecting it, one per line with the time they have left in turns and rounds, such as `Haste (1,5)`.
+*Xzar's quarterstaff does nothing to a werewolf.*
 
-**Timer bars in the popup.** While the creature under the cursor is busy, bars in the left panel show how far along it is:
+**The left panel is what the creature can do to you:** the roll it needs to hit each of your characters, and in the header its own damage and damage type.
 
-- orange: its attack round, with white ticks at the moments it makes its attack rolls
-- cyan: spell casting, with a white tick where the spell is released
-- green: contingency checks
-- red: modal actions such as bard song or turn undead
+**The header** also shows the creature's stoneskins or mirror images, and the spells affecting it with the time they have left, (turns, rounds). While it casts, the spell's name and a casting bar appear there.
 
-The same attack and casting bars appear under the names in the right panel for everyone who is attacking that creature.
+`[image: Attack Info with Mirror images.jpg]`
 
-**Hovering over a friend.** For party members, summons and allies the popup switches to a compact form that lists who that character is fighting: what they need to hit each opponent, and what each opponent needs to hit them. It only opens while you hold the keybind, so it stays out of the way.
+*Tarnesh, three mirror images up and already casting Horror; the bar under Xzar's name shows who it is aimed at.*
 
-Everything is configurable under Options > EEex Options > "Battle Sense: Attack Info": font size, roll or percentage, how immunities are shown, the keybinds, and each timer bar.
+**Timer bars.** Under your characters' names, bars show how far along they are: orange for the attack round, with a tick for every attack roll, and cyan for spell casting. A character using a wand or another item shows that item instead of a weapon.
+
+`[image: Attack Info with Item.jpg]`
+
+**Hovering over a friend** opens a compact form that lists who that character is fighting. Hold `Left Ctrl` or `Left Alt` to open the popup over any creature without the attack cursor.
 
 ## 2. Timer
 
 Bars beside the party portraits that show what each character is in the middle of:
 
-- **Casting timer** (cyan): the cooldown before the character can cast or use an item again, with a marker at the moment the spell being cast is released
-- **Attack round** (orange): how far the character is through their round, with a marker for every attack roll. The markers follow the character's weapon speed, and with a half attack (3/2, 5/2) the last marker only shows in the rounds where that attack is actually made
-- **Modal action** (red) and **contingency** (green) timers
-- **Resistance rings**: a small ring beside the portrait for every element the character resists, and for magic resistance. The green part of the ring is the resistance percentage
+- **Casting** (cyan): the time before the character can cast or use an item again, with a marker where the spell is released
+- **Attack round** (orange): with a marker for every attack roll. With a half attack, (3/2, 5/2), the last marker only shows in the rounds where that attack is made
+- **Modal action** (red) and **contingency** (green)
+- **Resistance rings**: a ring for every element the character resists, and for magic resistance; the green part is the percentage
 
-![Resistance ring beside a portrait](images/resistance-ring.png)
+`[image: Timer bars while Fighting 1x.jpg]`
 
-*Viconia's magic resistance, shown as a ring beside her portrait.*
+*Mid-fight: Montaron's attack round, Haakon between rounds with a marker for each of his attacks, and Xzar starting a spell. The rings show their resistances.*
 
-Each indicator can be switched off separately under "Battle Sense: Timer".
+`[image: Cast timer 3x.jpg]`
+
+*Three casters, each at a different point of their spell.*
 
 ## 3. Combat Log
 
-Extra lines in the combat log that explain things the game leaves out:
+Extra lines in the combat log that explain what the game leaves out:
 
-- **Spells and conditions ending:** `Haakon- Cure Light Wounds wore off`
-- **Failed saving throws:** `Gnoll- Failed save vs. Spell against Sleep`
+- **Spells and conditions ending:** `Imoen- Haste wore off` when the duration ran out, `Imoen- Stoneskin ended` when it was dispelled or used up
+- **Failed saves, with the roll that was needed**
 - **Why a spell did nothing:** `Skeleton- Unaffected by Sleep: immune to sleep`
 - **Why a weapon is ineffective:** `Minsc- Long Sword is ineffective against Werewolf: it requires a +1 weapon or better`
 
-![Combat Log line](images/combat-log.png)
+`[image: Combat Log Failed Save.jpg]`
 
-Lines are only printed when your party is involved, so the log stays readable and you learn nothing about creatures you cannot see.
+By default, lines are only printed when your party is involved, so the log stays readable and you learn nothing about creatures you can't see.
+
+## 4. Item Info
+
+Hover an item in a store, an opened container or the quick loot bar, and a popup shows its properties. If a character is selected, it also lists how their stats would change if they equipped it, in green for better and red for worse: armor class, THAC0, saves, ability scores, resistances, and for a weapon its damage, speed and the character's proficiency in it.
+
+`[image: Store Weapon Popup.jpg]`
+
+For a potion, the popup shows what drinking it would do to that character: hit points, ability scores, the effects it gives and how long they last. This also works on the quick item slots of the action bar.
+
+`[image: Quick Bar Popup.jpg]`
+
+## 5. Spell Info
+
+Pick a spell, wand, scroll or throwable potion, then hover the creature you want to target. Before you click, a popup shows what it will do:
+
+- **Magic resistance**, or that the spell ignores it
+- **Saving throws**: which save, the spell's bonus or penalty, and the roll the creature needs
+- **Damage** per element, with the creature's resistance to each
+- **Why it would be unaffected**: an immunity, (naming the item or spell it comes from), the spell's own exclusions, or a level limit, (Sleep only affects creatures up to level 4)
+
+`[image: Spell Info.jpg]`
+`[image: Spell Popup with Save.jpg]`
+`[image: Spell Popup Immune.jpg]`
+
+*Command won't work on Dorotea, who is an elf.*
 
 ---
 
-## Installation
+## Beta testing
 
-1. Install EEex v1.3.1.
-2. Extract the zip into your game folder, so that the `BattleSense` folder and `setup-BattleSense.exe` sit next to `chitin.key`.
-3. Run `setup-BattleSense.exe` and choose the components you want.
-4. Start the game with `InfinityLoader.exe`, as with any EEex mod.
+**Requires:** EEex v1.3.1, installed before Battle Sense.
+**Should work on:** BG:EE, BG2:EE, EET and IWD:EE. So far I have only tested it in the first part of BG:EE, so the rest of the saga and the other games are exactly where testers would help.
 
-## Good to know
+Good to know before you install:
 
-- **Attack Info and Timer replace EEex's own modules of the same name.** They are extended versions of those modules. When you install them, Battle Sense switches the EEex ones off so nothing is drawn twice. If you uninstall Battle Sense, turn them back on under EEex Options > Modules.
-- **Battle Sense has its own settings.** Anything you changed for EEex's Attack Info or Timer module is not carried over.
-- **The Combat Log component adds a hidden effect to every creature,** which is how it can see spells that get blocked. That effect is stored in your save games, so keep the component installed for saves made with it.
-- **English only for now.** Translations can be added as a single file; see the readme.
-- Battle Sense only adds files with the `ZJ` prefix to the override folder. It does not modify any file of the game, of EEex, or of another mod.
+- **Attack Info and Timer replace EEex's own modules of the same name.** They started from Bubb's modules, and Battle Sense switches the EEex ones off so nothing is drawn twice.
+- **The Combat Log component adds a hidden effect to every creature,** which is how it sees spells being blocked. That effect is stored in your saves, so keep the component installed for saves made with it.
+- **Everything is read-only.** Battle Sense never changes a roll, a spell or an item. It only adds files with the `ZJ` prefix to the override folder.
+- **English only.**
 
-## Status
+If you are interested or willing to test, let me know here or send me a message, and I will provide the download. In return, I'd love to hear:
 
-This is a first release. I have tested it on BG:EE with EEex v1.3.1; BG2:EE, EET and IWD:EE should work but have not been tried yet. Bug reports and suggestions are very welcome, here or at `<GitHub issues link>`.
+- which game you play, and which other mods you have installed
+- anything that looks wrong: a number that doesn't match what happens, a popup that doesn't open, or text that runs off the screen
+- any line in the combat log that starts with `[Battle Sense]`: that is an error, and a screenshot of it tells me exactly where to look
 
 ## Credits
 
-Battle Sense is built on [EEex](https://github.com/Bubb13/EEex) by Bubb. The Attack Info and Timer components started from his modules of the same name. Thank you, Bubb, for making all of this possible.
+Battle Sense is built on [EEex](https://github.com/Bubb13/EEex) by Bubb, and the Attack Info and Timer components started from his modules of the same name. Thank you, Bubb, for making all of this possible.
