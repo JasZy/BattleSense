@@ -431,7 +431,7 @@ uiStrings["ZJBattleSense_Options_TRANSLATION_ItemInfo_Enable"] = "Enabled"
 uiStrings["ZJBattleSense_Options_TRANSLATION_ItemInfo_Enable_Description"] = [[
 Enables the item popup.
 
-The item popup opens when hovering the cursor over an item in a store, or in the quick loot bar, and displays the properties of that item.
+The item popup opens when hovering the cursor over an item in a store, a container, the quick loot bar, or the inventory screen, and displays the properties of that item.
 ]]
 
 uiStrings["ZJBattleSense_Options_TRANSLATION_ItemInfo_FontPoint"] = "Font Point"
@@ -463,7 +463,7 @@ An item that isn't identified has no stat changes listed.
 uiStrings["ZJBattleSense_Options_TRANSLATION_ItemInfo_ShowWeaponStats"] = "Include Weapon Stats"
 
 uiStrings["ZJBattleSense_Options_TRANSLATION_ItemInfo_ShowWeaponStats_Description"] = [[
-For a weapon, also lists how its damage, THAC0 bonus, speed factor and the character's proficiency points compare with the weapon in hand. The damage, THAC0 bonus and speed factor include what the character's proficiency in the weapon adds, (or the penalty for not being proficient), and what its weapon style adds, (two-handed, sword and shield, single weapon or two weapons). When the style changes, the armor class includes the style's armor class bonus.
+For a weapon, also lists how its damage, THAC0 bonus, speed factor and the character's proficiency points compare with the weapon in hand. The damage, THAC0 bonus and speed factor include the character's strength bonus, (melee weapons, and ranged weapons that add it, like slings and thrown weapons), what the character's proficiency in the weapon adds, (or the penalty for not being proficient), and what its weapon style adds, (two-handed, sword and shield, single weapon or two weapons). When the style changes, the armor class includes the style's armor class bonus.
 ]]
 
 uiStrings["ZJBattleSense_Options_TRANSLATION_ItemInfo_ShowInStores"] = "Show In Stores"
@@ -482,6 +482,14 @@ uiStrings["ZJBattleSense_Options_TRANSLATION_ItemInfo_ShowInContainers"] = "Show
 
 uiStrings["ZJBattleSense_Options_TRANSLATION_ItemInfo_ShowInContainers_Description"] = [[
 Opens the popup when hovering an item in an opened container, or in the character's inventory beside it.
+]]
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_ItemInfo_ShowInInventory"] = "Show In Inventory"
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_ItemInfo_ShowInInventory_Description"] = [[
+Opens the popup when hovering an item on the inventory screen: in the backpack, on the ground, or worn.
+
+An item the character is wearing, (or the weapon in hand), has no stat changes listed.
 ]]
 
 uiStrings["ZJBattleSense_Options_TRANSLATION_ItemInfo_ShowOnQuickItems"] = "Show On Quick Items"
@@ -504,6 +512,7 @@ uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Stat_ArmorClassMissile"]  = "Armor
 uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Stat_ArmorClassPiercing"] = "Armor Class bonus vs. piercing"
 uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Stat_ArmorClassSlashing"] = "Armor Class bonus vs. slashing"
 uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Stat_THAC0"]              = "THAC0"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Stat_AttacksPerRound"]    = "Attacks per round"
 uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Stat_DamageBonus"]        = "Damage bonus"
 uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Stat_MaxHitPoints"]       = "Maximum Hit Points"
 uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Stat_STR"]                = "Strength"

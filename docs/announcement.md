@@ -17,7 +17,7 @@ It has five components, and you can install any combination of them:
 1. **Attack Info** – who can hit whom, and for how much, when you hover a creature
 2. **Timer** – casting, attack round and other timers beside the party portraits
 3. **Combat Log** – extra log lines that explain failed saves, immunities and effects ending
-4. **Item Info** – what an item would change for your character, in stores, containers and the quick loot bar
+4. **Item Info** – what an item would change for your character, in stores, containers, the quick loot bar and the inventory
 5. **Spell Info** – what a spell will do to the creature you are about to target
 
 Every component has its own tab under Options > EEex Options ("Battle Sense: ..."), where each part of it can be switched on or off.
@@ -90,7 +90,7 @@ By default, lines are only printed when your party is involved, so the log stays
 
 ## 4. Item Info
 
-Hover an item in a store, an opened container or the quick loot bar, and a popup shows its properties. If a character is selected, it also lists how their stats would change if they equipped it, in green for better and red for worse: armor class, THAC0, saves, ability scores, resistances, and for a weapon its damage, speed and the character's proficiency in it.
+Hover an item in a store, an opened container, the quick loot bar or your inventory, and a popup shows its properties. If a character is selected, it also lists how their stats would change if they equipped it, in green for better and red for worse: armor class, THAC0, saves, ability scores, resistances, and for a weapon its damage, speed and the character's proficiency in it.
 
 `[image: Store Weapon Popup.jpg]`
 

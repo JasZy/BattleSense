@@ -1,11 +1,12 @@
 
 --[[
 +--------------------------------------------------------------------------------------------------+
-| ZJItemInfo - Item popup for stores and the quick loot bar                                        |
+| ZJItemInfo - Item popup for stores, containers, the quick loot bar and the inventory             |
 +--------------------------------------------------------------------------------------------------+
-|   Hovering the cursor over an item in a store, a container, or the quick loot bar, opens a popup |
-|   with the properties of that item. If a character is selected, and the item can be worn / wielded, the   |
-|   popup also lists how the character's stats would change if they equipped it.                   |
+|   Hovering the cursor over an item in a store, a container, the quick loot bar, or the inventory |
+|   screen, opens a popup with the properties of that item. If a character is selected, and the    |
+|   item can be worn / wielded, the popup also lists how the character's stats would change if     |
+|   they equipped it, (not for an item the character is already wearing).                          |
 |                                                                                                  |
 |   Hovering a quick item on the action bar that is used on its owner, (a potion), lists what     |
 |   using it does to the selected character: hit points, stat changes, effects and duration.       |
@@ -76,6 +77,13 @@ ZJItemInfo_Private_ShowInContainers = EEex_Options_Register("ZJItemInfo_ShowInCo
 	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Item Info Module: Show In Containers" }),
 }))
 
+ZJItemInfo_Private_ShowInInventory = EEex_Options_Register("ZJItemInfo_ShowInInventory", EEex_Options_Option.new({
+	["default"]  = 1,
+	["type"]     = EEex_Options_ToggleType.new(),
+	["accessor"] = EEex_Options_ClampedAccessor.new({ ["min"] = 0, ["max"] = 1 }),
+	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Item Info Module: Show In Inventory" }),
+}))
+
 ZJItemInfo_Private_ShowOnQuickItems = EEex_Options_Register("ZJItemInfo_ShowOnQuickItems", EEex_Options_Option.new({
 	["default"]  = 1,
 	["type"]     = EEex_Options_ToggleType.new(),
@@ -139,6 +147,12 @@ EEex_Options_AddTab("ZJBattleSense_Options_TRANSLATION_ItemInfo_TabTitle", funct
 			["widget"]      = EEex_Options_ToggleWidget.new(),
 		}),
 		EEex_Options_DisplayEntry.new({
+			["optionID"]    = "ZJItemInfo_ShowInInventory",
+			["label"]       = "ZJBattleSense_Options_TRANSLATION_ItemInfo_ShowInInventory",
+			["description"] = "ZJBattleSense_Options_TRANSLATION_ItemInfo_ShowInInventory_Description",
+			["widget"]      = EEex_Options_ToggleWidget.new(),
+		}),
+		EEex_Options_DisplayEntry.new({
 			["optionID"]    = "ZJItemInfo_ShowOnQuickItems",
 			["label"]       = "ZJBattleSense_Options_TRANSLATION_ItemInfo_ShowOnQuickItems",
 			["description"] = "ZJBattleSense_Options_TRANSLATION_ItemInfo_ShowOnQuickItems_Description",
@@ -155,6 +169,7 @@ ZJItemInfo_Private_Enabled = false
 ZJItemInfo_Private_ErrorReported = false
 ZJItemInfo_Private_QuickItemErrorReported = false -- Shown in the message log, the quick item popup is new
 ZJItemInfo_Private_ContainerErrorReported = false -- Shown in the message log, the container popup is new
+ZJItemInfo_Private_InventoryErrorReported = false -- Shown in the message log, the inventory popup is new
 ZJItemInfo_Private_RefreshInterval = 500 -- Milliseconds, how often the popup of an item is rebuilt while the cursor stays on it
 
 -- The menus that hide the item under the cursor while they are open
@@ -258,6 +273,8 @@ function ZJItemInfo_Private_ReadItemInfo(resref)
 		local ability = EEex_PtrToUD(abilitiesAddress + Item_ability_st.sizeof * i, "Item_ability_st")
 		local abilityType = ability.type
 		if abilityType == 1 or abilityType == 2 then -- Melee / ranged
+			-- The ability's flags, (0x26): bit 0 adds the strength bonus to a ranged attack, a melee attack always gets it
+			local abilityFlags = EEex_ReadU32(EEex_UDToPtr(ability) + 0x26)
 			info.weapon = {
 				["diceCount"]   = ability.damageDiceCount,
 				["diceSize"]    = ability.damageDice,
@@ -265,6 +282,7 @@ function ZJItemInfo_Private_ReadItemInfo(resref)
 				["thac0Bonus"]  = ability.thac0Bonus,
 				["speedFactor"] = ability.speedFactor,
 				["ranged"]      = abilityType == 2,
+				["addStrength"] = abilityType == 1 or EEex_BAnd(abilityFlags, 0x1) ~= 0,
 			}
 			break
 		end
@@ -439,7 +457,20 @@ function ZJItemInfo_Private_AddEquippedEffects(totals, info, direction)
 
 		local opcode, amount, mode = effect[1], effect[2], effect[3]
 
-		if opcode == 0 then
+		if opcode == 1 then
+
+			-- Attacks per round, in the creature file's encoding, (0 - 5 whole attacks, 6 - 10 one half up to 9 halves)
+			if mode == 0 then
+				totals.attackHalves = totals.attackHalves + direction * ZJItemInfo_Private_DecodeAttacks(amount)
+			elseif mode == 1 then
+				if direction > 0 then
+					totals.attacksSet = ZJItemInfo_Private_DecodeAttacks(amount)
+				else
+					totals.attacksUnset = true
+				end
+			end
+
+		elseif opcode == 0 then
 
 			if mode == 0 then
 				totals.armorClassBonus = totals.armorClassBonus + direction * amount
@@ -472,6 +503,56 @@ function ZJItemInfo_Private_AddEquippedEffects(totals, info, direction)
 			end
 		end
 	end
+end
+
+-- The number of half attacks of an attacks per round value, (stat / op1 encoding: 0 - 5 whole attacks, 6 - 10 are 1/2, 3/2, ... 9/2)
+function ZJItemInfo_Private_DecodeAttacks(value)
+	if value > 5 then return (value - 5) * 2 - 1 end
+	return value * 2
+end
+
+-- Half attacks => "2", "3/2"
+function ZJItemInfo_Private_FormatAttacks(halves)
+	if halves % 2 == 0 then return tostring(halves / 2) end
+	return string.format("%d/2", halves)
+end
+
+-- CLASS.IDS of the classes whose level gives extra attacks per round, (WSPATCK.2DA), => which of the character's
+-- levels, (1 - 3), is its warrior level. Any other class gets what the table gives at level 1.
+ZJItemInfo_Private_WarriorLevelIndex = {
+	[2] = 1, [6] = 1, [7] = 1, [8] = 1, [9] = 1, [10] = 1, [12] = 1, [16] = 1, [17] = 1,
+	[18] = 2, -- Cleric / ranger
+}
+
+ZJItemInfo_Private_WeaponAttacks = nil -- WSPATCK.2DA, loaded the first time it is needed
+
+-- The extra half attacks per round `sprite` gets from `points` proficiency points in a melee weapon, (WSPATCK.2DA:
+-- 0 to 5 are whole attacks, -1 is a half, -2 one and a half, ...). The table also holds the warrior level progression.
+function ZJItemInfo_Private_GetProficiencyAttacks(sprite, points)
+
+	if ZJItemInfo_Private_WeaponAttacks == nil then
+		ZJItemInfo_Private_WeaponAttacks = EEex_Resource_Load2DA("WSPATCK")
+	end
+
+	local level = 1
+	local okClass, class = pcall(function() return sprite.m_typeAI.m_Class end)
+	local levelIndex = okClass and ZJItemInfo_Private_WarriorLevelIndex[class] or nil
+	if levelIndex ~= nil then
+		local stats = sprite:getActiveStats()
+		level = levelIndex == 2 and stats.m_nLevel2 or stats.m_nLevel1
+	end
+
+	local array = ZJItemInfo_Private_WeaponAttacks
+	local columns = array:getDimensions() - 1 -- The last column counts for every higher level
+	local value = tonumber(array:getAtPoint(math.max(1, math.min(level, columns)) - 1, math.min(points, 5)))
+	if value == nil then return 0 end
+	if value < 0 then return -value * 2 - 1 end
+	return value * 2
+end
+
+-- Whether the weapon of `info` attacks from range, (a launcher's ability isn't a ranged attack, its ammunition's is)
+function ZJItemInfo_Private_IsRangedWeapon(info)
+	return ZJItemInfo_Private_LauncherCategories[info.category] == true or (info.weapon ~= nil and info.weapon.ranged)
 end
 
 -- Returns `value` in the color that says whether it is better or worse than `oldValue`
@@ -683,6 +764,48 @@ function ZJItemInfo_Private_GetStyleChange(sprite, info)
 	return oldStyle, ZJItemInfo_Private_GetWeaponStyle(newMain, newOff)
 end
 
+ZJItemInfo_Private_StrengthMod   = nil -- STRMOD.2DA, loaded the first time it is needed
+ZJItemInfo_Private_StrengthModEx = nil -- STRMODEX.2DA, the exceptional strength of 18/01 - 18/00, on top of the row of 18
+
+-- The THAC0 bonus and damage bonus of a strength of `strength`, (and `extra` for exceptional strength)
+function ZJItemInfo_Private_GetStrengthBonus(strength, extra)
+
+	if ZJItemInfo_Private_StrengthMod == nil then
+		ZJItemInfo_Private_StrengthMod = EEex_Resource_Load2DA("STRMOD")
+		ZJItemInfo_Private_StrengthModEx = EEex_Resource_Load2DA("STRMODEX")
+	end
+
+	local get = function(array, column, row) return tonumber(array:getAtLabels(column, tostring(row))) or 0 end
+
+	local hit = get(ZJItemInfo_Private_StrengthMod, "TO_HIT", strength)
+	local damage = get(ZJItemInfo_Private_StrengthMod, "DAMAGE", strength)
+
+	if strength == 18 and extra > 0 then
+		hit = hit + get(ZJItemInfo_Private_StrengthModEx, "TO_HIT", extra)
+		damage = damage + get(ZJItemInfo_Private_StrengthModEx, "DAMAGE", extra)
+	end
+
+	return hit, damage
+end
+
+-- Returns `weapon` with the bonus of `strength` / `extra` added to its THAC0 bonus and damage bonus, if its attack gets it
+function ZJItemInfo_Private_ApplyStrength(weapon, addStrength, strength, extra)
+
+	local hit, damage = 0, 0
+	if addStrength then
+		local ok, okHit, okDamage = pcall(ZJItemInfo_Private_GetStrengthBonus, strength, extra)
+		if ok then hit, damage = okHit, okDamage end
+	end
+
+	return {
+		["diceCount"]   = weapon.diceCount,
+		["diceSize"]    = weapon.diceSize,
+		["bonus"]       = weapon.bonus + damage,
+		["thac0Bonus"]  = weapon.thac0Bonus + hit,
+		["speedFactor"] = weapon.speedFactor,
+	}
+end
+
 -- Returns `weapon` with `styleBonus` added to its THAC0 bonus, damage bonus and speed factor
 function ZJItemInfo_Private_ApplyStyle(weapon, styleBonus)
 	return {
@@ -798,6 +921,7 @@ function ZJItemInfo_Private_GetComparisonLines(sprite, info)
 		["unset"]           = {},
 		["armorClassBonus"] = 0,
 		["armorClassTypes"] = {},
+		["attackHalves"]    = 0,
 	}
 
 	local replacedResrefs = {}
@@ -871,6 +995,7 @@ function ZJItemInfo_Private_GetComparisonLines(sprite, info)
 
 	local stats = sprite:getActiveStats()
 	local baseStats = sprite.m_baseStats
+	local newValues = {} -- [stat key] = its value after the change, for the stats that change
 
 	for _, stat in ipairs(ZJItemInfo_Private_Stats) do
 
@@ -890,6 +1015,7 @@ function ZJItemInfo_Private_GetComparisonLines(sprite, info)
 		end
 
 		if newValue ~= nil and newValue ~= oldValue then
+			newValues[key] = newValue
 			table.insert(lines, ZJItemInfo_Private_FormatChangeLine(ZJItemInfo_Private_T("Stat_"..key), oldValue, newValue, stat.lowerIsBetter, stat.suffix))
 		end
 	end
@@ -901,6 +1027,62 @@ function ZJItemInfo_Private_GetComparisonLines(sprite, info)
 			local text = ZJItemInfo_Private_ColorChange(string.format("%+d", bonus), bonus, false)
 			table.insert(lines, string.format("%s: %s", ZJItemInfo_Private_T("Stat_"..armorClassType.key), text))
 		end
+	end
+
+	-----------------------
+	-- Attacks per round --
+	-----------------------
+
+	-- The current number, (which the engine worked out), plus what changes: the items' op1 effects, the proficiency
+	-- points in the weapon in hand, (melee only), and the extra attack of a weapon in the off hand. An item that sets
+	-- the number, (a bow sets 2), replaces all of that; once it is taken off, the number is worked out again from 1.
+	local okAttacks, attackLine = pcall(function()
+
+		local oldHalves = ZJItemInfo_Private_DecodeAttacks(stats.m_nNumberOfAttacks)
+		local isWeapon = ZJItemInfo_Private_CategorySlots[info.category] == "weapon"
+
+		local oldInfo = nil
+		if isWeapon then
+			local oldItem = replaced[1]
+			oldInfo = oldItem and ZJItemInfo_Private_CategorySlots[oldItem.info.category] == "weapon" and oldItem.info or nil
+		end
+
+		local weaponAttacks = function(weaponInfo)
+			if weaponInfo ~= nil and ZJItemInfo_Private_IsRangedWeapon(weaponInfo) then return 0 end
+			local points = weaponInfo and ZJItemInfo_Private_GetProficiency(sprite, weaponInfo.proficiencyType) or 0
+			return ZJItemInfo_Private_GetProficiencyAttacks(sprite, points)
+		end
+
+		local offHandAttacks = function(style) return style == "TWOWEAPON" and 2 or 0 end
+
+		local newHalves
+
+		if totals.attacksSet ~= nil then
+			newHalves = totals.attacksSet
+		elseif totals.attacksUnset then
+			-- Only for a weapon that is put in hand is it known what the number is without the item
+			if not isWeapon then return nil end
+			newHalves = 2 + totals.attackHalves + weaponAttacks(info) + offHandAttacks(newStyle)
+		else
+			newHalves = oldHalves + totals.attackHalves
+			if isWeapon then
+				newHalves = newHalves + weaponAttacks(info) - weaponAttacks(oldInfo)
+			end
+			newHalves = newHalves + offHandAttacks(newStyle) - offHandAttacks(oldStyle)
+		end
+
+		newHalves = math.max(newHalves, 0)
+		if newHalves == oldHalves then return nil end
+
+		local change = newHalves - oldHalves
+		local changeText = change % 2 == 0 and string.format("%+d", change / 2) or string.format("%s%d/2", change < 0 and "-" or "+", math.abs(change))
+
+		return string.format("%s: %s -> %s", ZJItemInfo_Private_T("Stat_AttacksPerRound"), ZJItemInfo_Private_FormatAttacks(oldHalves),
+			ZJItemInfo_Private_ColorChange(string.format("%s (%s)", ZJItemInfo_Private_FormatAttacks(newHalves), changeText), change, false))
+	end)
+
+	if okAttacks and attackLine ~= nil then
+		table.insert(lines, attackLine)
 	end
 
 	------------
@@ -916,10 +1098,19 @@ function ZJItemInfo_Private_GetComparisonLines(sprite, info)
 		local oldInfo = oldItem and ZJItemInfo_Private_CategorySlots[oldItem.info.category] == "weapon" and oldItem.info or nil
 		local oldWeapon = oldInfo and oldInfo.weapon or nil
 
-		-- Compared as the character would use them, with its proficiency in each, and the weapon style it fights in with each
+		-- The character's strength, now and with the item equipped, (exceptional strength only counts while it stays 18)
+		local oldStrength, oldExtra = stats.m_nSTR, stats.m_nSTRExtra
+		local newStrength = newValues["STR"] or oldStrength
+		local newExtra = newStrength == oldStrength and oldExtra or 0
+
+		-- Compared as the character would use them, with its strength bonus, its proficiency in each, and the weapon
+		-- style it fights in with each
+		local newAddStrength = newWeapon.addStrength
+		newWeapon = ZJItemInfo_Private_ApplyStrength(newWeapon, newAddStrength, newStrength, newExtra)
 		newWeapon = ZJItemInfo_Private_ApplyProficiency(sprite, newWeapon, info.proficiencyType)
 		newWeapon = ZJItemInfo_Private_ApplyStyle(newWeapon, newStyleBonus)
 		if oldWeapon ~= nil then
+			oldWeapon = ZJItemInfo_Private_ApplyStrength(oldWeapon, oldWeapon.addStrength, oldStrength, oldExtra)
 			oldWeapon = ZJItemInfo_Private_ApplyProficiency(sprite, oldWeapon, oldInfo.proficiencyType)
 			oldWeapon = ZJItemInfo_Private_ApplyStyle(oldWeapon, oldStyleBonus)
 		end
@@ -1395,6 +1586,7 @@ function ZJItemInfo_Private_ResetUICaches()
 	ZJItemInfo_Private_Lists = nil
 	ZJItemInfo_Private_ActionbarButtons = nil
 	ZJItemInfo_Private_ContainerSlots = nil
+	ZJItemInfo_Private_InventorySlots = nil
 end
 
 function ZJItemInfo_Private_GetQuickLootSlots()
@@ -1708,6 +1900,115 @@ function ZJItemInfo_Private_FindHoveredContainerItem()
 	return nil
 end
 
+ZJItemInfo_Private_InventoryMenuName = "INVENTORY"
+ZJItemInfo_Private_InventorySlots = nil -- Array of { item = uiItem, id = number }, the slot items of the inventory screen
+
+-- The equipment keys of UI.menu's inventory whose item is worn: it is shown without a comparison, (it would be
+-- compared with itself). The weapon slots are looked at one by one, only the one in hand is worn.
+ZJItemInfo_Private_InventoryWornKeys = {
+	["armor"] = true, ["gauntlets"] = true, ["helmet"] = true, ["amulet"] = true, ["belt"] = true, ["ringleft"] = true,
+	["ringright"] = true, ["cloak"] = true, ["boots"] = true, ["shield"] = true,
+}
+
+-- The slot items of the inventory screen. Each one is named "slot_inv_<id>", where <id> is the id of its entry in
+-- characters[id].equipment, (UI.menu's inventorySplitStack() builds the name the same way).
+function ZJItemInfo_Private_GetInventorySlots()
+
+	local slots = ZJItemInfo_Private_InventorySlots
+	if slots ~= nil then return slots end
+
+	slots = {}
+
+	local menu = EEex_Menu_Find(ZJItemInfo_Private_InventoryMenuName)
+	if menu ~= nil then
+		local item = menu.items
+		while item do
+			if item.type == uiItemType.ITEM_SLOT then
+				local slotId = tonumber((item.name:get() or ""):match("^slot_inv_(%d+)$"))
+				if slotId ~= nil then
+					table.insert(slots, { ["item"] = item, ["id"] = slotId })
+				end
+			end
+			item = item.next
+		end
+	end
+
+	ZJItemInfo_Private_InventorySlots = slots
+	return slots
+end
+
+-- Whether the item in the equipment entry `key` of the inventory screen is worn by `sprite`
+function ZJItemInfo_Private_IsInventoryItemWorn(sprite, key, info)
+
+	if ZJItemInfo_Private_InventoryWornKeys[key] then return true end
+
+	local weaponIndex = tonumber(key:match("^weapon(%d)$"))
+	if weaponIndex == nil or sprite == nil then return false end
+
+	local selectedWeapon = sprite.m_equipment.m_selectedWeapon
+	if selectedWeapon == 35 + weaponIndex then return true end
+
+	-- Ammunition is selected, the weapon in hand is its launcher
+	return selectedWeapon >= 11 and selectedWeapon <= 14 and ZJItemInfo_Private_LauncherCategories[info.category] == true
+end
+
+-- Returns the item of the inventory screen that is under the cursor, see ZJItemInfo_Private_FindHoveredQuickLootItem().
+-- It also has `worn`, true if the character is wearing it / holding it.
+function ZJItemInfo_Private_FindHoveredInventoryItem()
+
+	if type(characters) ~= "table" then return nil end
+	if not Infinity_IsMenuOnStack(ZJItemInfo_Private_InventoryMenuName) then return nil end
+
+	for _, slot in ipairs(ZJItemInfo_Private_GetInventorySlots()) do
+
+		local x, y, w, h = slot.item:getArea()
+
+		if EEex_Menu_IsCursorWithinRect(x, y, w, h) then
+
+			local character = characters[id]
+			local equipment = type(character) == "table" and character.equipment or nil
+			if type(equipment) ~= "table" then return nil end
+
+			local key, entry = nil, nil
+			for equipmentKey, equipmentEntry in pairs(equipment) do
+				if type(equipmentEntry) == "table" and equipmentEntry.id == slot.id then
+					key, entry = equipmentKey, equipmentEntry
+					break
+				end
+			end
+
+			if entry == nil or entry.empty ~= 0 then return nil end
+			local itemEntry = entry.item
+			if type(itemEntry) ~= "table" or type(itemEntry.res) ~= "string" then return nil end
+
+			local info = ZJItemInfo_Private_GetItemInfo(itemEntry.res)
+			if info == nil then return nil end
+
+			local identified = itemEntry.identified
+			if identified == nil then
+				identified = info.lore == 0
+			else
+				identified = identified ~= 0
+			end
+
+			local sprite = ZJItemInfo_Private_GetSelectedSprite()
+
+			return {
+				["resref"]     = itemEntry.res,
+				["info"]       = info,
+				["identified"] = identified,
+				["name"]       = itemEntry.name,
+				["tint"]       = itemEntry.tint,
+				["area"]       = { x, y, w, h },
+				["placement"]  = "above",
+				["worn"]       = type(key) == "string" and ZJItemInfo_Private_IsInventoryItemWorn(sprite, key, info),
+			}
+		end
+	end
+
+	return nil
+end
+
 function ZJItemInfo_Private_IsStoreOpen()
 	if type(store) ~= "table" then return false end
 	local chitin = EngineGlobals.g_pBaldurChitin
@@ -1919,6 +2220,17 @@ function ZJItemInfo_Private_FindHoveredItem()
 		end
 	end
 
+	if hovered == nil and ZJItemInfo_Private_ShowInInventory:get() ~= 0 then
+		-- Kept apart, so a problem with the inventory screen never stops the other popups
+		local ok, inventoryItem = pcall(ZJItemInfo_Private_FindHoveredInventoryItem)
+		if ok then
+			hovered = inventoryItem
+		elseif not ZJItemInfo_Private_InventoryErrorReported then
+			ZJItemInfo_Private_InventoryErrorReported = true
+			Infinity_DisplayString("[Battle Sense] Item Info, inventory: "..tostring(inventoryItem))
+		end
+	end
+
 	if hovered == nil and ZJItemInfo_Private_ShowOnQuickItems:get() ~= 0 then
 		-- Kept apart, so a problem with the action bar never stops the popups of stores and the quick loot bar
 		local ok, quickItem = pcall(ZJItemInfo_Private_FindHoveredQuickItem)
@@ -2092,6 +2404,8 @@ function ZJItemInfo_Private_BuildText(hovered, sprite)
 					table.insert(parts, table.concat(lines, "\n"))
 				end
 			end
+		elseif hovered.worn then
+			-- Already worn, there is nothing to compare it with
 		elseif not ZJItemInfo_Private_IsUsable(hovered) then
 			local okName, spriteName = pcall(function() return sprite:getName() end)
 			table.insert(parts, ZJItemInfo_Private_WorseColorStr
@@ -2254,6 +2568,7 @@ EEex_Menu_AddMainFileLoadedListener(function()
 	end
 
 	pushTickerOnOpen(ZJItemInfo_Private_QuickLootMenuName)
+	pushTickerOnOpen(ZJItemInfo_Private_InventoryMenuName)
 
 	for _, listEntry in ipairs(ZJItemInfo_Private_GetLists()) do
 		if listEntry.menuName:sub(1, 6) == "STORE_" then

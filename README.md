@@ -50,7 +50,7 @@ Adds lines to the combat log that explain:
 
 ### Item Info
 
-Hover the cursor over an item in a store, in an opened container, or in the quick loot bar, to open a popup with:
+Hover the cursor over an item in a store, in an opened container, in the quick loot bar, or on the inventory screen, to open a popup with:
 
 - The properties of the item, (the "STATISTICS" part of its description)
 - How the stats of the selected character would change if they equipped it in place of what they have equipped now: `Armor Class: 6 -> 4 (-2)`
