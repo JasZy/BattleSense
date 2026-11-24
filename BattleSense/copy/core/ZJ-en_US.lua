@@ -12,7 +12,7 @@ uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_Enable"] = "Enabled"
 uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_Enable_Description"] = [[
 Enables the attack information popup.
 
-The popup opens when hovering a hostile creature, a neutral creature with the attack cursor, or a party member or ally that is in a fight, (see "Enabled For Friendly").
+The popup opens when hovering a hostile creature, any creature with the attack cursor, or a party member or ally that is in a fight, (see "Enabled For Friendly").
 
 It has two panels, with a row for each selected party member:
 

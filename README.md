@@ -16,7 +16,7 @@ Each component can be installed on its own.
 
 ### Attack Info
 
-Hover over an enemy, (or a neutral creature with the attack cursor), to open a popup with, for every selected character:
+Hover over an enemy, (or any creature with the attack cursor), to open a popup with, for every selected character:
 
 - The chance to hit, as a percentage or as the minimum d20 roll
 - Damage per hit, with the target's resistances applied, and extra on-hit damage

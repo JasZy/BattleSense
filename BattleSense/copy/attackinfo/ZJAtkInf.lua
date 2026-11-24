@@ -376,8 +376,9 @@ function ZJAttackInfo_Private_LimitRowSprites(sprites, targetSprite)
 end
 
 -- Returns the sprites to list for `targetSprite`, and whether the compact popup should be used
-function ZJAttackInfo_Private_GetRowSprites(targetSprite)
-	if ZJAttackInfo_Private_IsCompactTarget(targetSprite) then
+-- `attackCursor`: the cursor is an attack cursor, the full popup is used then, (the selected creatures attacking an ally)
+function ZJAttackInfo_Private_GetRowSprites(targetSprite, attackCursor)
+	if not attackCursor and ZJAttackInfo_Private_IsCompactTarget(targetSprite) then
 		return ZJAttackInfo_Private_LimitRowSprites(ZJAttackInfo_Private_GetCombatants(targetSprite), targetSprite), true
 	end
 	return ZJAttackInfo_Private_LimitRowSprites(ZJAttackInfo_Private_GetSelectedSprites(targetSprite), targetSprite), false
@@ -2662,7 +2663,10 @@ function ZJAttackInfo_Private_Menu_Ticker_Tick()
 		return
 	end
 
-	local selectedSprites, compact = ZJAttackInfo_Private_GetRowSprites(targetSprite)
+	local nCurrentCursor = chitin.m_pObjectCursor.nCurrentCursor
+	local attackCursor = nCurrentCursor == 12 or (nCurrentCursor == 101 and EEex.IsDefaultAttackCursor())
+
+	local selectedSprites, compact = ZJAttackInfo_Private_GetRowSprites(targetSprite, attackCursor)
 
 	if selectedSprites[1] == nil or not ZJAttackInfo_Private_IsPopupAllowed(compact, targetSprite) then
 		-- Hide the popup if no currently selected sprites are eligible, (compact), the ally isn't fighting anyone,
@@ -2671,13 +2675,9 @@ function ZJAttackInfo_Private_Menu_Ticker_Tick()
 		return
 	end
 
-	-- The compact popup opens whenever the hovered ally is in a fight, the full popup always opens over a hostile
-	-- creature, and over a neutral one only from an attack cursor
-	local shouldBeOpen = compact or targetSprite.m_typeAI.m_EnemyAlly >= ZJAttackInfo_Private_EvilCutoff
-	if not shouldBeOpen then
-		local nCurrentCursor = chitin.m_pObjectCursor.nCurrentCursor
-		shouldBeOpen = nCurrentCursor == 12 or (nCurrentCursor == 101 and EEex.IsDefaultAttackCursor())
-	end
+	-- The full popup always opens from an attack cursor, (whoever is under it), and over a hostile creature, the
+	-- compact popup opens whenever the hovered ally is in a fight
+	local shouldBeOpen = attackCursor or compact or targetSprite.m_typeAI.m_EnemyAlly >= ZJAttackInfo_Private_EvilCutoff
 
 	if not shouldBeOpen then
 		-- Hide the popup if the cursor shape isn't attempting to open it
@@ -2700,7 +2700,7 @@ function ZJAttackInfo_Private_Menu_Ticker_Tick()
 		local lastTarget = EEex_GameObject_Get(ZJAttackInfo_Private_CurrentTargetID)
 		local lastSelectedSprites, lastCompact
 		if EEex_GameObject_IsSprite(lastTarget) then
-			lastSelectedSprites, lastCompact = ZJAttackInfo_Private_GetRowSprites(lastTarget)
+			lastSelectedSprites, lastCompact = ZJAttackInfo_Private_GetRowSprites(lastTarget, attackCursor)
 		end
 
 		if lastSelectedSprites ~= nil and lastSelectedSprites[1] ~= nil and ZJAttackInfo_Private_IsPopupAllowed(lastCompact, lastTarget) then
