@@ -369,9 +369,9 @@ end
 --
 ZJItemInfo_Private_Stats = {
 	{ ["key"] = "ArmorClass",       ["field"] = "m_nArmorClass",            ["lowerIsBetter"] = true, ["always"] = true },
+	{ ["key"] = "MaxHitPoints",     ["field"] = "m_nMaxHitPoints",          ["always"] = true },
 	{ ["key"] = "THAC0",            ["field"] = "m_nTHAC0",                 ["lowerIsBetter"] = true, ["always"] = true },
 	{ ["key"] = "DamageBonus",      ["field"] = "m_nDamageBonus"            },
-	{ ["key"] = "MaxHitPoints",     ["field"] = "m_nMaxHitPoints",          ["always"] = true },
 	{ ["key"] = "STR",              ["field"] = "m_nSTR",                   ["baseField"] = "m_STRBase" },
 	{ ["key"] = "DEX",              ["field"] = "m_nDEX",                   ["baseField"] = "m_DEXBase" },
 	{ ["key"] = "CON",              ["field"] = "m_nCON",                   ["baseField"] = "m_CONBase" },
@@ -1168,9 +1168,8 @@ function ZJItemInfo_Private_GetComparisonLines(sprite, info)
 			ZJItemInfo_Private_ColorChange(string.format("%s (%s)", ZJItemInfo_Private_FormatAttacks(newHalves), changeText), change, false))
 	end)
 
-	if okAttacks and attackLine ~= nil then
-		table.insert(lines, attackLine)
-	end
+	-- It goes below the weapon damage, (or here, when there is none)
+	if not okAttacks then attackLine = nil end
 
 	------------
 	-- Weapon --
@@ -1233,6 +1232,7 @@ function ZJItemInfo_Private_GetComparisonLines(sprite, info)
 		if oldInfo == nil or oldInfo.weapon == nil then
 			-- A weapon where there was none
 			table.insert(lines, string.format("%s: %s", ZJItemInfo_Private_T("Weapon_Damage"), newDamage))
+			if attackLine ~= nil then table.insert(lines, attackLine); attackLine = nil end
 			table.insert(lines, string.format("%s: %d", ZJItemInfo_Private_T("Weapon_SpeedFactor"), newWeapon.speedFactor))
 		else
 			oldWeapon.bonus = oldWeapon.bonus + oldDamageBonus
@@ -1245,6 +1245,7 @@ function ZJItemInfo_Private_GetComparisonLines(sprite, info)
 				table.insert(lines, string.format("%s: %s -> %s", ZJItemInfo_Private_T("Weapon_Damage"), oldDamage,
 					ZJItemInfo_Private_ColorChange(newDamage, change, false)))
 			end
+			if attackLine ~= nil then table.insert(lines, attackLine); attackLine = nil end
 
 			if oldWeapon.speedFactor == newWeapon.speedFactor then
 				table.insert(lines, ZJItemInfo_Private_FormatSameLine(ZJItemInfo_Private_T("Weapon_SpeedFactor"), tostring(newWeapon.speedFactor)))
@@ -1254,6 +1255,10 @@ function ZJItemInfo_Private_GetComparisonLines(sprite, info)
 					ZJItemInfo_Private_ColorChange(tostring(newWeapon.speedFactor), change, true)))
 			end
 		end
+	end
+
+	if attackLine ~= nil then
+		table.insert(lines, attackLine)
 	end
 
 	return lines
