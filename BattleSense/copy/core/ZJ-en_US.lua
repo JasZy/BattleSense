@@ -27,6 +27,24 @@ The right panel's header also lists the creature's stoneskins and mirror images,
 This replaces Bubb's "Attack Info" module that comes with EEex. That module has to be turned off, (Modules tab), or both popups are drawn on top of each other. Battle Sense turns it off by itself when the game starts, which takes effect from the next time the game is started.
 ]]
 
+uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_ShowAllies"] = "Show Allies"
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_ShowAllies_Description"] = [[
+Includes the party's summons and other allies, not just the party members, (companions).
+
+On: the popup over a creature lists the party's summons / allies that are fighting it, and hovering a summon / ally that is in a fight opens the compact popup, (see "Enabled For Friendly").
+
+Off: the popup only lists party members, and the compact popup only opens over party members.
+]]
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_MaxRows"] = "Max Creatures"
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_MaxRows_Description"] = [[
+The most creatures listed in the popup. Click to step through 6, (a full party), 10, 15 and 20. "Off" lists them all.
+
+When more creatures are eligible, the ones closest to the creature under the cursor are listed.
+]]
+
 uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_FontPoint"] = "Font Point"
 
 uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_FontPoint_Description"] = [[

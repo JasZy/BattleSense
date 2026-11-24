@@ -56,6 +56,47 @@ ZJAttackInfo_Private_ShowRowTimers = EEex_Options_Register("ZJAttackInfo_ShowRow
 	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Attack Info Module: Show Row Timers" }),
 }))
 
+-- 1 = Include the party's summons and other allies, 0 = Only the party members, (companions)
+ZJAttackInfo_Private_ShowAllies = EEex_Options_Register("ZJAttackInfo_ShowAllies", EEex_Options_Option.new({
+	["default"]  = 1,
+	["type"]     = EEex_Options_ToggleType.new(),
+	["accessor"] = EEex_Options_ClampedAccessor.new({ ["min"] = 0, ["max"] = 1 }),
+	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Attack Info Module: Show Allies" }),
+}))
+
+-- The most creatures listed in the popup: [option value] = the limit, option value 0 is Off, (no limit)
+ZJAttackInfo_Private_MaxRowsChoices = { 6, 10, 15, 20 } -- 6 = a full party
+ZJAttackInfo_Private_MaxRows = EEex_Options_Register("ZJAttackInfo_MaxRows", EEex_Options_Option.new({
+	["default"]  = 0,
+	["accessor"] = EEex_Options_ClampedAccessor.new({ ["min"] = 0, ["max"] = #ZJAttackInfo_Private_MaxRowsChoices }),
+	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Attack Info Module: Max Creatures" }),
+}))
+
+-- A button showing "Off" or the limit, clicking it steps Off, 6, 10, 15, 20, and back to Off
+ZJAttackInfo_MaxRowsWidget = {}
+ZJAttackInfo_MaxRowsWidget.__index = ZJAttackInfo_MaxRowsWidget
+setmetatable(ZJAttackInfo_MaxRowsWidget, ZJBarColors_CycleWidget)
+
+ZJAttackInfo_MaxRowsWidget.new = function(o)
+	if o == nil then o = {} end
+	setmetatable(o, ZJAttackInfo_MaxRowsWidget)
+	o:_init()
+	return o
+end
+
+function ZJAttackInfo_MaxRowsWidget:_getCount()
+	return #ZJAttackInfo_Private_MaxRowsChoices
+end
+
+function ZJAttackInfo_MaxRowsWidget:_getText(value)
+	local maxRows = ZJAttackInfo_Private_MaxRowsChoices[value]
+	return maxRows and tostring(maxRows) or getUiString(ZJBarColors_OffName)
+end
+
+function ZJAttackInfo_MaxRowsWidget:_getColor(value)
+	return EEex_Options_Private_GetFontStyleColor(styles["EEex_Options_Normal"])
+end
+
 EEex_Options_AddTab("ZJBattleSense_Options_TRANSLATION_AttackInfo_TabTitle", function() return {
 	{
 		EEex_Options_DisplayEntry.new({
@@ -69,6 +110,18 @@ EEex_Options_AddTab("ZJBattleSense_Options_TRANSLATION_AttackInfo_TabTitle", fun
 			["label"]       = "ZJBattleSense_Options_TRANSLATION_AttackInfo_CompactForAllies",
 			["description"] = "ZJBattleSense_Options_TRANSLATION_AttackInfo_CompactForAllies_Description",
 			["widget"]      = EEex_Options_ToggleWidget.new(),
+		}),
+		EEex_Options_DisplayEntry.new({
+			["optionID"]    = "ZJAttackInfo_ShowAllies",
+			["label"]       = "ZJBattleSense_Options_TRANSLATION_AttackInfo_ShowAllies",
+			["description"] = "ZJBattleSense_Options_TRANSLATION_AttackInfo_ShowAllies_Description",
+			["widget"]      = EEex_Options_ToggleWidget.new(),
+		}),
+		EEex_Options_DisplayEntry.new({
+			["optionID"]    = "ZJAttackInfo_MaxRows",
+			["label"]       = "ZJBattleSense_Options_TRANSLATION_AttackInfo_MaxRows",
+			["description"] = "ZJBattleSense_Options_TRANSLATION_AttackInfo_MaxRows_Description",
+			["widget"]      = ZJAttackInfo_MaxRowsWidget.new(),
 		}),
 		EEex_Options_DisplayEntry.new({
 			["optionID"]    = "ZJAttackInfo_FontPoint",
@@ -174,9 +227,16 @@ function ZJAttackInfo_SetEnabled(enabled)
 	ZJAttackInfo_Private_Menu_Ticker_SetOpen(ZJAttackInfo_Private_Menu_Ticker_ShouldBeOpen and enabled)
 end
 
--- Whether the popup may open over a target, (`compact` = the target is on the party's side)
-function ZJAttackInfo_Private_IsPopupAllowed(compact)
-	return not compact or ZJAttackInfo_Private_CompactForAllies:get() ~= 0
+-- Whether `sprite` is a party member, (has a portrait), as opposed to a summon or other ally
+function ZJAttackInfo_Private_IsPartyMember(sprite)
+	return EEex_Sprite_GetPortraitIndex(sprite) ~= -1
+end
+
+-- Whether the popup may open over `targetSprite`, (`compact` = the target is on the party's side)
+function ZJAttackInfo_Private_IsPopupAllowed(compact, targetSprite)
+	if not compact then return true end
+	return ZJAttackInfo_Private_CompactForAllies:get() ~= 0
+		and (ZJAttackInfo_Private_ShowAllies:get() ~= 0 or ZJAttackInfo_Private_IsPartyMember(targetSprite))
 end
 
 ----------
@@ -198,9 +258,12 @@ function ZJAttackInfo_Private_GetSelectedSprites(targetSprite)
 
 	local selectedSprites = {}
 	local addedIDs = {}
+	local showAllies = ZJAttackInfo_Private_ShowAllies:get() ~= 0
 
 	local add = function(sprite)
 		if sprite == nil or EEex_UDEqual(sprite, targetSprite) then return end
+		-- With "Show Allies" off, selected summons are left out too
+		if not showAllies and not ZJAttackInfo_Private_IsPartyMember(sprite) then return end
 		local id = sprite.m_id
 		if addedIDs[id] then return end
 		addedIDs[id] = true
@@ -222,7 +285,9 @@ function ZJAttackInfo_Private_GetSelectedSprites(targetSprite)
 	end
 
 	-- The same goes for the party's summons and other allies near the target
-	ZJAttackInfo_Private_IterateCombatants(targetSprite, "[GOODCUTOFF]", add)
+	if showAllies then
+		ZJAttackInfo_Private_IterateCombatants(targetSprite, "[GOODCUTOFF]", add)
+	end
 
 	EEex_Utility_AlphanumericSortTable(selectedSprites, function(sprite)
 		return sprite:getName()
@@ -274,12 +339,42 @@ function ZJAttackInfo_Private_IsCompactTarget(targetSprite)
 	return targetSprite.m_typeAI.m_EnemyAlly <= ZJAttackInfo_Private_GoodCutoff
 end
 
+-- With the "Max Creatures" option set, keeps that many of `sprites`: the ones closest to `targetSprite`,
+-- still in alphabetical order
+function ZJAttackInfo_Private_LimitRowSprites(sprites, targetSprite)
+
+	local maxRows = ZJAttackInfo_Private_MaxRowsChoices[ZJAttackInfo_Private_MaxRows:get()]
+	if maxRows == nil or #sprites <= maxRows then return sprites end
+
+	local targetPos = targetSprite.m_pos
+	local targetX, targetY = targetPos.x, targetPos.y
+	local distances = {}
+	for _, sprite in ipairs(sprites) do
+		local pos = sprite.m_pos
+		local dx, dy = pos.x - targetX, pos.y - targetY
+		distances[sprite.m_id] = dx * dx + dy * dy
+	end
+
+	local byDistance = {}
+	for i, sprite in ipairs(sprites) do byDistance[i] = sprite end
+	table.sort(byDistance, function(a, b) return distances[a.m_id] < distances[b.m_id] end)
+
+	local kept = {}
+	for i = 1, maxRows do kept[byDistance[i].m_id] = true end
+
+	local limited = {}
+	for _, sprite in ipairs(sprites) do
+		if kept[sprite.m_id] then table.insert(limited, sprite) end
+	end
+	return limited
+end
+
 -- Returns the sprites to list for `targetSprite`, and whether the compact popup should be used
 function ZJAttackInfo_Private_GetRowSprites(targetSprite)
 	if ZJAttackInfo_Private_IsCompactTarget(targetSprite) then
-		return ZJAttackInfo_Private_GetCombatants(targetSprite), true
+		return ZJAttackInfo_Private_LimitRowSprites(ZJAttackInfo_Private_GetCombatants(targetSprite), targetSprite), true
 	end
-	return ZJAttackInfo_Private_GetSelectedSprites(targetSprite), false
+	return ZJAttackInfo_Private_LimitRowSprites(ZJAttackInfo_Private_GetSelectedSprites(targetSprite), targetSprite), false
 end
 
 function ZJAttackInfo_Private_GetWeaponHitChance(sourceSprite, targetSprite, leftHand)
@@ -2553,7 +2648,7 @@ function ZJAttackInfo_Private_Menu_Ticker_Tick()
 
 	local selectedSprites, compact = ZJAttackInfo_Private_GetRowSprites(targetSprite)
 
-	if selectedSprites[1] == nil or not ZJAttackInfo_Private_IsPopupAllowed(compact) then
+	if selectedSprites[1] == nil or not ZJAttackInfo_Private_IsPopupAllowed(compact, targetSprite) then
 		-- Hide the popup if no currently selected sprites are eligible, (compact), the ally isn't fighting anyone,
 		-- or the popup is turned off for this side
 		ZJAttackInfo_Private_Menu_SetOpen(false)
@@ -2592,7 +2687,7 @@ function ZJAttackInfo_Private_Menu_Ticker_Tick()
 			lastSelectedSprites, lastCompact = ZJAttackInfo_Private_GetRowSprites(lastTarget)
 		end
 
-		if lastSelectedSprites ~= nil and lastSelectedSprites[1] ~= nil and ZJAttackInfo_Private_IsPopupAllowed(lastCompact) then
+		if lastSelectedSprites ~= nil and lastSelectedSprites[1] ~= nil and ZJAttackInfo_Private_IsPopupAllowed(lastCompact, lastTarget) then
 			ZJAttackInfo_Private_Layout(lastSelectedSprites, lastTarget, lastCompact)
 		else
 			ZJAttackInfo_Private_Menu_SetOpen(false, true)

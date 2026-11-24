@@ -92,6 +92,8 @@ end
 
 -- A button that shows the name of the option's color, in that color. Clicking it steps to the next color, and from
 -- the last one back to Off.
+--
+-- Other modules subclass it for other values that step on click, by overriding _getCount, _getText and _getColor.
 ZJBarColors_CycleWidget = {}
 ZJBarColors_CycleWidget.__index = ZJBarColors_CycleWidget
 setmetatable(ZJBarColors_CycleWidget, EEex_Options_Widget)
@@ -107,6 +109,11 @@ function ZJBarColors_CycleWidget:_init()
 	EEex_Utility_CallSuper(ZJBarColors_CycleWidget, "_init", self)
 	-- Derived
 	--   self._instanceData => The button in the options menu, (EEex_Options_TEMPLATE_TextButton instance)
+end
+
+-- The values are 0, (Off), up to and including this
+function ZJBarColors_CycleWidget:_getCount()
+	return #ZJBarColors_Colors
 end
 
 function ZJBarColors_CycleWidget:_getText(value)
@@ -131,10 +138,11 @@ function ZJBarColors_CycleWidget:_buildLayout(displayEntry, menuName)
 	local widget = self
 	local style = styles["EEex_Options_Normal"]
 
-	-- Wide enough for the longest name, so the options don't move around while clicking through the colors
-	local maxW = EEex_Options_Private_GetTextWidthHeight(style.font, style.point, getUiString(ZJBarColors_OffName))
-	for _, color in ipairs(ZJBarColors_Colors) do
-		local w = EEex_Options_Private_GetTextWidthHeight(style.font, style.point, getUiString(color.name))
+	-- Wide enough for the longest text, so the options don't move around while clicking through the values
+	local count = self:_getCount()
+	local maxW = 0
+	for value = 0, count do
+		local w = EEex_Options_Private_GetTextWidthHeight(style.font, style.point, self:_getText(value))
 		maxW = math.max(maxW, w)
 	end
 
@@ -143,12 +151,12 @@ function ZJBarColors_CycleWidget:_buildLayout(displayEntry, menuName)
 		["font"]          = style.font,
 		["point"]         = style.point,
 		["color"]         = self:_getColor(0),
-		["text"]          = getUiString(ZJBarColors_OffName),
+		["text"]          = self:_getText(0),
 		["width"]         = maxW,
 		["verticalAlign"] = EEex_Options_Private_LayoutText_VerticalAlign.CENTER,
 		["action"]        = function(instanceData)
 			local value = displayEntry:_getWorkingValue()
-			displayEntry:_setWorkingValue(value >= #ZJBarColors_Colors and 0 or value + 1)
+			displayEntry:_setWorkingValue(value >= count and 0 or value + 1)
 		end,
 	})
 
