@@ -842,10 +842,13 @@ function ZJAttackInfo_Private_IsCastingAt(casterSprite, targetSprite)
 	local casterId = casterSprite.m_id
 	local curAction = casterSprite.m_curAction
 	local actionID = curAction.m_actionID
+	-- A queued spell that waits for the cooldown of the earlier one doesn't count yet, that cooldown still belongs to
+	-- the earlier spell's target
+	local begun = casterSprite:zjHasCastBegun()
 
-	if ZJAttackInfo_Private_TargetedCastActions[actionID] then
+	if begun and ZJAttackInfo_Private_TargetedCastActions[actionID] then
 		ZJAttackInfo_Private_CastTargets[casterId] = curAction.m_acteeID.m_Instance
-	elseif ZJAttackInfo_Private_PointCastActions[actionID] or casterSprite:getCastTimerPercentage() <= 0 then
+	elseif (begun and ZJAttackInfo_Private_PointCastActions[actionID]) or casterSprite:getCastTimerPercentage() <= 0 then
 		ZJAttackInfo_Private_CastTargets[casterId] = nil
 	end
 
@@ -862,6 +865,8 @@ ZJAttackInfo_Private_ItemActions = {
 function ZJAttackInfo_Private_GetActionIcon(sprite)
 	local actionID = sprite.m_curAction.m_actionID
 	if ZJAttackInfo_Private_AttackActions[actionID] then return 1 end
+	-- Don't give away the spell / item a creature queued until the round it is used in begins
+	if not sprite:zjHasCastBegun() then return false end
 	if ZJAttackInfo_Private_ItemActions[actionID] then return 3 end
 	if ZJAttackInfo_Private_TargetedCastActions[actionID] or ZJAttackInfo_Private_PointCastActions[actionID] then return 2 end
 	return false
@@ -1079,6 +1084,9 @@ function ZJAttackInfo_Private_IsCastingSpellAt(casterSprite, targetSprite)
 
 	local curAction = casterSprite.m_curAction
 	local actionID = curAction.m_actionID
+
+	-- A queued spell that waits for the cooldown of the earlier one isn't aimed at anything yet
+	if not casterSprite:zjHasCastBegun() then return false end
 
 	if ZJAttackInfo_Private_TargetedCastActions[actionID] then
 		return curAction.m_acteeID.m_Instance == targetSprite.m_id

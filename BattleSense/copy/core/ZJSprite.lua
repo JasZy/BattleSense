@@ -47,6 +47,9 @@ function ZJSprite_GetCastReleaseTimer(sprite)
 
 	if not ZJSprite_Private_SpellActions[sprite.m_curAction.m_actionID] then return nil end
 
+	-- The cooldown of an earlier spell is still running, the release tick would give away the coming spell
+	if not ZJSprite_HasCastBegun(sprite) then return nil end
+
 	local flagged = sprite.m_bStartedCasting ~= 0
 
 	-- The engine's own casting state can't be relied on: a spell cast at a point leaves m_bStartedCasting and
@@ -113,6 +116,68 @@ function ZJSprite_Private_GetActionCastingTime(sprite)
 	return math.max(0, cache.speedFactor - sprite:getActiveStats().m_nMentalSpeed)
 end
 CGameSprite.zjGetCastReleaseTimer = ZJSprite_GetCastReleaseTimer
+
+-- ACTION.IDS values that wait for the sprite's spell cooldown before they start: the spell actions above,
+-- (and their point variants), UseItem(), UseItemPoint()
+ZJSprite_Private_CooldownActions = {
+	[31]  = true,
+	[34]  = true,
+	[95]  = true,
+	[97]  = true,
+	[113] = true,
+	[114] = true,
+	[191] = true,
+	[192] = true,
+	[318] = true,
+	[319] = true,
+}
+
+-- A creature's AI queues its next spell the moment the previous one is released, and that action then waits for the
+-- previous spell's cooldown to run out. The cast timer and game time at the moment each spell / item action became
+-- the sprite's action tell whether the cooldown it waits on has run out since.
+ZJSprite_Private_CooldownActionStarts = {} -- [sprite id] = { actionID, castTimer, gameTime }
+
+function ZJSprite_Private_GetGameTime()
+	return EngineGlobals.g_pBaldurChitin.m_pObjectGame.m_worldTime.m_gameTime
+end
+
+function ZJSprite_Private_OnSpriteStartedAction(sprite, action)
+	local actionID = action.m_actionID
+	if not ZJSprite_Private_CooldownActions[actionID] then
+		ZJSprite_Private_CooldownActionStarts[sprite.m_id] = nil
+		return
+	end
+	ZJSprite_Private_CooldownActionStarts[sprite.m_id] = {
+		["actionID"]  = actionID,
+		["castTimer"] = sprite:getCastTimer(),
+		["gameTime"]  = ZJSprite_Private_GetGameTime(),
+	}
+end
+EEex_Action_AddSpriteStartedActionListener(ZJSprite_Private_OnSpriteStartedAction)
+EEex_GameState_AddDestroyedListener(function() ZJSprite_Private_CooldownActionStarts = {} end)
+
+-- Returns false while the sprite's spell / item action is still waiting for the cooldown of an earlier spell, (the
+-- round in which it is cast hasn't begun yet), true otherwise.
+function ZJSprite_HasCastBegun(sprite)
+
+	if not sprite then return false end
+
+	local start = ZJSprite_Private_CooldownActionStarts[sprite.m_id]
+	-- Not seen starting, (it was already running when the game was loaded): nothing to go on
+	if start == nil or start.actionID ~= sprite.m_curAction.m_actionID then return true end
+
+	local castTimer = sprite:getCastTimer()
+	-- -1 = no cooldown running: the cast starts on the sprite's next update
+	if castTimer < 0 then return false end
+	-- There was no cooldown to wait for
+	if start.castTimer < 0 then return true end
+	-- The timer has been restarted, (it only counts up during a cooldown)
+	if castTimer < start.castTimer then return true end
+	-- A restarted timer can count past where the old cooldown was, but only after the whole old cooldown, (the rest
+	-- of a round), and that much of the new cast have run: more than a round since the action started
+	return ZJSprite_Private_GetGameTime() - start.gameTime >= 90
+end
+CGameSprite.zjHasCastBegun = ZJSprite_HasCastBegun
 
 -- ACTION.IDS values that run the engine's attack round: Attack(), GroupAttack(),
 -- AttackNoSound(), AttackOneRound(), AttackReevaluate()
