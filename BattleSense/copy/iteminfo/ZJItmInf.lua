@@ -371,6 +371,11 @@ ZJItemInfo_Private_Stats = {
 	{ ["key"] = "ArmorClass",       ["field"] = "m_nArmorClass",            ["lowerIsBetter"] = true, ["always"] = true },
 	{ ["key"] = "MaxHitPoints",     ["field"] = "m_nMaxHitPoints",          ["always"] = true },
 	{ ["key"] = "THAC0",            ["field"] = "m_nTHAC0",                 ["lowerIsBetter"] = true, ["always"] = true },
+	{ ["key"] = "SaveDeath",        ["field"] = "m_nSaveVSDeath",           ["lowerIsBetter"] = true },
+	{ ["key"] = "SaveWands",        ["field"] = "m_nSaveVSWands",           ["lowerIsBetter"] = true },
+	{ ["key"] = "SavePoly",         ["field"] = "m_nSaveVSPoly",            ["lowerIsBetter"] = true },
+	{ ["key"] = "SaveBreath",       ["field"] = "m_nSaveVSBreath",          ["lowerIsBetter"] = true },
+	{ ["key"] = "SaveSpell",        ["field"] = "m_nSaveVSSpell",           ["lowerIsBetter"] = true },
 	{ ["key"] = "DamageBonus",      ["field"] = "m_nDamageBonus"            },
 	{ ["key"] = "STR",              ["field"] = "m_nSTR",                   ["baseField"] = "m_STRBase" },
 	{ ["key"] = "DEX",              ["field"] = "m_nDEX",                   ["baseField"] = "m_DEXBase" },
@@ -378,11 +383,6 @@ ZJItemInfo_Private_Stats = {
 	{ ["key"] = "INT",              ["field"] = "m_nINT",                   ["baseField"] = "m_INTBase" },
 	{ ["key"] = "WIS",              ["field"] = "m_nWIS",                   ["baseField"] = "m_WISBase" },
 	{ ["key"] = "CHR",              ["field"] = "m_nCHR",                   ["baseField"] = "m_CHRBase" },
-	{ ["key"] = "SaveDeath",        ["field"] = "m_nSaveVSDeath",           ["lowerIsBetter"] = true },
-	{ ["key"] = "SaveWands",        ["field"] = "m_nSaveVSWands",           ["lowerIsBetter"] = true },
-	{ ["key"] = "SavePoly",         ["field"] = "m_nSaveVSPoly",            ["lowerIsBetter"] = true },
-	{ ["key"] = "SaveBreath",       ["field"] = "m_nSaveVSBreath",          ["lowerIsBetter"] = true },
-	{ ["key"] = "SaveSpell",        ["field"] = "m_nSaveVSSpell",           ["lowerIsBetter"] = true },
 	{ ["key"] = "ResistMagic",      ["field"] = "m_nResistMagic",           ["suffix"] = "%" },
 	{ ["key"] = "ResistFire",       ["field"] = "m_nResistFire",            ["suffix"] = "%" },
 	{ ["key"] = "ResistCold",       ["field"] = "m_nResistCold",            ["suffix"] = "%" },
@@ -1058,8 +1058,38 @@ function ZJItemInfo_Private_GetComparisonLines(sprite, info)
 	local baseStats = sprite.m_baseStats
 	local newValues = {} -- [stat key] = its value after the change, for the stats that change
 
-	-- The THAC0 line is added once the weapon in hand is worked out, (the stat leaves out its bonuses), at this index
+	-- The THAC0 line is added once the weapon in hand is worked out, (the stat leaves out its bonuses), at this index,
+	-- with the attacks per round line below it
 	local thac0LineIndex = nil
+
+	-- On armor the maximum hit points, THAC0 and attacks per round are only listed when they change
+	local isArmor = ZJItemInfo_Private_CategorySlots[info.category] == 1
+	-- On a weapon the maximum hit points are only listed when they change
+	local isWeaponItem = ZJItemInfo_Private_CategorySlots[info.category] == "weapon"
+
+	-- The armor class against each kind of attack, (the armor class plus the modifier against it), is compared as a
+	-- whole: a worse modifier on a better armor can still leave the character better off. A kind with no modifier on
+	-- either side would only repeat the armor class line. They go below the armor class line.
+	local addArmorClassTypeLines = function()
+
+		local oldArmorClass = stats.m_nArmorClass
+		local newArmorClass = newValues["ArmorClass"] or oldArmorClass
+
+		for _, armorClassType in ipairs(ZJItemInfo_Private_ArmorClassTypes) do
+			local oldMod = stats[armorClassType.field]
+			-- An op0 bonus lowers the modifier
+			local newMod = oldMod - (totals.armorClassTypes[armorClassType.flag] or 0)
+			if oldMod ~= 0 or newMod ~= 0 then
+				local label = ZJItemInfo_Private_T("Stat_"..armorClassType.key)
+				local oldValue, newValue = oldArmorClass + oldMod, newArmorClass + newMod
+				if oldValue == newValue then
+					table.insert(lines, ZJItemInfo_Private_FormatSameLine(label, tostring(newValue)))
+				else
+					table.insert(lines, ZJItemInfo_Private_FormatChangeLine(label, oldValue, newValue, true))
+				end
+			end
+		end
+	end
 
 	for _, stat in ipairs(ZJItemInfo_Private_Stats) do
 
@@ -1088,30 +1118,11 @@ function ZJItemInfo_Private_GetComparisonLines(sprite, info)
 			-- It is part of the weapon damage below
 		elseif newValue ~= nil and newValue ~= oldValue then
 			table.insert(lines, ZJItemInfo_Private_FormatChangeLine(ZJItemInfo_Private_T("Stat_"..key), oldValue, newValue, stat.lowerIsBetter, stat.suffix))
-		elseif stat.always then
+		elseif stat.always and (key == "ArmorClass" or not isArmor) and not (key == "MaxHitPoints" and isWeaponItem) then
 			table.insert(lines, ZJItemInfo_Private_FormatSameLine(ZJItemInfo_Private_T("Stat_"..key), string.format("%d%s", oldValue, stat.suffix or "")))
 		end
-	end
 
-	-- The armor class against each kind of attack, (the armor class plus the modifier against it), is compared as a
-	-- whole: a worse modifier on a better armor can still leave the character better off. A kind with no modifier on
-	-- either side would only repeat the armor class line.
-	local oldArmorClass = stats.m_nArmorClass
-	local newArmorClass = newValues["ArmorClass"] or oldArmorClass
-
-	for _, armorClassType in ipairs(ZJItemInfo_Private_ArmorClassTypes) do
-		local oldMod = stats[armorClassType.field]
-		-- An op0 bonus lowers the modifier
-		local newMod = oldMod - (totals.armorClassTypes[armorClassType.flag] or 0)
-		if oldMod ~= 0 or newMod ~= 0 then
-			local label = ZJItemInfo_Private_T("Stat_"..armorClassType.key)
-			local oldValue, newValue = oldArmorClass + oldMod, newArmorClass + newMod
-			if oldValue == newValue then
-				table.insert(lines, ZJItemInfo_Private_FormatSameLine(label, tostring(newValue)))
-			else
-				table.insert(lines, ZJItemInfo_Private_FormatChangeLine(label, oldValue, newValue, true))
-			end
-		end
+		if key == "ArmorClass" then addArmorClassTypeLines() end
 	end
 
 	-----------------------
@@ -1158,6 +1169,7 @@ function ZJItemInfo_Private_GetComparisonLines(sprite, info)
 
 		newHalves = math.max(newHalves, 0)
 		if newHalves == oldHalves then
+			if isArmor then return nil end
 			return ZJItemInfo_Private_FormatSameLine(ZJItemInfo_Private_T("Stat_AttacksPerRound"), ZJItemInfo_Private_FormatAttacks(oldHalves))
 		end
 
@@ -1168,7 +1180,7 @@ function ZJItemInfo_Private_GetComparisonLines(sprite, info)
 			ZJItemInfo_Private_ColorChange(string.format("%s (%s)", ZJItemInfo_Private_FormatAttacks(newHalves), changeText), change, false))
 	end)
 
-	-- It goes below the weapon damage, (or here, when there is none)
+	-- It goes below the THAC0 line
 	if not okAttacks then attackLine = nil end
 
 	------------
@@ -1216,8 +1228,15 @@ function ZJItemInfo_Private_GetComparisonLines(sprite, info)
 			newTHAC0 = newTHAC0 - newWeapon.thac0Bonus
 		end
 		local label = ZJItemInfo_Private_T("Stat_THAC0")
-		table.insert(lines, thac0LineIndex, oldTHAC0 == newTHAC0 and ZJItemInfo_Private_FormatSameLine(label, tostring(newTHAC0))
-			or ZJItemInfo_Private_FormatChangeLine(label, oldTHAC0, newTHAC0, true))
+		local attackIndex = thac0LineIndex
+		if oldTHAC0 ~= newTHAC0 then
+			table.insert(lines, thac0LineIndex, ZJItemInfo_Private_FormatChangeLine(label, oldTHAC0, newTHAC0, true))
+			attackIndex = attackIndex + 1
+		elseif not isArmor then
+			table.insert(lines, thac0LineIndex, ZJItemInfo_Private_FormatSameLine(label, tostring(newTHAC0)))
+			attackIndex = attackIndex + 1
+		end
+		if attackLine ~= nil then table.insert(lines, attackIndex, attackLine); attackLine = nil end
 	end
 
 	if isWeapon and info.weapon ~= nil and okOld and okNew and ZJItemInfo_Private_ShowWeaponStats:get() ~= 0 then
@@ -1232,7 +1251,6 @@ function ZJItemInfo_Private_GetComparisonLines(sprite, info)
 		if oldInfo == nil or oldInfo.weapon == nil then
 			-- A weapon where there was none
 			table.insert(lines, string.format("%s: %s", ZJItemInfo_Private_T("Weapon_Damage"), newDamage))
-			if attackLine ~= nil then table.insert(lines, attackLine); attackLine = nil end
 			table.insert(lines, string.format("%s: %d", ZJItemInfo_Private_T("Weapon_SpeedFactor"), newWeapon.speedFactor))
 		else
 			oldWeapon.bonus = oldWeapon.bonus + oldDamageBonus
@@ -1245,7 +1263,6 @@ function ZJItemInfo_Private_GetComparisonLines(sprite, info)
 				table.insert(lines, string.format("%s: %s -> %s", ZJItemInfo_Private_T("Weapon_Damage"), oldDamage,
 					ZJItemInfo_Private_ColorChange(newDamage, change, false)))
 			end
-			if attackLine ~= nil then table.insert(lines, attackLine); attackLine = nil end
 
 			if oldWeapon.speedFactor == newWeapon.speedFactor then
 				table.insert(lines, ZJItemInfo_Private_FormatSameLine(ZJItemInfo_Private_T("Weapon_SpeedFactor"), tostring(newWeapon.speedFactor)))
