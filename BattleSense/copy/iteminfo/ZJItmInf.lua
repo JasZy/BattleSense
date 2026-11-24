@@ -1062,10 +1062,10 @@ function ZJItemInfo_Private_GetComparisonLines(sprite, info)
 	-- with the attacks per round line below it
 	local thac0LineIndex = nil
 
-	-- On armor the maximum hit points, THAC0 and attacks per round are only listed when they change
-	local isArmor = ZJItemInfo_Private_CategorySlots[info.category] == 1
-	-- On a weapon the maximum hit points are only listed when they change
+	-- On a weapon the maximum hit points are only listed when they change, on anything else, (armor, bracers, rings,
+	-- ...), the THAC0 and attacks per round too
 	local isWeaponItem = ZJItemInfo_Private_CategorySlots[info.category] == "weapon"
+	local isArmor = not isWeaponItem
 
 	-- The armor class against each kind of attack, (the armor class plus the modifier against it), is compared as a
 	-- whole: a worse modifier on a better armor can still leave the character better off. A kind with no modifier on
