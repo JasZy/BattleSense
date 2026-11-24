@@ -450,11 +450,12 @@ ZJItemInfo_Private_OpcodeStats = {
 }
 
 -- op0's second parameter => the kind of attack that armor class bonus is against
+-- field => the stat with the character's modifier against it, (it is added to the armor class, so +2 is worse)
 ZJItemInfo_Private_ArmorClassTypes = {
-	{ ["flag"] = 1, ["key"] = "ArmorClassCrushing" },
-	{ ["flag"] = 2, ["key"] = "ArmorClassMissile"  },
-	{ ["flag"] = 4, ["key"] = "ArmorClassPiercing" },
-	{ ["flag"] = 8, ["key"] = "ArmorClassSlashing" },
+	{ ["flag"] = 1, ["key"] = "ArmorClassCrushing", ["field"] = "m_nACCrushingMod" },
+	{ ["flag"] = 2, ["key"] = "ArmorClassMissile",  ["field"] = "m_nACMissileMod"  },
+	{ ["flag"] = 4, ["key"] = "ArmorClassPiercing", ["field"] = "m_nACPiercingMod" },
+	{ ["flag"] = 8, ["key"] = "ArmorClassSlashing", ["field"] = "m_nACSlashingMod" },
 }
 
 -- Adds what the equipped effects of an item do to `totals`, `direction` is 1 for the item that is put on and -1 for one that is taken off:
@@ -1092,12 +1093,24 @@ function ZJItemInfo_Private_GetComparisonLines(sprite, info)
 		end
 	end
 
+	-- The armor class against each kind of attack, (the armor class plus the modifier against it), is compared as a
+	-- whole: a worse modifier on a better armor can still leave the character better off. A kind with no modifier on
+	-- either side would only repeat the armor class line.
+	local oldArmorClass = stats.m_nArmorClass
+	local newArmorClass = newValues["ArmorClass"] or oldArmorClass
+
 	for _, armorClassType in ipairs(ZJItemInfo_Private_ArmorClassTypes) do
-		local bonus = totals.armorClassTypes[armorClassType.flag] or 0
-		if bonus ~= 0 then
-			-- A bonus is the better one here, whatever it does to the number
-			local text = ZJItemInfo_Private_ColorChange(string.format("%+d", bonus), bonus, false)
-			table.insert(lines, string.format("%s: %s", ZJItemInfo_Private_T("Stat_"..armorClassType.key), text))
+		local oldMod = stats[armorClassType.field]
+		-- An op0 bonus lowers the modifier
+		local newMod = oldMod - (totals.armorClassTypes[armorClassType.flag] or 0)
+		if oldMod ~= 0 or newMod ~= 0 then
+			local label = ZJItemInfo_Private_T("Stat_"..armorClassType.key)
+			local oldValue, newValue = oldArmorClass + oldMod, newArmorClass + newMod
+			if oldValue == newValue then
+				table.insert(lines, ZJItemInfo_Private_FormatSameLine(label, tostring(newValue)))
+			else
+				table.insert(lines, ZJItemInfo_Private_FormatChangeLine(label, oldValue, newValue, true))
+			end
 		end
 	end
 
@@ -1509,10 +1522,12 @@ function ZJItemInfo_Private_GetUseLines(sprite, use)
 	end
 
 	for _, armorClassType in ipairs(ZJItemInfo_Private_ArmorClassTypes) do
+		-- The armor class against that kind of attack, (the armor class plus the modifier against it), an op0 bonus lowers the modifier
 		local bonus = armorClassTypes[armorClassType.flag] or 0
 		if bonus ~= 0 then
-			local text = ZJItemInfo_Private_ColorChange(string.format("%+d", bonus), bonus, false)
-			table.insert(pending, { string.format("%s: %s", ZJItemInfo_Private_T("Stat_"..armorClassType.key), text), nil })
+			local mod = stats[armorClassType.field]
+			table.insert(pending, { ZJItemInfo_Private_FormatChangeLine(ZJItemInfo_Private_T("Stat_"..armorClassType.key),
+				stats.m_nArmorClass + mod, values["ArmorClass"] + mod - bonus, true), nil })
 		end
 	end
 
