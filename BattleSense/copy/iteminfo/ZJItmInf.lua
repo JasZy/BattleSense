@@ -2339,12 +2339,19 @@ function ZJItemInfo_Private_FindHoveredItem()
 	return hovered
 end
 
--- The character a comparison is for: the one whose portrait is selected in a store, otherwise the leader of the selected creatures
+-- The character a comparison is for: the one the inventory screen shows, (UI.menu's global `id`, which can be another
+-- one than the leader of the selected creatures), the one whose portrait is selected in a store, otherwise the leader
+-- of the selected creatures
 function ZJItemInfo_Private_GetSelectedSprite()
 
 	local sprite = nil
 
-	if ZJItemInfo_Private_IsStoreOpen() then
+	if type(id) == "number" and Infinity_IsMenuOnStack(ZJItemInfo_Private_InventoryMenuName) then
+		local ok, inventorySprite = pcall(EEex_GameObject_Get, id)
+		if ok then sprite = inventorySprite end
+	end
+
+	if not EEex_GameObject_IsSprite(sprite) and ZJItemInfo_Private_IsStoreOpen() then
 		local ok, portraitIndex = pcall(function()
 			return EngineGlobals.g_pBaldurChitin.m_pEngineStore.m_nSelectedCharacter
 		end)
