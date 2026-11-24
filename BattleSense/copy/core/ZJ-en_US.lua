@@ -459,7 +459,7 @@ An item that isn't identified has no stat changes listed.
 uiStrings["ZJBattleSense_Options_TRANSLATION_ItemInfo_ShowWeaponStats"] = "Include Weapon Stats"
 
 uiStrings["ZJBattleSense_Options_TRANSLATION_ItemInfo_ShowWeaponStats_Description"] = [[
-For a weapon, also lists how its damage, THAC0 bonus, speed factor and the character's proficiency points compare with the weapon in hand. The damage, THAC0 bonus and speed factor include the character's strength bonus, (melee weapons, and ranged weapons that add it, like slings and thrown weapons), what the character's proficiency in the weapon adds, (or the penalty for not being proficient), and what its weapon style adds, (two-handed, sword and shield, single weapon or two weapons). When the style changes, the armor class includes the style's armor class bonus.
+For a weapon, also lists how its damage and speed factor compare with the weapon in hand. These, and the THAC0, include the character's strength bonus, (melee weapons, and ranged weapons that add it, like slings and thrown weapons), what the character's proficiency in the weapon adds, (or the penalty for not being proficient), and what its weapon style adds, (two-handed, sword and shield, single weapon or two weapons). The damage also includes the character's damage bonus. When the style changes, the armor class includes the style's armor class bonus.
 ]]
 
 uiStrings["ZJBattleSense_Options_TRANSLATION_ItemInfo_ShowInStores"] = "Show In Stores"
@@ -499,7 +499,6 @@ Items aimed at a creature, (a wand, a thrown potion), are described by Spell Inf
 uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Unidentified"]        = "Not identified"
 uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_IfEquipped"]          = "If %s equips this:"
 uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_IfEquippedReplacing"] = "If %s equips this instead of %s:"
-uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_NoChange"]            = "No stat changes"
 uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_NotUsable"]           = "Not usable by %s"
 
 uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Stat_ArmorClass"]         = "Armor Class"
@@ -574,15 +573,7 @@ uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Use_Regeneration"]   = "Regenerati
 uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Use_FreeAction"]     = "Free action"
 
 uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Weapon_Damage"]      = "Weapon damage"
-uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Weapon_THAC0Bonus"]  = "THAC0 bonus"
 uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Weapon_SpeedFactor"] = "Speed factor"
-uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Weapon_Proficiency"] = "Proficiency points"
-uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Weapon_Style"]       = "Weapon style"
-uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Style_NONE"]           = "none"
-uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Style_TWOHANDED"]      = "Two-handed"
-uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Style_SWORDANDSHIELD"] = "Sword and shield"
-uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Style_SINGLEWEAPON"]   = "Single weapon"
-uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Style_TWOWEAPON"]      = "Two weapons"
 
 ------------------
 -- Ability Info --

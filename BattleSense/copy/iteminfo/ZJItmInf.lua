@@ -365,12 +365,13 @@ end
 --   field         => The field of the character's stats that holds it
 --   lowerIsBetter => true if a lower value is the better one
 --   suffix        => What goes behind its value
+--   always        => true if it is listed even when it doesn't change, (in white)
 --
 ZJItemInfo_Private_Stats = {
-	{ ["key"] = "ArmorClass",       ["field"] = "m_nArmorClass",            ["lowerIsBetter"] = true },
-	{ ["key"] = "THAC0",            ["field"] = "m_nTHAC0",                 ["lowerIsBetter"] = true },
+	{ ["key"] = "ArmorClass",       ["field"] = "m_nArmorClass",            ["lowerIsBetter"] = true, ["always"] = true },
+	{ ["key"] = "THAC0",            ["field"] = "m_nTHAC0",                 ["lowerIsBetter"] = true, ["always"] = true },
 	{ ["key"] = "DamageBonus",      ["field"] = "m_nDamageBonus"            },
-	{ ["key"] = "MaxHitPoints",     ["field"] = "m_nMaxHitPoints"           },
+	{ ["key"] = "MaxHitPoints",     ["field"] = "m_nMaxHitPoints",          ["always"] = true },
 	{ ["key"] = "STR",              ["field"] = "m_nSTR",                   ["baseField"] = "m_STRBase" },
 	{ ["key"] = "DEX",              ["field"] = "m_nDEX",                   ["baseField"] = "m_DEXBase" },
 	{ ["key"] = "CON",              ["field"] = "m_nCON",                   ["baseField"] = "m_CONBase" },
@@ -584,6 +585,11 @@ function ZJItemInfo_Private_FormatChangeLine(label, oldValue, newValue, lowerIsB
 	return string.format("%s: %d%s -> %s", label, oldValue, suffix, ZJItemInfo_Private_ColorChange(newText, change, lowerIsBetter))
 end
 
+-- A stat that stays the same, (in the default color)
+function ZJItemInfo_Private_FormatSameLine(label, valueText)
+	return string.format("%s: %s", label, valueText)
+end
+
 function ZJItemInfo_Private_FormatWeaponDamage(weapon)
 	local hasDice = weapon.diceCount > 0 and weapon.diceSize > 0
 	if not hasDice then return tostring(weapon.bonus) end
@@ -759,6 +765,45 @@ function ZJItemInfo_Private_GetHandInfos(sprite)
 
 	return mainInfo, getInfo(ZJItemInfo_Private_Slot_Shield)
 end
+
+-- The item info of the weapon `sprite` attacks with, (the launcher while its ammunition is selected), nil for its fists
+function ZJItemInfo_Private_GetWeaponInHand(sprite)
+
+	local equipment = sprite.m_equipment
+	local items = equipment.m_items
+
+	local getInfo = function(slotNum)
+		local item = items:get(slotNum)
+		if item == nil then return nil end
+		return ZJItemInfo_Private_GetItemInfo(item.cResRef:get())
+	end
+
+	local selectedWeapon = equipment.m_selectedWeapon
+
+	if selectedWeapon >= 35 and selectedWeapon <= 38 then
+		return getInfo(selectedWeapon)
+	elseif selectedWeapon >= 11 and selectedWeapon <= 14 then
+		for weaponSlot = 35, 38 do
+			local slotInfo = getInfo(weaponSlot)
+			if slotInfo ~= nil and ZJItemInfo_Private_LauncherCategories[slotInfo.category] then
+				return slotInfo
+			end
+		end
+	end
+
+	return nil
+end
+
+-- What a character without a weapon attacks with, (FIST.ITM)
+ZJItemInfo_Private_FistWeapon = {
+	["diceCount"]   = 1,
+	["diceSize"]    = 2,
+	["bonus"]       = 0,
+	["thac0Bonus"]  = 0,
+	["speedFactor"] = 1,
+	["ranged"]      = false,
+	["addStrength"] = true,
+}
 
 -- Returns the weapon style `sprite` fights in now, and the one it would fight in after equipping the item of `info`
 function ZJItemInfo_Private_GetStyleChange(sprite, info)
@@ -1012,6 +1057,9 @@ function ZJItemInfo_Private_GetComparisonLines(sprite, info)
 	local baseStats = sprite.m_baseStats
 	local newValues = {} -- [stat key] = its value after the change, for the stats that change
 
+	-- The THAC0 line is added once the weapon in hand is worked out, (the stat leaves out its bonuses), at this index
+	local thac0LineIndex = nil
+
 	for _, stat in ipairs(ZJItemInfo_Private_Stats) do
 
 		local key = stat.key
@@ -1031,7 +1079,16 @@ function ZJItemInfo_Private_GetComparisonLines(sprite, info)
 
 		if newValue ~= nil and newValue ~= oldValue then
 			newValues[key] = newValue
+		end
+
+		if key == "THAC0" then
+			thac0LineIndex = #lines + 1
+		elseif key == "DamageBonus" and info.weapon ~= nil and ZJItemInfo_Private_ShowWeaponStats:get() ~= 0 then
+			-- It is part of the weapon damage below
+		elseif newValue ~= nil and newValue ~= oldValue then
 			table.insert(lines, ZJItemInfo_Private_FormatChangeLine(ZJItemInfo_Private_T("Stat_"..key), oldValue, newValue, stat.lowerIsBetter, stat.suffix))
+		elseif stat.always then
+			table.insert(lines, ZJItemInfo_Private_FormatSameLine(ZJItemInfo_Private_T("Stat_"..key), string.format("%d%s", oldValue, stat.suffix or "")))
 		end
 	end
 
@@ -1087,7 +1144,9 @@ function ZJItemInfo_Private_GetComparisonLines(sprite, info)
 		end
 
 		newHalves = math.max(newHalves, 0)
-		if newHalves == oldHalves then return nil end
+		if newHalves == oldHalves then
+			return ZJItemInfo_Private_FormatSameLine(ZJItemInfo_Private_T("Stat_AttacksPerRound"), ZJItemInfo_Private_FormatAttacks(oldHalves))
+		end
 
 		local change = newHalves - oldHalves
 		local changeText = change % 2 == 0 and string.format("%+d", change / 2) or string.format("%s%d/2", change < 0 and "-" or "+", math.abs(change))
@@ -1104,84 +1163,84 @@ function ZJItemInfo_Private_GetComparisonLines(sprite, info)
 	-- Weapon --
 	------------
 
-	local newWeapon = info.weapon
+	-- The weapon in hand before and after, (the item itself if it is a weapon, else the weapon it doesn't touch). The
+	-- one it replaces is the first item that is taken off, (the second one is the shield, for a two-handed weapon).
+	local isWeapon = ZJItemInfo_Private_CategorySlots[info.category] == "weapon"
+	local oldInfo, newInfo
 
-	if newWeapon ~= nil and ZJItemInfo_Private_ShowWeaponStats:get() ~= 0 then
-
-		-- The weapon it replaces is the first item that is taken off, (the second one is the shield, for a two-handed weapon)
+	if isWeapon then
 		local oldItem = replaced[1]
-		local oldInfo = oldItem and ZJItemInfo_Private_CategorySlots[oldItem.info.category] == "weapon" and oldItem.info or nil
-		local oldWeapon = oldInfo and oldInfo.weapon or nil
+		oldInfo = oldItem and ZJItemInfo_Private_CategorySlots[oldItem.info.category] == "weapon" and oldItem.info or nil
+		newInfo = info
+	else
+		local okHand, handInfo = pcall(ZJItemInfo_Private_GetWeaponInHand, sprite)
+		oldInfo = okHand and handInfo or nil
+		newInfo = oldInfo
+	end
 
-		-- The character's strength, now and with the item equipped, (exceptional strength only counts while it stays 18)
-		local oldStrength, oldExtra = stats.m_nSTR, stats.m_nSTRExtra
-		local newStrength = newValues["STR"] or oldStrength
-		local newExtra = newStrength == oldStrength and oldExtra or 0
+	-- The character's strength, now and with the item equipped, (exceptional strength only counts while it stays 18)
+	local oldStrength, oldExtra = stats.m_nSTR, stats.m_nSTRExtra
+	local newStrength = newValues["STR"] or oldStrength
+	local newExtra = newStrength == oldStrength and oldExtra or 0
 
-		-- Compared as the character would use them, with its strength bonus, its proficiency in each, and the weapon
-		-- style it fights in with each
-		local newAddStrength = newWeapon.addStrength
-		newWeapon = ZJItemInfo_Private_ApplyStrength(newWeapon, newAddStrength, newStrength, newExtra)
-		newWeapon = ZJItemInfo_Private_ApplyProficiency(sprite, newWeapon, info.proficiencyType)
-		newWeapon = ZJItemInfo_Private_ApplyStyle(newWeapon, newStyleBonus)
-		if oldWeapon ~= nil then
-			oldWeapon = ZJItemInfo_Private_ApplyStrength(oldWeapon, oldWeapon.addStrength, oldStrength, oldExtra)
-			oldWeapon = ZJItemInfo_Private_ApplyProficiency(sprite, oldWeapon, oldInfo.proficiencyType)
-			oldWeapon = ZJItemInfo_Private_ApplyStyle(oldWeapon, oldStyleBonus)
+	-- The weapon as the character would use it, with its strength bonus, its proficiency in it, and the weapon style it
+	-- fights in with it. No weapon is a fist.
+	local applyAll = function(weaponInfo, strength, extra, styleBonus)
+		local weapon = weaponInfo and weaponInfo.weapon or ZJItemInfo_Private_FistWeapon
+		weapon = ZJItemInfo_Private_ApplyStrength(weapon, weapon.addStrength, strength, extra)
+		weapon = ZJItemInfo_Private_ApplyProficiency(sprite, weapon, weaponInfo and weaponInfo.weapon and weaponInfo.proficiencyType or nil)
+		return ZJItemInfo_Private_ApplyStyle(weapon, styleBonus)
+	end
+
+	local okOld, oldWeapon = pcall(applyAll, oldInfo, oldStrength, oldExtra, oldStyleBonus)
+	local okNew, newWeapon = pcall(applyAll, newInfo, newStrength, newExtra, newStyleBonus)
+
+	-- THAC0, (the stat leaves out what the weapon in hand adds to it, as does the inventory screen's)
+	if thac0LineIndex ~= nil then
+		local oldTHAC0 = stats.m_nTHAC0
+		local newTHAC0 = newValues["THAC0"] or oldTHAC0
+		if okOld and okNew then
+			oldTHAC0 = oldTHAC0 - oldWeapon.thac0Bonus
+			newTHAC0 = newTHAC0 - newWeapon.thac0Bonus
 		end
+		local label = ZJItemInfo_Private_T("Stat_THAC0")
+		table.insert(lines, thac0LineIndex, oldTHAC0 == newTHAC0 and ZJItemInfo_Private_FormatSameLine(label, tostring(newTHAC0))
+			or ZJItemInfo_Private_FormatChangeLine(label, oldTHAC0, newTHAC0, true))
+	end
+
+	if isWeapon and info.weapon ~= nil and okOld and okNew and ZJItemInfo_Private_ShowWeaponStats:get() ~= 0 then
+
+		-- The character's damage bonus, (op73 etc.), adds to the damage of every weapon
+		local oldDamageBonus = stats.m_nDamageBonus
+		local newDamageBonus = newValues["DamageBonus"] or oldDamageBonus
+		newWeapon.bonus = newWeapon.bonus + newDamageBonus
 
 		local newDamage = ZJItemInfo_Private_FormatWeaponDamage(newWeapon)
 
-		if oldWeapon == nil then
+		if oldInfo == nil or oldInfo.weapon == nil then
+			-- A weapon where there was none
 			table.insert(lines, string.format("%s: %s", ZJItemInfo_Private_T("Weapon_Damage"), newDamage))
-			table.insert(lines, string.format("%s: %+d", ZJItemInfo_Private_T("Weapon_THAC0Bonus"), newWeapon.thac0Bonus))
 			table.insert(lines, string.format("%s: %d", ZJItemInfo_Private_T("Weapon_SpeedFactor"), newWeapon.speedFactor))
 		else
+			oldWeapon.bonus = oldWeapon.bonus + oldDamageBonus
+
 			local oldDamage = ZJItemInfo_Private_FormatWeaponDamage(oldWeapon)
-			if oldDamage ~= newDamage then
+			if oldDamage == newDamage then
+				table.insert(lines, ZJItemInfo_Private_FormatSameLine(ZJItemInfo_Private_T("Weapon_Damage"), newDamage))
+			else
 				local change = ZJItemInfo_Private_GetWeaponAverageDamage(newWeapon) - ZJItemInfo_Private_GetWeaponAverageDamage(oldWeapon)
 				table.insert(lines, string.format("%s: %s -> %s", ZJItemInfo_Private_T("Weapon_Damage"), oldDamage,
 					ZJItemInfo_Private_ColorChange(newDamage, change, false)))
 			end
 
-			if oldWeapon.thac0Bonus ~= newWeapon.thac0Bonus then
-				local change = newWeapon.thac0Bonus - oldWeapon.thac0Bonus
-				table.insert(lines, string.format("%s: %+d -> %s", ZJItemInfo_Private_T("Weapon_THAC0Bonus"), oldWeapon.thac0Bonus,
-					ZJItemInfo_Private_ColorChange(string.format("%+d", newWeapon.thac0Bonus), change, false)))
-			end
-
-			if oldWeapon.speedFactor ~= newWeapon.speedFactor then
+			if oldWeapon.speedFactor == newWeapon.speedFactor then
+				table.insert(lines, ZJItemInfo_Private_FormatSameLine(ZJItemInfo_Private_T("Weapon_SpeedFactor"), tostring(newWeapon.speedFactor)))
+			else
 				local change = newWeapon.speedFactor - oldWeapon.speedFactor
 				table.insert(lines, string.format("%s: %d -> %s", ZJItemInfo_Private_T("Weapon_SpeedFactor"), oldWeapon.speedFactor,
 					ZJItemInfo_Private_ColorChange(tostring(newWeapon.speedFactor), change, true)))
 			end
 		end
-
-		local newProficiency = ZJItemInfo_Private_GetProficiency(sprite, info.proficiencyType)
-
-		if oldInfo == nil then
-			table.insert(lines, string.format("%s: %d", ZJItemInfo_Private_T("Weapon_Proficiency"), newProficiency))
-		else
-			local oldProficiency = ZJItemInfo_Private_GetProficiency(sprite, oldInfo.proficiencyType)
-			if oldProficiency ~= newProficiency then
-				table.insert(lines, string.format("%s: %d -> %s", ZJItemInfo_Private_T("Weapon_Proficiency"), oldProficiency,
-					ZJItemInfo_Private_ColorChange(tostring(newProficiency), newProficiency - oldProficiency, false)))
-			end
-		end
-	end
-
-	-- Which style the numbers above were worked out with, (its points in brackets)
-	if oldStyle ~= newStyle and ZJItemInfo_Private_ShowWeaponStats:get() ~= 0 then
-		local styleName = function(style, bonus)
-			if style == nil then return ZJItemInfo_Private_T("Style_NONE") end
-			return string.format("%s (%d)", ZJItemInfo_Private_T("Style_"..style), bonus.points)
-		end
-		table.insert(lines, string.format("%s: %s -> %s", ZJItemInfo_Private_T("Weapon_Style"),
-			styleName(oldStyle, oldStyleBonus), styleName(newStyle, newStyleBonus)))
-	end
-
-	if #lines == 1 then
-		table.insert(lines, ZJItemInfo_Private_T("NoChange"))
 	end
 
 	return lines
