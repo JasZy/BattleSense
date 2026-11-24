@@ -14,6 +14,14 @@ EEex_Options_Register("ZJAttackInfo_Enable", EEex_Options_Option.new({
 	["onChange"] = function(self, oldValue) ZJAttackInfo_SetEnabled(self:get() ~= 0) end,
 }))
 
+-- "Enabled For Friendly": the compact popup, over party members and allies that are in a fight
+ZJAttackInfo_Private_CompactForAllies = EEex_Options_Register("ZJAttackInfo_CompactForAllies", EEex_Options_Option.new({
+	["default"]  = 1,
+	["type"]     = EEex_Options_ToggleType.new(),
+	["accessor"] = EEex_Options_ClampedAccessor.new({ ["min"] = 0, ["max"] = 1 }),
+	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Attack Info Module: Compact For Allies" }),
+}))
+
 ZJAttackInfo_Private_FontPoint = EEex_Options_Register("ZJAttackInfo_FontPoint", EEex_Options_Option.new({
 	["default"]  = 11,
 	["type"]     = EEex_Options_EditType.new(),
@@ -34,49 +42,11 @@ ZJAttackInfo_Private_ImmunityDisplayType = EEex_Options_Register("ZJAttackInfo_I
 	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Attack Info Module: Immunity Display Type" }),
 }))
 
-EEex_Options_Register("ZJAttackInfo_OpenKeybind", EEex_Options_Option.new({
-	["default"]  = EEex_Options_UnmarshalKeybind("Left Ctrl|Down"),
-	["type"]     = EEex_Options_KeybindType.new({
-		["lockedFireType"] = EEex_Keybinds_FireType.DOWN,
-		["callback"]       = function() ZJAttackInfo_Private_OnOpenKeybindPressed()     end,
-		["onSatisfied"]    = function() ZJAttackInfo_Private_OnOpenKeybindSatisfied()   end,
-		["onUnsatisfied"]  = function() ZJAttackInfo_Private_OnOpenKeybindUnsatisfied() end,
-	}),
-	["accessor"] = EEex_Options_KeybindAccessor.new({ ["keybindID"] = "ZJAttackInfo_OpenKeybind" }),
-	["storage"]  = EEex_Options_KeybindLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Attack Info Module: Open Keybind" }),
-}))
-
-ZJAttackInfo_Private_OpenWithAttackCursor = EEex_Options_Register("ZJAttackInfo_OpenWithAttackCursor", EEex_Options_Option.new({
-	["default"]  = 1,
-	["type"]     = EEex_Options_ToggleType.new(),
-	["accessor"] = EEex_Options_ClampedAccessor.new({ ["min"] = 0, ["max"] = 1 }),
-	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Attack Info Module: Open With Attack Cursor" }),
-}))
-
-EEex_Options_Register("ZJAttackInfo_ReverseKeybind", EEex_Options_Option.new({
-	["default"]  = EEex_Options_UnmarshalKeybind("Left Alt|Down"),
-	["type"]     = EEex_Options_KeybindType.new({
-		["lockedFireType"] = EEex_Keybinds_FireType.DOWN,
-		["callback"]       = function() ZJAttackInfo_Private_OnReverseKeybindPressed()     end,
-		["onSatisfied"]    = function() ZJAttackInfo_Private_OnReverseKeybindSatisfied()   end,
-		["onUnsatisfied"]  = function() ZJAttackInfo_Private_OnReverseKeybindUnsatisfied() end,
-	}),
-	["accessor"] = EEex_Options_KeybindAccessor.new({ ["keybindID"] = "ZJAttackInfo_ReverseKeybind" }),
-	["storage"]  = EEex_Options_KeybindLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Attack Info Module: Reverse Keybind" }),
-}))
-
 ZJAttackInfo_Private_ShowSpellEffects = EEex_Options_Register("ZJAttackInfo_ShowSpellEffects", EEex_Options_Option.new({
 	["default"]  = 1,
 	["type"]     = EEex_Options_ToggleType.new(),
 	["accessor"] = EEex_Options_ClampedAccessor.new({ ["min"] = 0, ["max"] = 1 }),
 	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Attack Info Module: Show Spell Effects" }),
-}))
-
-ZJAttackInfo_Private_CompactForAllies = EEex_Options_Register("ZJAttackInfo_CompactForAllies", EEex_Options_Option.new({
-	["default"]  = 1,
-	["type"]     = EEex_Options_ToggleType.new(),
-	["accessor"] = EEex_Options_ClampedAccessor.new({ ["min"] = 0, ["max"] = 1 }),
-	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Attack Info Module: Compact For Allies" }),
 }))
 
 ZJAttackInfo_Private_ShowRowTimers = EEex_Options_Register("ZJAttackInfo_ShowRowTimers", EEex_Options_Option.new({
@@ -92,6 +62,12 @@ EEex_Options_AddTab("ZJBattleSense_Options_TRANSLATION_AttackInfo_TabTitle", fun
 			["optionID"]    = "ZJAttackInfo_Enable",
 			["label"]       = "ZJBattleSense_Options_TRANSLATION_AttackInfo_Enable",
 			["description"] = "ZJBattleSense_Options_TRANSLATION_AttackInfo_Enable_Description",
+			["widget"]      = EEex_Options_ToggleWidget.new(),
+		}),
+		EEex_Options_DisplayEntry.new({
+			["optionID"]    = "ZJAttackInfo_CompactForAllies",
+			["label"]       = "ZJBattleSense_Options_TRANSLATION_AttackInfo_CompactForAllies",
+			["description"] = "ZJBattleSense_Options_TRANSLATION_AttackInfo_CompactForAllies_Description",
 			["widget"]      = EEex_Options_ToggleWidget.new(),
 		}),
 		EEex_Options_DisplayEntry.new({
@@ -142,33 +118,9 @@ EEex_Options_AddTab("ZJBattleSense_Options_TRANSLATION_AttackInfo_TabTitle", fun
 			}),
 		}),
 		EEex_Options_DisplayEntry.new({
-			["optionID"]    = "ZJAttackInfo_OpenKeybind",
-			["label"]       = "ZJBattleSense_Options_TRANSLATION_AttackInfo_OpenKeybind",
-			["description"] = "ZJBattleSense_Options_TRANSLATION_AttackInfo_OpenKeybind_Description",
-			["widget"]      = EEex_Options_KeybindWidget.new(),
-		}),
-		EEex_Options_DisplayEntry.new({
-			["optionID"]    = "ZJAttackInfo_OpenWithAttackCursor",
-			["label"]       = "ZJBattleSense_Options_TRANSLATION_AttackInfo_OpenWithAttackCursor",
-			["description"] = "ZJBattleSense_Options_TRANSLATION_AttackInfo_OpenWithAttackCursor_Description",
-			["widget"]      = EEex_Options_ToggleWidget.new(),
-		}),
-		EEex_Options_DisplayEntry.new({
-			["optionID"]    = "ZJAttackInfo_ReverseKeybind",
-			["label"]       = "ZJBattleSense_Options_TRANSLATION_AttackInfo_ReverseKeybind",
-			["description"] = "ZJBattleSense_Options_TRANSLATION_AttackInfo_ReverseKeybind_Description",
-			["widget"]      = EEex_Options_KeybindWidget.new(),
-		}),
-		EEex_Options_DisplayEntry.new({
 			["optionID"]    = "ZJAttackInfo_ShowSpellEffects",
 			["label"]       = "ZJBattleSense_Options_TRANSLATION_AttackInfo_ShowSpellEffects",
 			["description"] = "ZJBattleSense_Options_TRANSLATION_AttackInfo_ShowSpellEffects_Description",
-			["widget"]      = EEex_Options_ToggleWidget.new(),
-		}),
-		EEex_Options_DisplayEntry.new({
-			["optionID"]    = "ZJAttackInfo_CompactForAllies",
-			["label"]       = "ZJBattleSense_Options_TRANSLATION_AttackInfo_CompactForAllies",
-			["description"] = "ZJBattleSense_Options_TRANSLATION_AttackInfo_CompactForAllies_Description",
 			["widget"]      = EEex_Options_ToggleWidget.new(),
 		}),
 		EEex_Options_DisplayEntry.new({
@@ -198,13 +150,12 @@ EEex_Options_AddTab("ZJBattleSense_Options_TRANSLATION_AttackInfo_TabTitle", fun
 
 ZJAttackInfo_Private_CombatantSearchRange = 896 -- Twice a sprite's default visual range
 ZJAttackInfo_Private_GoodCutoff = 30 -- EA.IDS, everything up to this value is on the party's side
+ZJAttackInfo_Private_EvilCutoff = 200 -- EA.IDS, everything from this value is hostile to the party
 ZJAttackInfo_Private_ObjectTypes = {} -- [script object string] = CAIObjectType
 ZJAttackInfo_Private_CurrentTargetID = -1
 ZJAttackInfo_Private_Enabled = false
 ZJAttackInfo_Private_LastTargetID = -1
 ZJAttackInfo_Private_OpenDelayTarget = -1
-ZJAttackInfo_Private_OpenKeybindPressed = false
-ZJAttackInfo_Private_ReverseKeybindPressed = false
 
 -------------
 -- General --
@@ -221,6 +172,11 @@ ZJAttackInfo_Private_ReverseKeybindPressed = false
 function ZJAttackInfo_SetEnabled(enabled)
 	ZJAttackInfo_Private_Enabled = enabled
 	ZJAttackInfo_Private_Menu_Ticker_SetOpen(ZJAttackInfo_Private_Menu_Ticker_ShouldBeOpen and enabled)
+end
+
+-- Whether the popup may open over a target, (`compact` = the target is on the party's side)
+function ZJAttackInfo_Private_IsPopupAllowed(compact)
+	return not compact or ZJAttackInfo_Private_CompactForAllies:get() ~= 0
 end
 
 ----------
@@ -315,8 +271,7 @@ end
 -- The compact popup is used for the party and its summons / allies. Instead of the selected party members,
 -- it lists the creatures the target is fighting.
 function ZJAttackInfo_Private_IsCompactTarget(targetSprite)
-	return ZJAttackInfo_Private_CompactForAllies:get() ~= 0
-		and targetSprite.m_typeAI.m_EnemyAlly <= ZJAttackInfo_Private_GoodCutoff
+	return targetSprite.m_typeAI.m_EnemyAlly <= ZJAttackInfo_Private_GoodCutoff
 end
 
 -- Returns the sprites to list for `targetSprite`, and whether the compact popup should be used
@@ -2598,23 +2553,23 @@ function ZJAttackInfo_Private_Menu_Ticker_Tick()
 
 	local selectedSprites, compact = ZJAttackInfo_Private_GetRowSprites(targetSprite)
 
-	if not compact and selectedSprites[1] == nil then
-		-- Hide the popup if no currently selected sprites are eligible
+	if selectedSprites[1] == nil or not ZJAttackInfo_Private_IsPopupAllowed(compact) then
+		-- Hide the popup if no currently selected sprites are eligible, (compact), the ally isn't fighting anyone,
+		-- or the popup is turned off for this side
 		ZJAttackInfo_Private_Menu_SetOpen(false)
 		return
 	end
 
-	-- Checking if the popup should open from a keybind
-	local shouldBeOpen = ZJAttackInfo_Private_OpenKeybindPressed or ZJAttackInfo_Private_ReverseKeybindPressed
-
-	-- Checking if the popup should open from an attack cursor, (the compact popup only opens from a keybind)
-	if not compact and not shouldBeOpen and ZJAttackInfo_Private_OpenWithAttackCursor:get() ~= 0 then
+	-- The compact popup opens whenever the hovered ally is in a fight, the full popup always opens over a hostile
+	-- creature, and over a neutral one only from an attack cursor
+	local shouldBeOpen = compact or targetSprite.m_typeAI.m_EnemyAlly >= ZJAttackInfo_Private_EvilCutoff
+	if not shouldBeOpen then
 		local nCurrentCursor = chitin.m_pObjectCursor.nCurrentCursor
 		shouldBeOpen = nCurrentCursor == 12 or (nCurrentCursor == 101 and EEex.IsDefaultAttackCursor())
 	end
 
 	if not shouldBeOpen then
-		-- Hide the popup if neither a keybind or the cursor shape are attempting to open it
+		-- Hide the popup if the cursor shape isn't attempting to open it
 		ZJAttackInfo_Private_Menu_SetOpen(false)
 		return
 	end
@@ -2637,7 +2592,7 @@ function ZJAttackInfo_Private_Menu_Ticker_Tick()
 			lastSelectedSprites, lastCompact = ZJAttackInfo_Private_GetRowSprites(lastTarget)
 		end
 
-		if lastSelectedSprites ~= nil and (lastCompact or lastSelectedSprites[1] ~= nil) then
+		if lastSelectedSprites ~= nil and lastSelectedSprites[1] ~= nil and ZJAttackInfo_Private_IsPopupAllowed(lastCompact) then
 			ZJAttackInfo_Private_Layout(lastSelectedSprites, lastTarget, lastCompact)
 		else
 			ZJAttackInfo_Private_Menu_SetOpen(false, true)
@@ -2778,43 +2733,6 @@ function ZJAttackInfo_Private_Menu_SetOpen(open, dontResetOpenDelay)
 		ZJAttackInfo_Private_CurrentTargetID = -1
 		ZJAttackInfo_Private_Menu_Close()
 	end
-end
-
------------------------
--- Keybind Listeners --
------------------------
-
--- Both keybinds open the same popup. The "reverse" keybind used to switch the popup to the target's attacks, which
--- are now always shown in the left panel; it keeps its name so existing settings carry over.
---
--- The resets allow the keybinds to build off each other, e.g. CTRL, ALT, CTRL+ALT, and ALT+CTRL all open the popup.
-
-function ZJAttackInfo_Private_OnOpenKeybindPressed()
-	ZJAttackInfo_Private_OpenKeybindPressed = true
-end
-
-function ZJAttackInfo_Private_OnOpenKeybindSatisfied()
-	if EEex_Keybinds_IsSatisfied("ZJAttackInfo_ReverseKeybind") then return end
-	-- Allow the alternate keybinding to start after this one
-	EEex_Keybinds_Reset("ZJAttackInfo_ReverseKeybind")
-end
-
-function ZJAttackInfo_Private_OnOpenKeybindUnsatisfied()
-	ZJAttackInfo_Private_OpenKeybindPressed = false
-end
-
-function ZJAttackInfo_Private_OnReverseKeybindPressed()
-	ZJAttackInfo_Private_ReverseKeybindPressed = true
-end
-
-function ZJAttackInfo_Private_OnReverseKeybindSatisfied()
-	if EEex_Keybinds_IsSatisfied("ZJAttackInfo_OpenKeybind") then return end
-	-- Allow the normal keybinding to start after this one
-	EEex_Keybinds_Reset("ZJAttackInfo_OpenKeybind")
-end
-
-function ZJAttackInfo_Private_OnReverseKeybindUnsatisfied()
-	ZJAttackInfo_Private_ReverseKeybindPressed = false
 end
 
 ---------------------

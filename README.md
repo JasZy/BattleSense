@@ -16,7 +16,7 @@ Each component can be installed on its own.
 
 ### Attack Info
 
-Hover the attack cursor over a creature to open a popup with, for every selected character:
+Hover over an enemy, (or a neutral creature with the attack cursor), to open a popup with, for every selected character:
 
 - The chance to hit, as a percentage or as the minimum d20 roll
 - Damage per hit, with the target's resistances applied, and extra on-hit damage
@@ -24,7 +24,7 @@ Hover the attack cursor over a creature to open a popup with, for every selected
 - Whether the target is immune to the weapon
 - Timer bars for the attack round, spell casting, contingencies and modal actions
 
-The left panel shows the same for the creature attacking your party: the roll it needs to hit each of them and its damage. Hold `Left Ctrl` or `Left Alt`, (the two open keybinds), to open the popup over any creature, without the attack cursor.
+The left panel shows the same for the creature attacking your party: the roll it needs to hit each of them and its damage. Hovering a party member or ally that is in a fight opens a compact popup listing who it is fighting.
 
 This is an extended version of EEex's own "Attack Info" module, and replaces it.
 

@@ -12,7 +12,7 @@ uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_Enable"] = "Enabled"
 uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_Enable_Description"] = [[
 Enables the attack information popup.
 
-The popup opens when hovering the attack cursor over a creature, (see "Open With Attack Cursor"), or when holding the open keybind, (by default 'Left Ctrl'), or the alternate open keybind, (by default 'Left Alt'), over any creature.
+The popup opens when hovering a hostile creature, a neutral creature with the attack cursor, or a party member or ally that is in a fight, (see "Enabled For Friendly").
 
 It has two panels, with a row for each selected party member:
 
@@ -65,26 +65,6 @@ uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_ImmunityDisplayType_None
 
 uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_ImmunityDisplayType_Text"] = "Text"
 
-
-uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_OpenKeybind"] = "Open Keybind"
-
-uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_OpenKeybind_Description"] = [[
-This keybind opens the attack information popup.
-
-The popup has two panels: the left one shows the attacks of the creature under the cursor, the right one shows the attacks on that creature.
-]]
-
-uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_OpenWithAttackCursor"] = "Open With Attack Cursor"
-
-uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_OpenWithAttackCursor_Description"] = [[
-Determines whether the attack information popup automatically opens when an attack cursor is hovered over a creature.
-]]
-
-uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_ReverseKeybind"] = "Alternate Open Keybind"
-
-uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_ReverseKeybind_Description"] = [[
-A second keybind that opens the attack information popup, exactly like "Open Keybind".
-]]
 
 -----------
 -- Timer --
@@ -159,16 +139,16 @@ The bars have the colors set by "Attack Timer" and "Cast Timer", and a bar whose
 -- Attack Info --
 -----------------
 
-uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_CompactForAllies"] = "Compact Popup For Allies"
+uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_CompactForAllies"] = "Enabled For Friendly"
 
 uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_CompactForAllies_Description"] = [[
-Uses a compact popup for party members and the party's summons / allies.
+Enables a compact attack information popup over party members and the party's summons / allies, (only while "Enabled" is on).
 
 The compact popup lists the creatures that the creature under the cursor is attacking or is being attacked by, with the roll the creature needs to hit them and the damage it does in the left panel, and their rolls and damage against the creature in the right panel.
 
 A creature is on the same row in both panels. If it is only attacking, or only being attacked, its row in the other panel is left empty.
 
-The compact popup only opens while the open or alternate open keybind is held.
+The compact popup opens by itself when hovering a party member or ally that is attacking, or being attacked by, another creature. Turn this off to not open a popup over them at all.
 ]]
 
 uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_ShowSpellEffects"] = "Show Spell Effects"

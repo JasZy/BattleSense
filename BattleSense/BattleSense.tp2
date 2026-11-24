@@ -44,7 +44,7 @@ END
 LANGUAGE ~English~ ~english~ ~BattleSense/language/english/setup.tra~
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Attack Info: To-hit chances, damage and timers when hovering the attack cursor over a creature      //
+// Attack Info: To-hit chances, damage and timers when hovering a creature in a fight                  //
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 BEGIN @10 LABEL ~ZJ-BattleSense-Attack-Info~ DESIGNATED 10

@@ -26,7 +26,7 @@ Every component has its own tab under Options > EEex Options ("Battle Sense: ...
 
 ## 1. Attack Info
 
-Hover the attack cursor over a creature and a popup opens with two panels.
+Hover over an enemy and a popup opens with two panels.
 
 `[image: Attack Info with Resistances.jpg]`
 
@@ -54,7 +54,7 @@ Hover the attack cursor over a creature and a popup opens with two panels.
 
 `[image: Attack Info with Item.jpg]`
 
-**Hovering over a friend** opens a compact form that lists who that character is fighting. Hold `Left Ctrl` or `Left Alt` to open the popup over any creature without the attack cursor.
+**Hovering over a friend** who is in a fight opens a compact form that lists who that character is fighting.
 
 ## 2. Timer
 
