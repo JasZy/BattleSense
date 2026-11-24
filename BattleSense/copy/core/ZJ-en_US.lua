@@ -65,23 +65,19 @@ uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_HitDisplayType_Roll"] = 
 
 uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_HitDisplayType_Percentage"] = "Percentage"
 
-uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_ImmunityDisplayType"] = "Immunity Display Type"
+uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_ResistanceColor"] = "Resistance Color"
 
-uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_ImmunityDisplayType_Description"] = [[
-The method used to display target immunities in the popup.
+uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_ResistanceColor_Description"] = [[
+The color of the creature's resistance behind the damage, e.g. "-50%", where it takes damage away. Click to pick the next color, "Off" hides the resistances: the damage is shown as if the creature had none.
 
-'Color' - Show the hit roll and damage in red for entries where the target is immune to the attacker, with "Immune" behind the damage.
-
-'None' - Do not display immunity data.
-
-'Text' - Replace the hit roll and damage for entries where the target is immune to the attacker.
+A resistance that adds damage, (a negative resistance, e.g. "+25%"), is always green.
 ]]
 
-uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_ImmunityDisplayType_Color"] = "Color"
+uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_ImmunityColor"] = "Immunity Color"
 
-uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_ImmunityDisplayType_None"] = "None"
-
-uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_ImmunityDisplayType_Text"] = "Text"
+uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_ImmunityColor_Description"] = [[
+The color of the hit roll and damage of the rows where the creature is immune to the attacker's weapon, with "Immune" behind the damage. Click to pick the next color, "Off" shows the rows as if the creature wasn't immune: the normal roll and damage, with its resistance and the extra damage of a hit.
+]]
 
 
 -----------

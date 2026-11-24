@@ -36,11 +36,26 @@ ZJAttackInfo_Private_HitDisplayType = EEex_Options_Register("ZJAttackInfo_HitDis
 	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Attack Info Module: Hit Display Type" }),
 }))
 
-ZJAttackInfo_Private_ImmunityDisplayType = EEex_Options_Register("ZJAttackInfo_ImmunityDisplayType", EEex_Options_Option.new({
-	["default"]  = 0,
-	["accessor"] = EEex_Options_ClampedAccessor.new({ ["min"] = 0, ["max"] = 2 }),
-	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Attack Info Module: Immunity Display Type" }),
-}))
+-- The colors of the resistance and immunity labels, one of the bar colors, (ZJBarCol.lua), option value 0 is Off: the
+-- damage is shown as if the target had no resistance / immunity
+local registerLabelColorOption = function(name, default)
+	return EEex_Options_Register("ZJAttackInfo_"..name.."Color", EEex_Options_Option.new({
+		["default"]  = default,
+		["accessor"] = EEex_Options_ClampedAccessor.new({ ["min"] = 0, ["max"] = #ZJBarColors_Colors }),
+		["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Attack Info Module: "..name.." Color" }),
+	}))
+end
+
+ZJAttackInfo_Private_ResistanceColor = registerLabelColorOption("Resistance", 1) -- Red
+ZJAttackInfo_Private_ImmunityColor   = registerLabelColorOption("Immunity",   7) -- Purple
+
+-- The text color code of a label color option's value, (half as bright if `dim`), "" if it is Off
+function ZJAttackInfo_Private_LabelColorStr(value, dim)
+	local color = ZJBarColors_Colors[value]
+	if color == nil then return "" end
+	local scale = dim and 0.5 or 1
+	return string.format("^0xFF%02X%02X%02X", math.floor(color.b * scale), math.floor(color.g * scale), math.floor(color.r * scale))
+end
 
 ZJAttackInfo_Private_ShowSpellEffects = EEex_Options_Register("ZJAttackInfo_ShowSpellEffects", EEex_Options_Option.new({
 	["default"]  = 1,
@@ -150,25 +165,16 @@ EEex_Options_AddTab("ZJBattleSense_Options_TRANSLATION_AttackInfo_TabTitle", fun
 			}),
 		}),
 		EEex_Options_DisplayEntry.new({
-			["optionID"]    = "ZJAttackInfo_ImmunityDisplayType",
-			["label"]       = "ZJBattleSense_Options_TRANSLATION_AttackInfo_ImmunityDisplayType",
-			["description"] = "ZJBattleSense_Options_TRANSLATION_AttackInfo_ImmunityDisplayType_Description",
-			["widget"]      = EEex_Options_HorizontalMultiToggleWidget.new({
-				["toggles"] = {
-					{
-						["label"] = "ZJBattleSense_Options_TRANSLATION_AttackInfo_ImmunityDisplayType_Color",
-						["data"] = { ["toggleValue"] = 0 },
-					},
-					{
-						["label"] = "ZJBattleSense_Options_TRANSLATION_AttackInfo_ImmunityDisplayType_None",
-						["data"] = { ["toggleValue"] = 1 },
-					},
-					{
-						["label"] = "ZJBattleSense_Options_TRANSLATION_AttackInfo_ImmunityDisplayType_Text",
-						["data"] = { ["toggleValue"] = 2 },
-					},
-				},
-			}),
+			["optionID"]    = "ZJAttackInfo_ResistanceColor",
+			["label"]       = "ZJBattleSense_Options_TRANSLATION_AttackInfo_ResistanceColor",
+			["description"] = "ZJBattleSense_Options_TRANSLATION_AttackInfo_ResistanceColor_Description",
+			["widget"]      = ZJBarColors_CycleWidget.new(),
+		}),
+		EEex_Options_DisplayEntry.new({
+			["optionID"]    = "ZJAttackInfo_ImmunityColor",
+			["label"]       = "ZJBattleSense_Options_TRANSLATION_AttackInfo_ImmunityColor",
+			["description"] = "ZJBattleSense_Options_TRANSLATION_AttackInfo_ImmunityColor_Description",
+			["widget"]      = ZJBarColors_CycleWidget.new(),
 		}),
 		EEex_Options_DisplayEntry.new({
 			["optionID"]    = "ZJAttackInfo_ShowSpellEffects",
@@ -395,7 +401,9 @@ function ZJAttackInfo_Private_GetWeaponHitChance(sourceSprite, targetSprite, lef
 		sourceSpriteSelectedWeapon = sourceSpriteEquipment.m_items:get(nSourceSpriteSelectedWeapon)
 	end
 
-	local isImmune = EEex.IsImmuneToWeapon(sourceSprite, targetSprite, nSourceSpriteSelectedWeapon, sourceSpriteSelectedWeapon, nSourceSpriteSelectedWeaponAbility)
+	-- With the "Immunity Color" option Off, an immune target is shown as if it weren't immune
+	local isImmune = ZJAttackInfo_Private_ImmunityColor:get() ~= 0
+		and EEex.IsImmuneToWeapon(sourceSprite, targetSprite, nSourceSpriteSelectedWeapon, sourceSpriteSelectedWeapon, nSourceSpriteSelectedWeaponAbility)
 	local hitChance, reasoning = EEex.GetWeaponHitChance(sourceSprite, targetSprite, sourceSpriteSelectedWeapon, nSourceSpriteSelectedWeaponAbility, leftHand)
 
 	-- Reading the weapon's damage is cosmetic, never let it take the popup down
@@ -407,12 +415,12 @@ function ZJAttackInfo_Private_GetWeaponHitChance(sourceSprite, targetSprite, lef
 	end
 
 	-- The target's resistance to the weapon's damage type reduces what a hit does, (or increases it, if it is negative).
-	-- If the target is immune to the weapon, (and the "Immunity Display Type" option is 'Color'), a hit does nothing at
-	-- all, the resistance makes no difference then and "Immune" is shown in its place.
+	-- If the target is immune to the weapon, a hit does nothing at all, the resistance makes no difference then and
+	-- "Immune" is shown in its place. With the "Resistance Color" option Off, the resistance isn't shown.
 	local okResistance, resistance = pcall(ZJAttackInfo_Private_GetDamageResistance, targetSprite, damageType)
-	if isImmune and ZJAttackInfo_Private_ImmunityDisplayType:get() == 0 then
+	if isImmune then
 		damageStr = string.format("%s %s", damageStr, uiStrings["ZJBattleSense_TRANSLATION_AttackInfo_Immune"])
-	elseif okResistance and resistance ~= 0 then
+	elseif okResistance and resistance ~= 0 and ZJAttackInfo_Private_ResistanceColor:get() ~= 0 then
 		damageStr = string.format("%s %s", damageStr, ZJAttackInfo_Private_FormatResistance(resistance))
 	end
 
@@ -468,7 +476,8 @@ function ZJAttackInfo_Private_GetHandDisplay(damageType, extras, targetSprite)
 		["extraIcons"] = {},
 	}
 
-	local targetStats = targetSprite and targetSprite:getActiveStats() or nil
+	-- With the "Resistance Color" option Off, the resistances aren't shown
+	local targetStats = targetSprite and ZJAttackInfo_Private_ResistanceColor:get() ~= 0 and targetSprite:getActiveStats() or nil
 	local textParts = {}
 
 	-- The extra damage that has an icon comes first, so the amounts are in the order of the icons
@@ -1397,7 +1406,8 @@ function ZJAttackInfo_Private_Layout(selectedSprites, targetSprite, compact)
 
 	local fontPoint                     = ZJAttackInfo_Private_FontPoint:get()
 	local hitDisplayType                = ZJAttackInfo_Private_HitDisplayType:get()
-	local immuneDisplayType             = ZJAttackInfo_Private_ImmunityDisplayType:get()
+	local resistanceColor               = ZJAttackInfo_Private_ResistanceColor:get()
+	local immunityColor                 = ZJAttackInfo_Private_ImmunityColor:get()
 	local showRowTimers                 = ZJAttackInfo_Private_ShowRowTimers:get() ~= 0
 
 	------------------------------
@@ -1655,10 +1665,15 @@ function ZJAttackInfo_Private_Layout(selectedSprites, targetSprite, compact)
 	-- the target isn't attacking / casting at, on the right, the rows of the creatures that aren't attacking / casting
 	-- at the target. A creature that is being attacked without fighting back is white on the left and grey on the right.
 	local dimColorStr       = "^0xFF808080"
-	local dimImmuneColorStr = "^0xFF162680"
-	local redColorStr       = "^0xFF2B4BFF" -- The immune color, also used for the resistances that take damage away
 	local greenColorStr     = "^0xFF40E040" -- The resistances that add damage
 	local dimGreenColorStr  = "^0xFF207020"
+
+	-- The "Immunity Color" and "Resistance Color" options, (the resistances that take damage away). When Off, there is
+	-- nothing to color: ZJAttackInfo_Private_GetWeaponHitChance() leaves the immunity / resistances out.
+	local immuneColorStr       = ZJAttackInfo_Private_LabelColorStr(immunityColor, false)
+	local dimImmuneColorStr    = ZJAttackInfo_Private_LabelColorStr(immunityColor, true)
+	local resistColorStr       = ZJAttackInfo_Private_LabelColorStr(resistanceColor, false)
+	local dimResistColorStr    = ZJAttackInfo_Private_LabelColorStr(resistanceColor, true)
 
 	local dimRowsLeft  = {} -- [index in selectedSprites] = true
 	local dimRowsRight = {} -- [index in selectedSprites] = true
@@ -1716,11 +1731,6 @@ function ZJAttackInfo_Private_Layout(selectedSprites, targetSprite, compact)
 	-- `dim` => The row isn't part of the fight, its text is greyed out
 	local formatChanceStr = function(chance, immune, weaponDamageStr, dim)
 
-		if immune and immuneDisplayType == 2 then
-			local immuneStr = string.format(" %s%s", dim and dimColorStr or "", uiStrings["ZJBattleSense_TRANSLATION_AttackInfo_Immune"])
-			return immuneStr, immuneStr, "", true
-		end
-
 		local rollStr
 
 		if hitDisplayType == 1 then
@@ -1735,15 +1745,15 @@ function ZJAttackInfo_Private_Layout(selectedSprites, targetSprite, compact)
 		end
 
 		local colorStr
-		if immune and immuneDisplayType == 0 then
-			colorStr = dim and dimImmuneColorStr or redColorStr
+		if immune then
+			colorStr = dim and dimImmuneColorStr or immuneColorStr
 		else
 			colorStr = dim and dimColorStr or ""
 		end
 		rollStr = string.format(" %s%s", colorStr, rollStr)
 
 		if weaponDamageStr == nil then
-			if not (immune and immuneDisplayType == 0) then
+			if not immune then
 				return rollStr, rollStr, "", false
 			end
 			-- Without the damage, (the left panel), "Immune" still takes its place
@@ -1751,7 +1761,7 @@ function ZJAttackInfo_Private_Layout(selectedSprites, targetSprite, compact)
 		end
 
 		weaponDamageStr = ZJAttackInfo_Private_ColorResistance(weaponDamageStr,
-			dim and dimImmuneColorStr or redColorStr, dim and dimGreenColorStr or greenColorStr, colorStr)
+			dim and dimResistColorStr or resistColorStr, dim and dimGreenColorStr or greenColorStr, colorStr)
 
 		return rollStr..hitDamageGapStr..weaponDamageStr, rollStr, colorStr..weaponDamageStr, false
 	end
@@ -1951,19 +1961,17 @@ function ZJAttackInfo_Private_Layout(selectedSprites, targetSprite, compact)
 					if reverse or rightHandDamageString == "" then rightHandDisplay = nil end
 					if reverse or leftHandDamageString == "" then leftHandDisplay = nil end
 
-					-- An immune target isn't hurt by the extra damage of a hit either, ('Color' immunity display)
-					if immuneDisplayType == 0 then
-						if rightHandIneffective and rightHandDisplay ~= nil then
-							rightHandDisplay.extraText, rightHandDisplay.extraIcons = "", {}
-						end
-						if leftHandIneffective and leftHandDisplay ~= nil then
-							leftHandDisplay.extraText, leftHandDisplay.extraIcons = "", {}
-						end
+					-- An immune target isn't hurt by the extra damage of a hit either
+					if rightHandIneffective and rightHandDisplay ~= nil then
+						rightHandDisplay.extraText, rightHandDisplay.extraIcons = "", {}
+					end
+					if leftHandIneffective and leftHandDisplay ~= nil then
+						leftHandDisplay.extraText, leftHandDisplay.extraIcons = "", {}
 					end
 
 					for _, handDisplay in pairs({ rightHandDisplay, leftHandDisplay }) do
 						handDisplay.extraText = ZJAttackInfo_Private_ColorResistance(handDisplay.extraText,
-							dim and dimImmuneColorStr or redColorStr, dim and dimGreenColorStr or greenColorStr, dim and dimColorStr or "")
+							dim and dimResistColorStr or resistColorStr, dim and dimGreenColorStr or greenColorStr, dim and dimColorStr or "")
 					end
 				end
 
