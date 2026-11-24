@@ -438,6 +438,8 @@ uiStrings["ZJBattleSense_Options_TRANSLATION_ItemInfo_ShowFullDescription"] = "S
 
 uiStrings["ZJBattleSense_Options_TRANSLATION_ItemInfo_ShowFullDescription_Description"] = [[
 Displays the whole description of the item, instead of only the part that lists its properties, (below "STATISTICS:").
+
+A long description, (e.g. a scroll's spell), is cut off after about 700 characters, so the popup doesn't cover the item.
 ]]
 
 uiStrings["ZJBattleSense_Options_TRANSLATION_ItemInfo_ShowComparison"] = "Show Stat Changes"

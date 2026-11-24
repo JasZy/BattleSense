@@ -337,7 +337,22 @@ function ZJItemInfo_Private_GetItemDescription(info, identified)
 		description = ZJItemInfo_Private_GetStatistics(description)
 	end
 
-	return description
+	return ZJItemInfo_Private_TrimToLength(description, ZJItemInfo_Private_MaxDescriptionLength)
+end
+
+-- The most characters of an item's description the popup shows, (a scroll has the spell's whole description), so the
+-- popup stays small enough to fit above the item without covering it
+ZJItemInfo_Private_MaxDescriptionLength = 700
+
+-- Cuts `text` to at most `maxLength` characters, at the end of a word, with "..." behind it
+function ZJItemInfo_Private_TrimToLength(text, maxLength)
+	if #text <= maxLength then return text end
+	local cut = text:sub(1, maxLength)
+	local lastSpace = cut:match(".*()%s")
+	if lastSpace ~= nil and lastSpace > maxLength / 2 then
+		cut = cut:sub(1, lastSpace - 1)
+	end
+	return ZJItemInfo_Private_Trim(cut):gsub("[,;:%.]+$", "").."..."
 end
 
 ----------------
