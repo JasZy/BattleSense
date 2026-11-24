@@ -90,7 +90,7 @@ By default, lines are only printed when your party is involved, so the log stays
 
 ## 4. Item Info
 
-Hover an item in a store, an opened container, the quick loot bar or your inventory, and a popup shows its properties. If a character is selected, it also lists how their stats would change if they equipped it, in green for better and red for worse: armor class, THAC0, saves, ability scores, resistances, and for a weapon its damage, speed and the character's proficiency in it.
+Hover an item in a store, an opened container, the quick loot bar or your inventory, and a popup shows its properties. If a character is selected, it also lists how their stats would change if they equipped it, in green for better and red for worse: armor class, (also against crushing, missile, piercing and slashing), THAC0, saves, ability scores, resistances, and for a weapon its damage, speed and the character's proficiency in it.
 
 `[image: Store Weapon Popup.jpg]`
 

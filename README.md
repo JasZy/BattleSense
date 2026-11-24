@@ -53,7 +53,7 @@ Adds lines to the combat log that explain:
 Hover the cursor over an item in a store, in an opened container, in the quick loot bar, or on the inventory screen, to open a popup with:
 
 - The properties of the item, (the "STATISTICS" part of its description)
-- How the stats of the selected character would change if they equipped it in place of what they have equipped now: `Armor Class: 6 -> 4 (-2)`
+- How the stats of the selected character, (on the inventory screen, the character it shows), would change if they equipped it in place of what they have equipped now: `Armor Class: 6 -> 4 (-2)`, and the armor class against each kind of attack the armors change: `Armor Class vs. crushing: 4 -> 3 (-1)`
 
 The stat changes are added up from what the items say they do while equipped. If the character can't use the item, the popup says "Not usable" instead. An item that isn't identified has no stat changes listed.
 
