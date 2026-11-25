@@ -777,21 +777,36 @@ function ZJSpellInfo_Private_BuildText(caster, target)
 	return table.concat(lines, "\n")
 end
 
--- Returns the line with how far `target` is from `caster`, and how far it is out of `range`, in the units of an ability's
--- range field, (8 pixels each, tested in game: a spell with range 60 casts without walking from 480 pixels away). The
--- engine measures distances in pixels, with the vertical axis stretched by 4/3, (see Attack Info's
--- ZJAttackInfo_Private_IsInArea).
+-- Returns the line with how far `target` is from `caster`, and how far it is out of reach, in the units of an ability's
+-- range field, (search map squares of 16 pixels). The engine measures distances in pixels, with the vertical axis
+-- stretched by 4/3, (see Attack Info's ZJAttackInfo_Private_IsInArea).
+--
+-- A caster also has to see the target: its visual range, (14 by default, in units of 32 pixels), caps the range.
+-- Tested in game: Command, (range 35), and Magic Missile, (range 60), both walk until about 416 pixels away, straight
+-- up as well as sideways, (inside the 448 pixels of the default visual range, the caster stops on the walking grid).
 function ZJSpellInfo_Private_DescribeDistance(caster, target, range)
 
 	local casterPos, targetPos = caster.m_pos, target.m_pos
 	local offsetX = targetPos.x - casterPos.x
 	local offsetY = (targetPos.y - casterPos.y) * 4 / 3
-	local distance = math.floor(math.sqrt(offsetX * offsetX + offsetY * offsetY) / 8 + 0.5)
+	local distance = math.floor(math.sqrt(offsetX * offsetX + offsetY * offsetY) / 16 + 0.5)
 
-	local distanceStr = string.format(ZJSpellInfo_Private_T("Distance"), distance, range)
-	if distance <= range then return distanceStr end
+	local ok, visualRange = pcall(function() return caster:getActiveStats().m_nVisualRange end)
+	if not ok or visualRange == nil or visualRange <= 0 then visualRange = 14 end
+	local sight = visualRange * 2
+
+	local reach = range
+	local distanceStr
+	if sight < range then
+		reach = sight
+		distanceStr = string.format(ZJSpellInfo_Private_T("DistanceSight"), distance, range, sight)
+	else
+		distanceStr = string.format(ZJSpellInfo_Private_T("Distance"), distance, range)
+	end
+
+	if distance <= reach then return distanceStr end
 	return string.format("%s %s%s^-", distanceStr, ZJSpellInfo_Private_RedColorStr,
-		string.format(ZJSpellInfo_Private_T("OutOfRange"), distance - range))
+		string.format(ZJSpellInfo_Private_T("OutOfRange"), distance - reach))
 end
 
 ----------
