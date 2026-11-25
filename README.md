@@ -99,7 +99,7 @@ For example `Large Sword: 2 points` with `To-hit bonus +1`, `Damage bonus +2`, `
 2. Extract this mod so that the `BattleSense` folder and `setup-BattleSense.exe` sit in your game folder.
 3. Run `setup-BattleSense.exe` and pick the components you want.
 
-The settings of each component are in the game under Options > EEex Options, in the tabs named "Battle Sense: ...".
+The settings of each component are in the game under Options > EEex Options. The "Battle Sense Modules" tab switches each installed component on or off, and the tabs named "Battle Sense: ..." hold each component's other settings.
 
 ## Good to know
 

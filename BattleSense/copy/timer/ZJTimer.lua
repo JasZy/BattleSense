@@ -45,12 +45,6 @@ ZJTimer_Private_ShowResistRings = EEex_Options_Register("ZJTimer_ShowResistRings
 EEex_Options_AddTab("ZJBattleSense_Options_TRANSLATION_Timer_TabTitle", function() return {
 	{
 		EEex_Options_DisplayEntry.new({
-			["optionID"]    = "ZJTimer_Enable",
-			["label"]       = "ZJBattleSense_Options_TRANSLATION_Timer_Enable",
-			["description"] = "ZJBattleSense_Options_TRANSLATION_Timer_Enable_Description",
-			["widget"]      = EEex_Options_ToggleWidget.new(),
-		}),
-		EEex_Options_DisplayEntry.new({
 			["optionID"]    = "ZJTimer_HugPortraits",
 			["label"]       = "ZJBattleSense_Options_TRANSLATION_Timer_HugPortraits",
 			["description"] = "ZJBattleSense_Options_TRANSLATION_Timer_HugPortraits_Description",
@@ -373,7 +367,7 @@ end
 
 ZJTimer_Private_NextUpdateTick = -1
 
--- Set by the "Enabled" option, once the file has loaded. While it is off, every bar, marker and ring is hidden,
+-- Set by the "ZJTimer_Enable" option, (the "Battle Sense Modules" tab), once the file has loaded. While it is off, every bar, marker and ring is hidden,
 -- (see the TEMPLATE functions below), and the tick does nothing.
 ZJTimer_Private_Enabled = false
 

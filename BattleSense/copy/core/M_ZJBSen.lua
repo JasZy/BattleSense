@@ -67,19 +67,29 @@ end
 
 -- EEex sorts its options tabs by name, which puts "Battle Sense: ..." in front of everything. Once all tabs are in,
 -- EEex makes one last change to the order, (EEex_Options_Private_SpecialSortTabs()); after it, the Battle Sense
--- tabs are moved behind Bubb's "Module: ..." tabs, (or to the end if there are none), keeping their own order.
+-- tabs are moved behind Bubb's "Module: ..." tabs, (or to the end if there are none), keeping their own order,
+-- except that the "Battle Sense Modules" tab goes first, (as EEex puts its "Modules" tab before its module tabs).
 ZJBattleSense_Private_TabLabelPrefix = "ZJBattleSense_Options_TRANSLATION_"
+ZJBattleSense_Private_ModulesTabLabel = "ZJBattleSense_Options_TRANSLATION_Modules_TabTitle"
 
 function ZJBattleSense_Private_SortTabs()
 
 	local tabs = EEex_Options_Private_Tabs
 	local prefix = ZJBattleSense_Private_TabLabelPrefix
 	local ours = {}
+	local modulesTab
 
 	for i = #tabs, 1, -1 do
-		if tabs[i].label:sub(1, #prefix) == prefix then
+		local label = tabs[i].label
+		if label == ZJBattleSense_Private_ModulesTabLabel then
+			modulesTab = table.remove(tabs, i)
+		elseif label:sub(1, #prefix) == prefix then
 			table.insert(ours, 1, table.remove(tabs, i))
 		end
+	end
+
+	if modulesTab ~= nil then
+		table.insert(ours, 1, modulesTab)
 	end
 
 	local insertAt = #tabs + 1
@@ -179,4 +189,50 @@ for _, moduleFile in ipairs(ZJBattleSense_Private_ModuleOrder) do
 
 		ZJBattleSense_Private_DoModuleFile(moduleFile)
 	end
+end
+
+--------------------------
+-- Battle Sense Modules --
+--------------------------
+
+-- Every module's on / off switch is in one "Battle Sense Modules" tab, like EEex's "Modules" tab, instead of in the
+-- module's own tab. Unlike EEex's, they apply at once. Only the modules that are installed are listed.
+--
+--   "optionID" - The option the module registers for it.
+--   "name"     - The module's part of the strings' names, (ZJBattleSense_Options_TRANSLATION_<name>_Enable).
+--
+ZJBattleSense_Private_ModuleToggles = {
+	["ZJAblInf"] = { ["optionID"] = "ZJAbilityInfo_Enable",     ["name"] = "AbilityInfo"     },
+	["ZJAtkInf"] = { ["optionID"] = "ZJAttackInfo_Enable",      ["name"] = "AttackInfo"      },
+	["ZJCmbLog"] = { ["optionID"] = "ZJCombatLog_Enable",       ["name"] = "CombatLog"       },
+	["ZJItmInf"] = { ["optionID"] = "ZJItemInfo_Enable",        ["name"] = "ItemInfo"        },
+	["ZJPrfInf"] = { ["optionID"] = "ZJProficiencyInfo_Enable", ["name"] = "ProficiencyInfo" },
+	["ZJSplInf"] = { ["optionID"] = "ZJSpellInfo_Enable",       ["name"] = "SpellInfo"       },
+	["ZJTimer"]  = { ["optionID"] = "ZJTimer_Enable",           ["name"] = "Timer"           },
+}
+
+function ZJBattleSense_Private_InstalledModuleToggles()
+	local toggles = {}
+	for _, moduleFile in ipairs(ZJBattleSense_Private_ModuleOrder) do
+		local toggle = ZJBattleSense_Private_ModuleToggles[moduleFile]
+		if ZJBattleSense_Modules[moduleFile] and toggle ~= nil and EEex_Options_Get(toggle.optionID) ~= nil then
+			table.insert(toggles, toggle)
+		end
+	end
+	return toggles
+end
+
+if #ZJBattleSense_Private_InstalledModuleToggles() > 0 then
+	EEex_Options_AddTab(ZJBattleSense_Private_ModulesTabLabel, function()
+		local entries = {}
+		for _, toggle in ipairs(ZJBattleSense_Private_InstalledModuleToggles()) do
+			table.insert(entries, EEex_Options_DisplayEntry.new({
+				["optionID"]    = toggle.optionID,
+				["label"]       = "ZJBattleSense_Options_TRANSLATION_"..toggle.name.."_Enable",
+				["description"] = "ZJBattleSense_Options_TRANSLATION_"..toggle.name.."_Enable_Description",
+				["widget"]      = EEex_Options_ToggleWidget.new(),
+			}))
+		end
+		return { entries }
+	end)
 end

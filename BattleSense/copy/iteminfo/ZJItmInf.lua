@@ -98,12 +98,6 @@ ZJItemInfo_Private_ShowOnQuickItems = EEex_Options_Register("ZJItemInfo_ShowOnQu
 
 EEex_Options_AddTab("ZJBattleSense_Options_TRANSLATION_ItemInfo_TabTitle", function() return {
 	{
-		EEex_Options_DisplayEntry.new({
-			["optionID"]    = "ZJItemInfo_Enable",
-			["label"]       = "ZJBattleSense_Options_TRANSLATION_ItemInfo_Enable",
-			["description"] = "ZJBattleSense_Options_TRANSLATION_ItemInfo_Enable_Description",
-			["widget"]      = EEex_Options_ToggleWidget.new(),
-		}),
 		ZJPopup_OpenOnDisplayEntry("ZJItemInfo_OpenOn"),
 		EEex_Options_DisplayEntry.new({
 			["optionID"]    = "ZJItemInfo_FontPoint",

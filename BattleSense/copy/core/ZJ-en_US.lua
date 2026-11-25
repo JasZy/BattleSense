@@ -1,6 +1,13 @@
 
 -- Battle Sense - English strings. Translations go in ZJ-<language>.lua, (for example ZJ-de_DE.lua).
 
+-------------
+-- Modules --
+-------------
+
+-- The tab with every module's on / off switch, (M_ZJBSen.lua). Each switch's strings are the "_Enable" ones below.
+uiStrings["ZJBattleSense_Options_TRANSLATION_Modules_TabTitle"] = "Battle Sense Modules"
+
 ------------
 -- Popups --
 ------------
@@ -27,7 +34,7 @@ uiStrings["ZJBattleSense_TRANSLATION_OpenOn_RightShift"]    = "Right Shift"
 
 uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_TabTitle"] = "Battle Sense: Attack Info"
 
-uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_Enable"] = "Enabled"
+uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_Enable"] = "Enable Attack Info Module"
 
 uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_Enable_Description"] = [[
 Enables the attack information popup.
@@ -176,7 +183,7 @@ The bars have the colors set by "Attack Timer" and "Cast Timer", and a bar whose
 uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_CompactForAllies"] = "Enabled For Friendly"
 
 uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_CompactForAllies_Description"] = [[
-Enables a compact attack information popup over party members and the party's summons / allies, (only while "Enabled" is on).
+Enables a compact attack information popup over party members and the party's summons / allies, (only while the Attack Info module is enabled, see "Battle Sense Modules").
 
 The compact popup lists the creatures that the creature under the cursor is attacking or is being attacked by, with the roll the creature needs to hit them and the damage it does in the left panel, and their rolls and damage against the creature in the right panel.
 
@@ -197,7 +204,7 @@ These are the spells EEex's Effect Menu module shows: spells from items, permane
 
 uiStrings["ZJBattleSense_Options_TRANSLATION_SpellInfo_TabTitle"] = "Battle Sense: Spell Info"
 
-uiStrings["ZJBattleSense_Options_TRANSLATION_SpellInfo_Enable"] = "Enabled"
+uiStrings["ZJBattleSense_Options_TRANSLATION_SpellInfo_Enable"] = "Enable Spell Info Module"
 
 uiStrings["ZJBattleSense_Options_TRANSLATION_SpellInfo_Enable_Description"] = [[
 While a spell, wand, scroll or other item ability is waiting for a target, hovering a creature shows what it will do to that creature: its magic resistance, the saving throws it gets and the roll it needs, the damage with its resistance to each element, and why it would be unaffected, (immunities, the spell's own exclusions and level limits).
@@ -308,7 +315,7 @@ uiStrings["ZJBattleSense_TRANSLATION_AttackInfo_Poison"] = "poison"
 
 uiStrings["ZJBattleSense_Options_TRANSLATION_Timer_TabTitle"] = "Battle Sense: Timer"
 
-uiStrings["ZJBattleSense_Options_TRANSLATION_Timer_Enable"] = "Enabled"
+uiStrings["ZJBattleSense_Options_TRANSLATION_Timer_Enable"] = "Enable Timer Module"
 
 uiStrings["ZJBattleSense_Options_TRANSLATION_Timer_Enable_Description"] = [[
 Shows the timers beside the party portraits: the casting timer, the attack round bar, the modal action and contingency timers, and the rings for active elemental resistances. Each can also be turned off on its own below.
@@ -396,7 +403,7 @@ The green part of the ring, starting at the top and going clockwise, displays th
 
 uiStrings["ZJBattleSense_Options_TRANSLATION_CombatLog_TabTitle"] = "Battle Sense: Combat Log"
 
-uiStrings["ZJBattleSense_Options_TRANSLATION_CombatLog_Enable"] = "Enabled"
+uiStrings["ZJBattleSense_Options_TRANSLATION_CombatLog_Enable"] = "Enable Combat Log Module"
 
 uiStrings["ZJBattleSense_Options_TRANSLATION_CombatLog_Enable_Description"] = [[
 Adds lines to the combat log that explain what happened: effects ending, failed saving throws, why a spell did nothing, and why a weapon is ineffective. Each can also be turned off on its own below.
@@ -452,7 +459,7 @@ The lowest value is 1.
 
 uiStrings["ZJBattleSense_Options_TRANSLATION_ItemInfo_TabTitle"] = "Battle Sense: Item Info"
 
-uiStrings["ZJBattleSense_Options_TRANSLATION_ItemInfo_Enable"] = "Enabled"
+uiStrings["ZJBattleSense_Options_TRANSLATION_ItemInfo_Enable"] = "Enable Item Info Module"
 
 uiStrings["ZJBattleSense_Options_TRANSLATION_ItemInfo_Enable_Description"] = [[
 Enables the item popup.
@@ -613,7 +620,7 @@ uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Weapon_SpeedFactor"] = "Speed fact
 
 uiStrings["ZJBattleSense_Options_TRANSLATION_AbilityInfo_TabTitle"] = "Battle Sense: Ability Info"
 
-uiStrings["ZJBattleSense_Options_TRANSLATION_AbilityInfo_Enable"] = "Enabled"
+uiStrings["ZJBattleSense_Options_TRANSLATION_AbilityInfo_Enable"] = "Enable Ability Info Module"
 
 uiStrings["ZJBattleSense_Options_TRANSLATION_AbilityInfo_Enable_Description"] = [[
 Enables the ability popup.
@@ -653,7 +660,7 @@ uiStrings["ZJBattleSense_TRANSLATION_AbilityInfo_Stat_StorePrices"]       = "Sto
 
 uiStrings["ZJBattleSense_Options_TRANSLATION_ProficiencyInfo_TabTitle"] = "Battle Sense: Proficiency Info"
 
-uiStrings["ZJBattleSense_Options_TRANSLATION_ProficiencyInfo_Enable"] = "Enabled"
+uiStrings["ZJBattleSense_Options_TRANSLATION_ProficiencyInfo_Enable"] = "Enable Proficiency Info Module"
 
 uiStrings["ZJBattleSense_Options_TRANSLATION_ProficiencyInfo_Enable_Description"] = [[
 Enables the proficiency popup.

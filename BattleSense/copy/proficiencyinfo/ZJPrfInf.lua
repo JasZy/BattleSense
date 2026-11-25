@@ -43,12 +43,6 @@ ZJProficiencyInfo_Private_OpenOn = ZJPopup_RegisterOpenOn("ZJProficiencyInfo_Ope
 
 EEex_Options_AddTab("ZJBattleSense_Options_TRANSLATION_ProficiencyInfo_TabTitle", function() return {
 	{
-		EEex_Options_DisplayEntry.new({
-			["optionID"]    = "ZJProficiencyInfo_Enable",
-			["label"]       = "ZJBattleSense_Options_TRANSLATION_ProficiencyInfo_Enable",
-			["description"] = "ZJBattleSense_Options_TRANSLATION_ProficiencyInfo_Enable_Description",
-			["widget"]      = EEex_Options_ToggleWidget.new(),
-		}),
 		ZJPopup_OpenOnDisplayEntry("ZJProficiencyInfo_OpenOn"),
 	},
 } end)

@@ -41,12 +41,6 @@ ZJAbilityInfo_Private_OpenOn = ZJPopup_RegisterOpenOn("ZJAbilityInfo_OpenOn", "A
 
 EEex_Options_AddTab("ZJBattleSense_Options_TRANSLATION_AbilityInfo_TabTitle", function() return {
 	{
-		EEex_Options_DisplayEntry.new({
-			["optionID"]    = "ZJAbilityInfo_Enable",
-			["label"]       = "ZJBattleSense_Options_TRANSLATION_AbilityInfo_Enable",
-			["description"] = "ZJBattleSense_Options_TRANSLATION_AbilityInfo_Enable_Description",
-			["widget"]      = EEex_Options_ToggleWidget.new(),
-		}),
 		ZJPopup_OpenOnDisplayEntry("ZJAbilityInfo_OpenOn"),
 	},
 } end)

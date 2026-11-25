@@ -20,7 +20,7 @@ It has five components, and you can install any combination of them:
 4. **Item Info** – what an item would change for your character, in stores, containers, the quick loot bar and the inventory
 5. **Spell Info** – what a spell will do to the creature you are about to target
 
-Every component has its own tab under Options > EEex Options ("Battle Sense: ..."), where each part of it can be switched on or off.
+Under Options > EEex Options, the "Battle Sense Modules" tab switches each component on or off, and every component has its own tab ("Battle Sense: ..."), where each part of it can be switched on or off.
 
 The three popups, (Attack Info, Item Info and Spell Info), only open while you hold a key, so they stay out of the way until you want them. The key is Left Ctrl by default; each popup's tab can change it to Right Ctrl, or the left or right Alt or Shift.
 

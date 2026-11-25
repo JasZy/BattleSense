@@ -87,12 +87,6 @@ ZJCombatLog_Private_RepeatDelay = EEex_Options_Register("ZJCombatLog_RepeatDelay
 EEex_Options_AddTab("ZJBattleSense_Options_TRANSLATION_CombatLog_TabTitle", function() return {
 	{
 		EEex_Options_DisplayEntry.new({
-			["optionID"]    = "ZJCombatLog_Enable",
-			["label"]       = "ZJBattleSense_Options_TRANSLATION_CombatLog_Enable",
-			["description"] = "ZJBattleSense_Options_TRANSLATION_CombatLog_Enable_Description",
-			["widget"]      = EEex_Options_ToggleWidget.new(),
-		}),
-		EEex_Options_DisplayEntry.new({
 			["optionID"]    = "ZJCombatLog_ReportEffectEnds",
 			["label"]       = "ZJBattleSense_Options_TRANSLATION_CombatLog_ReportEffectEnds",
 			["description"] = "ZJBattleSense_Options_TRANSLATION_CombatLog_ReportEffectEnds_Description",

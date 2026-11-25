@@ -92,12 +92,6 @@ ZJSpellInfo_Private_ShowOnParty = EEex_Options_Register("ZJSpellInfo_ShowOnParty
 
 EEex_Options_AddTab("ZJBattleSense_Options_TRANSLATION_SpellInfo_TabTitle", function() return {
 	{
-		EEex_Options_DisplayEntry.new({
-			["optionID"]    = "ZJSpellInfo_Enable",
-			["label"]       = "ZJBattleSense_Options_TRANSLATION_SpellInfo_Enable",
-			["description"] = "ZJBattleSense_Options_TRANSLATION_SpellInfo_Enable_Description",
-			["widget"]      = EEex_Options_ToggleWidget.new(),
-		}),
 		ZJPopup_OpenOnDisplayEntry("ZJSpellInfo_OpenOn"),
 		EEex_Options_DisplayEntry.new({
 			["optionID"]    = "ZJSpellInfo_FontPoint",
@@ -263,7 +257,7 @@ ZJSpellInfo_Private_SplprotRelations = {
 -- Globals --
 -------------
 
-ZJSpellInfo_Private_Enabled       = false -- Set by the "Enabled" option, once the file has loaded
+ZJSpellInfo_Private_Enabled       = false -- Set by the "ZJSpellInfo_Enable" option, (the "Battle Sense Modules" tab), once the file has loaded
 ZJSpellInfo_Private_ErrorReported = false
 ZJSpellInfo_Private_Menu_IsOpen = false
 ZJSpellInfo_Private_Menu_Text   = ""

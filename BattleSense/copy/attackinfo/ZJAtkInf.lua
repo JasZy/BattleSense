@@ -118,12 +118,6 @@ end
 
 EEex_Options_AddTab("ZJBattleSense_Options_TRANSLATION_AttackInfo_TabTitle", function() return {
 	{
-		EEex_Options_DisplayEntry.new({
-			["optionID"]    = "ZJAttackInfo_Enable",
-			["label"]       = "ZJBattleSense_Options_TRANSLATION_AttackInfo_Enable",
-			["description"] = "ZJBattleSense_Options_TRANSLATION_AttackInfo_Enable_Description",
-			["widget"]      = EEex_Options_ToggleWidget.new(),
-		}),
 		ZJPopup_OpenOnDisplayEntry("ZJAttackInfo_OpenOn"),
 		EEex_Options_DisplayEntry.new({
 			["optionID"]    = "ZJAttackInfo_CompactForAllies",
