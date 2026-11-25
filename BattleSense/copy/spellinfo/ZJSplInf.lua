@@ -174,6 +174,12 @@ ZJSpellInfo_Private_CastSpellOpcodes = {
 	[326] = true, -- Apply effects list
 }
 
+-- Opcodes that make the target immune to a spell when it matches a SPLPROT.2DA row
+ZJSpellInfo_Private_SplprotOpcodes = {
+	[318] = true, -- Protection from resource
+	[324] = true, -- Immunity to resource and message
+}
+
 -- The opcodes worth naming in an immunity, and that can be limited to a level range by their dice fields
 ZJSpellInfo_Private_OpcodeNames = {
 	[  3] = "berserk",        [  5] = "charm",          [ 13] = "instant death",  [ 24] = "fear",
@@ -439,6 +445,22 @@ function ZJSpellInfo_Private_CheckSplprot(sprite, row, value)
 	local relation = tonumber(array:getAtPoint(2, row))
 	if stat == nil or tableValue == nil or relation == nil then return nil end
 
+	-- 0x103 / 0x104 combine two other rows, (VALUE and RELATION are row numbers): the sprite matches either of them,
+	-- or neither of them. Larloch's Minor Drain excludes "ENTRIES=(1||27)", undead or golems.
+	if stat == 0x103 or stat == 0x104 then
+		if tableValue == row or relation == row then return nil end
+		local matchesA, labelA = ZJSpellInfo_Private_CheckSplprot(sprite, tableValue, value)
+		local matchesB, labelB = ZJSpellInfo_Private_CheckSplprot(sprite, relation, value)
+		if stat == 0x103 then
+			if matchesA then return true, labelA end
+			if matchesB then return true, labelB end
+			if matchesA == nil or matchesB == nil then return nil end
+			return false, labelA
+		end
+		if matchesA == nil or matchesB == nil then return nil end
+		return not matchesA and not matchesB, string.format("not %s or %s", labelA, labelB)
+	end
+
 	if tableValue ~= -1 then value = tableValue end
 
 	local compare = ZJSpellInfo_Private_SplprotRelations[relation]
@@ -460,11 +482,11 @@ function ZJSpellInfo_Private_CheckSplprot(sprite, row, value)
 end
 
 -- Returns why a creature of `level` is outside `effect`'s level range, or nil if the effect lands on it.
--- The named opcodes, and op324, use their dice fields as a level range, (Sleep only affects creatures up to level 4).
+-- The named opcodes, and op318 / op324, use their dice fields as a level range, (Sleep only affects creatures up to level 4).
 function ZJSpellInfo_Private_LevelExcludes(effect, level)
 
 	local opcodeName = ZJSpellInfo_Private_OpcodeNames[effect.opcode]
-	if opcodeName == nil and effect.opcode ~= 324 then return nil end
+	if opcodeName == nil and not ZJSpellInfo_Private_SplprotOpcodes[effect.opcode] then return nil end
 
 	local maxLevel = effect.numDice
 	local minLevel = effect.diceSize
@@ -553,10 +575,10 @@ function ZJSpellInfo_Private_Describe(target, effects)
 	end
 	effects = applying
 
-	-- The spell's own exclusions, (op324: "the target is immune to this spell if it matches SPLPROT row X")
+	-- The spell's own exclusions, (op318 / op324: "the target is immune to this spell if it matches SPLPROT row X")
 	local excluded = {} -- [spell resref] = reason
 	for _, effect in ipairs(effects) do
-		if effect.opcode == 324 and excluded[effect.origin.resref] == nil then
+		if ZJSpellInfo_Private_SplprotOpcodes[effect.opcode] and excluded[effect.origin.resref] == nil then
 			local ok, matches, label = pcall(ZJSpellInfo_Private_CheckSplprot, target, effect.param2, effect.param1)
 			if ok and matches then
 				local protectedResref = effect.res ~= "" and effect.res or effect.origin.resref
@@ -568,7 +590,7 @@ function ZJSpellInfo_Private_Describe(target, effects)
 	-- Magic resistance only stops the effects that can be resisted, (resistance field 1 / 2)
 	local resistible, anyEffect = false, false
 	for _, effect in ipairs(effects) do
-		if effect.opcode ~= 324 then
+		if not ZJSpellInfo_Private_SplprotOpcodes[effect.opcode] then
 			anyEffect = true
 			if effect.resist == 1 or effect.resist == 2 then resistible = true end
 		end
