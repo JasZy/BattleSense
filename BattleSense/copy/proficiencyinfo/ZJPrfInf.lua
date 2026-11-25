@@ -41,9 +41,54 @@ EEex_Options_Register("ZJProficiencyInfo_Enable", EEex_Options_Option.new({
 
 ZJProficiencyInfo_Private_OpenOn = ZJPopup_RegisterOpenOn("ZJProficiencyInfo_OpenOn", "Proficiency Info Module: Open On")
 
+ZJProficiencyInfo_Private_FontPoint = EEex_Options_Register("ZJProficiencyInfo_FontPoint", EEex_Options_Option.new({
+	["default"]  = 11,
+	["type"]     = EEex_Options_EditType.new(),
+	["accessor"] = EEex_Options_ClampedAccessor.new({ ["min"] = 1, ["max"] = 99 }),
+	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Proficiency Info Module: Font Point" }),
+}))
+
+ZJProficiencyInfo_Private_BackgroundOpacity = EEex_Options_Register("ZJProficiencyInfo_BackgroundOpacity", EEex_Options_Option.new({
+	["default"]  = 92,
+	["type"]     = EEex_Options_EditType.new(),
+	["accessor"] = EEex_Options_ClampedAccessor.new({ ["min"] = 0, ["max"] = 100 }),
+	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Proficiency Info Module: Background Opacity" }),
+}))
+
+ZJProficiencyInfo_Private_ShowNextPoint = EEex_Options_Register("ZJProficiencyInfo_ShowNextPoint", EEex_Options_Option.new({
+	["default"]  = 1,
+	["type"]     = EEex_Options_ToggleType.new(),
+	["accessor"] = EEex_Options_ClampedAccessor.new({ ["min"] = 0, ["max"] = 1 }),
+	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Proficiency Info Module: Show Next Point" }),
+}))
+
 EEex_Options_AddTab("ZJBattleSense_Options_TRANSLATION_ProficiencyInfo_TabTitle", function() return {
 	{
 		ZJPopup_OpenOnDisplayEntry("ZJProficiencyInfo_OpenOn"),
+		EEex_Options_DisplayEntry.new({
+			["optionID"]    = "ZJProficiencyInfo_FontPoint",
+			["label"]       = "ZJBattleSense_Options_TRANSLATION_ProficiencyInfo_FontPoint",
+			["description"] = "ZJBattleSense_Options_TRANSLATION_ProficiencyInfo_FontPoint_Description",
+			["widget"]      = EEex_Options_EditWidget.new({
+				["maxCharacters"] = 2,
+				["number"]        = true,
+			}),
+		}),
+		EEex_Options_DisplayEntry.new({
+			["optionID"]    = "ZJProficiencyInfo_BackgroundOpacity",
+			["label"]       = "ZJBattleSense_Options_TRANSLATION_ProficiencyInfo_BackgroundOpacity",
+			["description"] = "ZJBattleSense_Options_TRANSLATION_ProficiencyInfo_BackgroundOpacity_Description",
+			["widget"]      = EEex_Options_EditWidget.new({
+				["maxCharacters"] = 3,
+				["number"]        = true,
+			}),
+		}),
+		EEex_Options_DisplayEntry.new({
+			["optionID"]    = "ZJProficiencyInfo_ShowNextPoint",
+			["label"]       = "ZJBattleSense_Options_TRANSLATION_ProficiencyInfo_ShowNextPoint",
+			["description"] = "ZJBattleSense_Options_TRANSLATION_ProficiencyInfo_ShowNextPoint_Description",
+			["widget"]      = EEex_Options_ToggleWidget.new(),
+		}),
 	},
 } end)
 
@@ -218,14 +263,14 @@ function ZJProficiencyInfo_Private_GetSpecializationRow(points)
 end
 
 -- Returns what `points` in the proficiency `id` give a character of `class` at `level`, as a list of
--- { label, value, format }, where format is "signed" or "attacks". Values of 0 are left out.
-function ZJProficiencyInfo_Private_GetStats(id, points, class, level)
+-- { label, value, format }, where format is "signed" or "attacks". Values of 0 are left out, unless `keepZeros`.
+function ZJProficiencyInfo_Private_GetStats(id, points, class, level, keepZeros)
 
 	local T = ZJProficiencyInfo_Private_T
 	local stats = {}
 
 	local add = function(key, value, format)
-		if value == 0 then return end
+		if value == 0 and not keepZeros then return end
 		table.insert(stats, { ["label"] = T("Stat_"..key), ["value"] = value, ["format"] = format or "signed" })
 	end
 
@@ -289,6 +334,45 @@ function ZJProficiencyInfo_Private_FormatValue(value, format)
 	return string.format("%+d", value)
 end
 
+-- The most points the game's tables go up to, (a class may allow fewer)
+ZJProficiencyInfo_Private_MaxWeaponPoints = 5
+ZJProficiencyInfo_Private_MaxStylePoints  = 3
+
+-- What one more point in the proficiency `id` would change: a heading, ("Next point:"), and the values that change,
+-- ("Damage bonus +2 -> +3"), or "No change". Nil at the most points the tables go up to.
+function ZJProficiencyInfo_Private_GetNextPointLines(id, points, class, level)
+
+	local T = ZJProficiencyInfo_Private_T
+	local format = ZJProficiencyInfo_Private_FormatValue
+
+	local maxPoints = ZJProficiencyInfo_Private_Styles[id] and ZJProficiencyInfo_Private_MaxStylePoints
+		or ZJProficiencyInfo_Private_MaxWeaponPoints
+	if points >= maxPoints then return nil end
+
+	local currentValues = {} -- [label] = the value now, as shown
+	for _, stat in ipairs(ZJProficiencyInfo_Private_GetStats(id, points, class, level, true)) do
+		currentValues[stat.label] = format(stat.value, stat.format)
+	end
+
+	local lines = { ZJProficiencyInfo_Private_TitleColorStr..T("NextPoint")..ZJProficiencyInfo_Private_ColorEndStr }
+
+	for _, stat in ipairs(ZJProficiencyInfo_Private_GetStats(id, points + 1, class, level, true)) do
+		local nextValue = format(stat.value, stat.format)
+		local currentValue = currentValues[stat.label]
+		if currentValue == nil then
+			table.insert(lines, stat.label.." "..nextValue)
+		elseif currentValue ~= nextValue then
+			table.insert(lines, stat.label.." "..currentValue.." -> "..nextValue)
+		end
+	end
+
+	if #lines == 1 then
+		table.insert(lines, T("NoChange"))
+	end
+
+	return lines
+end
+
 -----------
 -- Popup --
 -----------
@@ -314,7 +398,8 @@ function ZJProficiencyInfo_Private_GetText(row)
 	if not okClass then class, level = nil, nil end
 
 	-- The popup is updated every frame, only build its text again when something changed
-	local key = string.format("%d|%d|%s|%s", id, points, tostring(class), tostring(level))
+	local showNextPoint = ZJProficiencyInfo_Private_ShowNextPoint:get() ~= 0
+	local key = string.format("%d|%d|%s|%s|%s", id, points, tostring(class), tostring(level), tostring(showNextPoint))
 	if key == ZJProficiencyInfo_Private_PopupKey then return ZJProficiencyInfo_Private_PopupText end
 
 	local T = ZJProficiencyInfo_Private_T
@@ -333,6 +418,16 @@ function ZJProficiencyInfo_Private_GetText(row)
 	end
 	if #stats == 0 then
 		table.insert(lines, T("NoBonus"))
+	end
+
+	if showNextPoint then
+		local nextLines = ZJProficiencyInfo_Private_GetNextPointLines(id, points, class, level)
+		if nextLines ~= nil then
+			table.insert(lines, "")
+			for _, line in ipairs(nextLines) do
+				table.insert(lines, line)
+			end
+		end
 	end
 
 	ZJProficiencyInfo_Private_PopupKey = key
@@ -360,7 +455,7 @@ function ZJProficiencyInfo_Private_UpdatePopup()
 		return
 	end
 
-	ZJPopup_ShowOnScreen(owner, text, rowY)
+	ZJPopup_ShowOnScreen(owner, text, rowY, ZJProficiencyInfo_Private_FontPoint:get(), ZJProficiencyInfo_Private_BackgroundOpacity:get())
 end
 
 ---------------

@@ -98,7 +98,9 @@ ZJPopup_Private_Screen_Text       = ""
 ZJPopup_Private_Screen_TextUD     = nil -- uiItem
 ZJPopup_Private_Screen_ShownFrame = -1  -- The frame it was last shown in
 
-ZJPopup_Private_Screen_FontPoint = 11
+ZJPopup_Private_Screen_FontPoint = 11 -- Used if the module doesn't give one
+ZJPopup_Private_Screen_DefaultOpacity = 92 -- The background's opacity in percent, used if the module doesn't give one
+ZJPopup_Private_Screen_Opacity = ZJPopup_Private_Screen_DefaultOpacity
 
 -- Whether the screen popup was shown in this frame or the one before. A module shows it every frame from something its
 -- screen draws, so once that screen is gone the popup stops drawing, even before anything closed it.
@@ -150,12 +152,14 @@ function ZJPopup_FindHoveredRow(menuName, listTable)
 	return nil
 end
 
--- Shows `text` in the screen popup, beside the cursor, at the height of `rowY`. `owner` is the module showing it.
--- Called every frame while it should be showing.
-function ZJPopup_ShowOnScreen(owner, text, rowY)
+-- Shows `text` in the screen popup, beside the cursor, at the height of `rowY`. `owner` is the module showing it,
+-- `fontPoint` the size of the text and `opacity` the background's opacity in percent, (both optional). Called every
+-- frame while it should be showing.
+function ZJPopup_ShowOnScreen(owner, text, rowY, fontPoint, opacity)
 
 	local style = styles["normal"]
-	local fontPoint = ZJPopup_Private_Screen_FontPoint
+	fontPoint = fontPoint or ZJPopup_Private_Screen_FontPoint
+	ZJPopup_Private_Screen_Opacity = opacity or ZJPopup_Private_Screen_DefaultOpacity
 
 	local pad = 10
 	local gap = 8 -- Between the popup and the cursor
@@ -246,5 +250,5 @@ EEex.RegisterSlicedRect("ZJPopup_BackgroundRect", {
 })
 
 EEex_Menu_AddBeforeUIItemRenderListener("ZJPopup_Screen_Background", function(item)
-	EEex.DrawSlicedRect("ZJPopup_BackgroundRect", { item:getArea() }, 255 * 0.92)
+	EEex.DrawSlicedRect("ZJPopup_BackgroundRect", { item:getArea() }, math.floor(255 * ZJPopup_Private_Screen_Opacity / 100))
 end)

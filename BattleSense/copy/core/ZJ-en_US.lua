@@ -630,7 +630,29 @@ The popup opens when hovering an ability on the abilities screen of character cr
 Values that only matter to some classes, (spells, thieving skills), are only listed for those classes. The popup follows the score as it is rerolled or changed.
 ]]
 
-uiStrings["ZJBattleSense_TRANSLATION_AbilityInfo_None"] = "none"
+uiStrings["ZJBattleSense_Options_TRANSLATION_AbilityInfo_FontPoint"] = "Font Point"
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_AbilityInfo_FontPoint_Description"] = [[
+The size of the text in the ability popup.
+]]
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_AbilityInfo_BackgroundOpacity"] = "Background Opacity"
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_AbilityInfo_BackgroundOpacity_Description"] = [[
+How solid the background of the ability popup is, in percent: 0 is see-through, 100 is fully solid.
+]]
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_AbilityInfo_ShowNextScore"] = "Show Next Score"
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_AbilityInfo_ShowNextScore_Description"] = [[
+Below what the current score gives, lists what one more point would change, e.g. "At 17: Damage bonus +0 -> +1", or "No change" if it changes nothing.
+
+Exceptional strength, (18/xx), goes to 19.
+]]
+
+uiStrings["ZJBattleSense_TRANSLATION_AbilityInfo_None"]      = "none"
+uiStrings["ZJBattleSense_TRANSLATION_AbilityInfo_NextScore"] = "At %s:"
+uiStrings["ZJBattleSense_TRANSLATION_AbilityInfo_NoChange"]  = "No change"
 
 uiStrings["ZJBattleSense_TRANSLATION_AbilityInfo_Stat_ToHit"]             = "To-hit bonus"
 uiStrings["ZJBattleSense_TRANSLATION_AbilityInfo_Stat_Damage"]            = "Damage bonus"
@@ -670,8 +692,30 @@ The popup opens when hovering a weapon proficiency or fighting style on the prof
 For a weapon: the to-hit and damage bonus, the speed factor, and the extra attacks per round the points add at the character's level, (with no points: the class's penalty for using it). For a fighting style: its damage, to-hit, armor class, speed factor and critical hit bonuses.
 ]]
 
+uiStrings["ZJBattleSense_Options_TRANSLATION_ProficiencyInfo_FontPoint"] = "Font Point"
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_ProficiencyInfo_FontPoint_Description"] = [[
+The size of the text in the proficiency popup.
+]]
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_ProficiencyInfo_BackgroundOpacity"] = "Background Opacity"
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_ProficiencyInfo_BackgroundOpacity_Description"] = [[
+How solid the background of the proficiency popup is, in percent: 0 is see-through, 100 is fully solid.
+]]
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_ProficiencyInfo_ShowNextPoint"] = "Show Next Point"
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_ProficiencyInfo_ShowNextPoint_Description"] = [[
+Below what the current points give, lists what one more point would change, e.g. "Next point: Damage bonus +2 -> +3", or "No change" if it changes nothing.
+
+It is shown up to 5 points for weapons and 3 for fighting styles, (what the game's tables go up to). Your class may allow fewer.
+]]
+
 uiStrings["ZJBattleSense_TRANSLATION_ProficiencyInfo_Title"]   = "%s: %d points"
 uiStrings["ZJBattleSense_TRANSLATION_ProficiencyInfo_NoBonus"] = "No bonuses or penalties"
+uiStrings["ZJBattleSense_TRANSLATION_ProficiencyInfo_NextPoint"] = "Next point:"
+uiStrings["ZJBattleSense_TRANSLATION_ProficiencyInfo_NoChange"]  = "No change"
 
 uiStrings["ZJBattleSense_TRANSLATION_ProficiencyInfo_Stat_ToHit"]             = "To-hit bonus"
 uiStrings["ZJBattleSense_TRANSLATION_ProficiencyInfo_Stat_Damage"]            = "Damage bonus"

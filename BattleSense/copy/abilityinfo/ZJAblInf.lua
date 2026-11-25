@@ -39,9 +39,54 @@ EEex_Options_Register("ZJAbilityInfo_Enable", EEex_Options_Option.new({
 
 ZJAbilityInfo_Private_OpenOn = ZJPopup_RegisterOpenOn("ZJAbilityInfo_OpenOn", "Ability Info Module: Open On")
 
+ZJAbilityInfo_Private_FontPoint = EEex_Options_Register("ZJAbilityInfo_FontPoint", EEex_Options_Option.new({
+	["default"]  = 11,
+	["type"]     = EEex_Options_EditType.new(),
+	["accessor"] = EEex_Options_ClampedAccessor.new({ ["min"] = 1, ["max"] = 99 }),
+	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Ability Info Module: Font Point" }),
+}))
+
+ZJAbilityInfo_Private_BackgroundOpacity = EEex_Options_Register("ZJAbilityInfo_BackgroundOpacity", EEex_Options_Option.new({
+	["default"]  = 92,
+	["type"]     = EEex_Options_EditType.new(),
+	["accessor"] = EEex_Options_ClampedAccessor.new({ ["min"] = 0, ["max"] = 100 }),
+	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Ability Info Module: Background Opacity" }),
+}))
+
+ZJAbilityInfo_Private_ShowNextScore = EEex_Options_Register("ZJAbilityInfo_ShowNextScore", EEex_Options_Option.new({
+	["default"]  = 1,
+	["type"]     = EEex_Options_ToggleType.new(),
+	["accessor"] = EEex_Options_ClampedAccessor.new({ ["min"] = 0, ["max"] = 1 }),
+	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Ability Info Module: Show Next Score" }),
+}))
+
 EEex_Options_AddTab("ZJBattleSense_Options_TRANSLATION_AbilityInfo_TabTitle", function() return {
 	{
 		ZJPopup_OpenOnDisplayEntry("ZJAbilityInfo_OpenOn"),
+		EEex_Options_DisplayEntry.new({
+			["optionID"]    = "ZJAbilityInfo_FontPoint",
+			["label"]       = "ZJBattleSense_Options_TRANSLATION_AbilityInfo_FontPoint",
+			["description"] = "ZJBattleSense_Options_TRANSLATION_AbilityInfo_FontPoint_Description",
+			["widget"]      = EEex_Options_EditWidget.new({
+				["maxCharacters"] = 2,
+				["number"]        = true,
+			}),
+		}),
+		EEex_Options_DisplayEntry.new({
+			["optionID"]    = "ZJAbilityInfo_BackgroundOpacity",
+			["label"]       = "ZJBattleSense_Options_TRANSLATION_AbilityInfo_BackgroundOpacity",
+			["description"] = "ZJBattleSense_Options_TRANSLATION_AbilityInfo_BackgroundOpacity_Description",
+			["widget"]      = EEex_Options_EditWidget.new({
+				["maxCharacters"] = 3,
+				["number"]        = true,
+			}),
+		}),
+		EEex_Options_DisplayEntry.new({
+			["optionID"]    = "ZJAbilityInfo_ShowNextScore",
+			["label"]       = "ZJBattleSense_Options_TRANSLATION_AbilityInfo_ShowNextScore",
+			["description"] = "ZJBattleSense_Options_TRANSLATION_AbilityInfo_ShowNextScore_Description",
+			["widget"]      = EEex_Options_ToggleWidget.new(),
+		}),
 	},
 } end)
 
@@ -263,6 +308,42 @@ function ZJAbilityInfo_Private_FormatScore(score, extra)
 	return tostring(score)
 end
 
+ZJAbilityInfo_Private_MaxScore = 25
+
+-- What one more point in `ability` would change: a heading, ("At 17:"), and the values that change, ("Damage bonus +0 ->
+-- +1"), or "No change". A score of 18 with exceptional strength goes to 19. Nil at the highest score.
+function ZJAbilityInfo_Private_GetNextScoreLines(ability, score, extra, class)
+
+	local T = ZJAbilityInfo_Private_T
+	local format = ZJAbilityInfo_Private_FormatValue
+
+	local nextScore = score + 1
+	if nextScore > ZJAbilityInfo_Private_MaxScore then return nil end
+
+	local currentValues = {} -- [label] = the value now, as shown
+	for _, stat in ipairs(ZJAbilityInfo_Private_GetStats(ability, score, extra, class)) do
+		currentValues[stat.label] = format(stat.value, stat.format)
+	end
+
+	local lines = { ZJAbilityInfo_Private_TitleColorStr..string.format(T("NextScore"), tostring(nextScore))..ZJAbilityInfo_Private_ColorEndStr }
+
+	for _, stat in ipairs(ZJAbilityInfo_Private_GetStats(ability, nextScore, 0, class)) do
+		local nextValue = format(stat.value, stat.format)
+		local currentValue = currentValues[stat.label]
+		if currentValue == nil then
+			table.insert(lines, stat.label.." "..nextValue)
+		elseif currentValue ~= nextValue then
+			table.insert(lines, stat.label.." "..currentValue.." -> "..nextValue)
+		end
+	end
+
+	if #lines == 1 then
+		table.insert(lines, T("NoChange"))
+	end
+
+	return lines
+end
+
 -----------
 -- Popup --
 -----------
@@ -280,7 +361,8 @@ function ZJAbilityInfo_Private_GetText(row)
 	if not okClass then class = nil end
 
 	-- The popup is updated every frame, only build its text again when something changed
-	local key = string.format("%d|%s|%s", row, tostring(class), tostring(rowEntry.roll))
+	local showNextScore = ZJAbilityInfo_Private_ShowNextScore:get() ~= 0
+	local key = string.format("%d|%s|%s|%s", row, tostring(class), tostring(rowEntry.roll), tostring(showNextScore))
 	if key == ZJAbilityInfo_Private_PopupKey then return ZJAbilityInfo_Private_PopupText end
 
 	local text = nil
@@ -299,6 +381,13 @@ function ZJAbilityInfo_Private_GetText(row)
 
 		text = ZJAbilityInfo_Private_TitleColorStr..name.." "..ZJAbilityInfo_Private_FormatScore(score, extra)
 			..ZJAbilityInfo_Private_ColorEndStr.."\n"..table.concat(values, "\n")
+
+		if showNextScore then
+			local nextLines = ZJAbilityInfo_Private_GetNextScoreLines(ability, score, extra, class)
+			if nextLines ~= nil then
+				text = text.."\n\n"..table.concat(nextLines, "\n")
+			end
+		end
 	end
 
 	ZJAbilityInfo_Private_PopupKey = key
@@ -326,7 +415,7 @@ function ZJAbilityInfo_Private_UpdatePopup()
 		return
 	end
 
-	ZJPopup_ShowOnScreen(owner, text, rowY)
+	ZJPopup_ShowOnScreen(owner, text, rowY, ZJAbilityInfo_Private_FontPoint:get(), ZJAbilityInfo_Private_BackgroundOpacity:get())
 end
 
 ---------------
