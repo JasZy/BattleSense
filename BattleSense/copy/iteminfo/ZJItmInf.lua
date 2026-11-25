@@ -1062,8 +1062,8 @@ function ZJItemInfo_Private_GetComparisonLines(sprite, info)
 	-- with the attacks per round line below it
 	local thac0LineIndex = nil
 
-	-- On a weapon the maximum hit points are only listed when they change, on anything else, (armor, bracers, rings,
-	-- ...), the THAC0 and attacks per round too
+	-- On a weapon the armor class and maximum hit points are only listed when they change, on anything else, (armor,
+	-- bracers, rings, ...), the THAC0 and attacks per round
 	local isWeaponItem = ZJItemInfo_Private_CategorySlots[info.category] == "weapon"
 	local isArmor = not isWeaponItem
 
@@ -1083,7 +1083,9 @@ function ZJItemInfo_Private_GetComparisonLines(sprite, info)
 				local label = ZJItemInfo_Private_T("Stat_"..armorClassType.key)
 				local oldValue, newValue = oldArmorClass + oldMod, newArmorClass + newMod
 				if oldValue == newValue then
-					table.insert(lines, ZJItemInfo_Private_FormatSameLine(label, tostring(newValue)))
+					if isArmor then
+						table.insert(lines, ZJItemInfo_Private_FormatSameLine(label, tostring(newValue)))
+					end
 				else
 					table.insert(lines, ZJItemInfo_Private_FormatChangeLine(label, oldValue, newValue, true))
 				end
@@ -1118,7 +1120,7 @@ function ZJItemInfo_Private_GetComparisonLines(sprite, info)
 			-- It is part of the weapon damage below
 		elseif newValue ~= nil and newValue ~= oldValue then
 			table.insert(lines, ZJItemInfo_Private_FormatChangeLine(ZJItemInfo_Private_T("Stat_"..key), oldValue, newValue, stat.lowerIsBetter, stat.suffix))
-		elseif stat.always and (key == "ArmorClass" or not isArmor) and not (key == "MaxHitPoints" and isWeaponItem) then
+		elseif stat.always and (key == "ArmorClass") == isArmor and not (key == "MaxHitPoints" and isWeaponItem) then
 			table.insert(lines, ZJItemInfo_Private_FormatSameLine(ZJItemInfo_Private_T("Stat_"..key), string.format("%d%s", oldValue, stat.suffix or "")))
 		end
 
