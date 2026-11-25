@@ -177,17 +177,64 @@ function ZJBattleSense_Private_DoModuleFile(moduleFile)
 	end
 end
 
+-- Every module's on / off switch. A module registers its own switch, and is only loaded if the switch was on when the
+-- game started: a module that is switched off adds nothing to the game, (no listeners, no menus). Switching a loaded
+-- module off or on again applies at once. Switching on a module that wasn't loaded applies on the next launch, as with
+-- EEex's modules, (see ZJBattleSense_Private_RegisterUnloadedToggle()).
+--
+--   "optionID" - The option the module registers for its switch.
+--   "key"      - Where that option is stored, (the "Battle Sense" section of Baldur.lua).
+--   "name"     - The module's part of the strings' names, (ZJBattleSense_Options_TRANSLATION_<name>_Enable).
+--
+ZJBattleSense_Private_ToggleSection = "Battle Sense"
+
+ZJBattleSense_Private_ModuleToggles = {
+	["ZJAblInf"] = { ["optionID"] = "ZJAbilityInfo_Enable",     ["key"] = "Ability Info",     ["name"] = "AbilityInfo"     },
+	["ZJAtkInf"] = { ["optionID"] = "ZJAttackInfo_Enable",      ["key"] = "Attack Info",      ["name"] = "AttackInfo"      },
+	["ZJCmbLog"] = { ["optionID"] = "ZJCombatLog_Enable",       ["key"] = "Combat Log",       ["name"] = "CombatLog"       },
+	["ZJItmInf"] = { ["optionID"] = "ZJItemInfo_Enable",        ["key"] = "Item Info",        ["name"] = "ItemInfo"        },
+	["ZJPrfInf"] = { ["optionID"] = "ZJProficiencyInfo_Enable", ["key"] = "Proficiency Info", ["name"] = "ProficiencyInfo" },
+	["ZJSplInf"] = { ["optionID"] = "ZJSpellInfo_Enable",       ["key"] = "Spell Info",       ["name"] = "SpellInfo"       },
+	["ZJTimer"]  = { ["optionID"] = "ZJTimer_Enable",           ["key"] = "Timer",            ["name"] = "Timer"           },
+}
+
+-- Whether the module's switch is on, read from where its option stores it, (the module isn't loaded yet, so its option
+-- doesn't exist). The switches are on by default.
+function ZJBattleSense_Private_IsModuleSwitchedOn(toggle)
+	local value = tonumber(Infinity_GetINIString(ZJBattleSense_Private_ToggleSection, toggle.key, "X-DEFAULT"))
+	return value == nil or value ~= 0
+end
+
+-- Stands in for the switch of a module that wasn't loaded, so that it can still be switched on. It is stored in the
+-- same place as the module's own switch, and applies on the next launch, (EEex shows that next to it).
+function ZJBattleSense_Private_RegisterUnloadedToggle(toggle)
+	EEex_Options_Register(toggle.optionID, EEex_Options_Option.new({
+		["default"]         = 1,
+		["type"]            = EEex_Options_ToggleType.new(),
+		["accessor"]        = EEex_Options_ClampedAccessor.new({ ["min"] = 0, ["max"] = 1 }),
+		["storage"]         = EEex_Options_NumberLuaStorage.new({ ["section"] = ZJBattleSense_Private_ToggleSection, ["key"] = toggle.key }),
+		["requiresRestart"] = true,
+	}))
+end
+
 Infinity_DoFile("ZJSprite")
 
 for _, moduleFile in ipairs(ZJBattleSense_Private_ModuleOrder) do
 	if ZJBattleSense_Modules[moduleFile] then
 
-		local replaces = ZJBattleSense_Private_Replaces[moduleFile]
-		if replaces ~= nil then
-			EEex_Utility_TryIgnore(ZJBattleSense_Private_ReplaceEEexModule, replaces)
-		end
+		local toggle = ZJBattleSense_Private_ModuleToggles[moduleFile]
 
-		ZJBattleSense_Private_DoModuleFile(moduleFile)
+		if ZJBattleSense_Private_IsModuleSwitchedOn(toggle) then
+
+			local replaces = ZJBattleSense_Private_Replaces[moduleFile]
+			if replaces ~= nil then
+				EEex_Utility_TryIgnore(ZJBattleSense_Private_ReplaceEEexModule, replaces)
+			end
+
+			ZJBattleSense_Private_DoModuleFile(moduleFile)
+		else
+			ZJBattleSense_Private_RegisterUnloadedToggle(toggle)
+		end
 	end
 end
 
@@ -196,21 +243,7 @@ end
 --------------------------
 
 -- Every module's on / off switch is in one "Battle Sense Modules" tab, like EEex's "Modules" tab, instead of in the
--- module's own tab. Unlike EEex's, they apply at once. Only the modules that are installed are listed.
---
---   "optionID" - The option the module registers for it.
---   "name"     - The module's part of the strings' names, (ZJBattleSense_Options_TRANSLATION_<name>_Enable).
---
-ZJBattleSense_Private_ModuleToggles = {
-	["ZJAblInf"] = { ["optionID"] = "ZJAbilityInfo_Enable",     ["name"] = "AbilityInfo"     },
-	["ZJAtkInf"] = { ["optionID"] = "ZJAttackInfo_Enable",      ["name"] = "AttackInfo"      },
-	["ZJCmbLog"] = { ["optionID"] = "ZJCombatLog_Enable",       ["name"] = "CombatLog"       },
-	["ZJItmInf"] = { ["optionID"] = "ZJItemInfo_Enable",        ["name"] = "ItemInfo"        },
-	["ZJPrfInf"] = { ["optionID"] = "ZJProficiencyInfo_Enable", ["name"] = "ProficiencyInfo" },
-	["ZJSplInf"] = { ["optionID"] = "ZJSpellInfo_Enable",       ["name"] = "SpellInfo"       },
-	["ZJTimer"]  = { ["optionID"] = "ZJTimer_Enable",           ["name"] = "Timer"           },
-}
-
+-- module's own tab. Only the modules that are installed are listed.
 function ZJBattleSense_Private_InstalledModuleToggles()
 	local toggles = {}
 	for _, moduleFile in ipairs(ZJBattleSense_Private_ModuleOrder) do
