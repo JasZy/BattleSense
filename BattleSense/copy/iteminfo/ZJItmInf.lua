@@ -272,7 +272,7 @@ function ZJItemInfo_Private_ReadItemInfo(resref)
 	for i = 0, header.abilityCount - 1 do
 		local ability = EEex_PtrToUD(abilitiesAddress + Item_ability_st.sizeof * i, "Item_ability_st")
 		local abilityType = ability.type
-		if abilityType == 1 or abilityType == 2 then -- Melee / ranged
+		if abilityType == 1 or abilityType == 2 or abilityType == 4 then -- Melee / ranged / launcher
 			-- The ability's flags, (0x26): bit 0 adds the strength bonus to a ranged attack, a melee attack always gets it
 			local abilityFlags = EEex_ReadU32(EEex_UDToPtr(ability) + 0x26)
 			info.weapon = {
@@ -281,7 +281,8 @@ function ZJItemInfo_Private_ReadItemInfo(resref)
 				["bonus"]       = ability.damageDiceBonus,
 				["thac0Bonus"]  = ability.thac0Bonus,
 				["speedFactor"] = ability.speedFactor,
-				["ranged"]      = abilityType == 2,
+				["ranged"]      = abilityType ~= 1,
+				["launcher"]    = abilityType == 4, -- Its bonuses add to those of the ammunition it fires
 				["addStrength"] = abilityType == 1 or EEex_BAnd(abilityFlags, 0x1) ~= 0,
 			}
 			break
@@ -806,6 +807,65 @@ ZJItemInfo_Private_FistWeapon = {
 	["addStrength"] = true,
 }
 
+-- The launcher categories => the category of the ammunition they fire, (arrows, bullets, bolts)
+ZJItemInfo_Private_LauncherAmmoCategories = { [15] = 5, [18] = 14, [27] = 31 }
+
+-- The item info of the ammunition `sprite` would fire from the launcher of `launcherInfo`: the selected quiver slot if
+-- it holds the right kind, else the first quiver slot that does. nil if it has none.
+function ZJItemInfo_Private_GetAmmoInfo(sprite, launcherInfo)
+
+	local ammoCategory = ZJItemInfo_Private_LauncherAmmoCategories[launcherInfo.category]
+	if ammoCategory == nil then return nil end
+
+	local equipment = sprite.m_equipment
+	local items = equipment.m_items
+
+	local getAmmo = function(slotNum)
+		local item = items:get(slotNum)
+		if item == nil then return nil end
+		local ammoInfo = ZJItemInfo_Private_GetItemInfo(item.cResRef:get())
+		if ammoInfo == nil or ammoInfo.category ~= ammoCategory or ammoInfo.weapon == nil then return nil end
+		return ammoInfo
+	end
+
+	local selectedWeapon = equipment.m_selectedWeapon
+	if selectedWeapon >= 11 and selectedWeapon <= 14 then
+		local ammoInfo = getAmmo(selectedWeapon)
+		if ammoInfo ~= nil then return ammoInfo end
+	end
+
+	for quiverSlot = 11, 14 do
+		local ammoInfo = getAmmo(quiverSlot)
+		if ammoInfo ~= nil then return ammoInfo end
+	end
+
+	return nil
+end
+
+-- Returns the attack of the launcher `launcher` firing `ammo`, (the weapon of an item info, nil for none): the
+-- ammunition's damage dice, the bonuses of both, and the launcher's speed factor
+function ZJItemInfo_Private_ApplyAmmo(launcher, ammo)
+
+	if ammo == nil then return launcher end
+
+	local diceCount, diceSize = ammo.diceCount, ammo.diceSize
+	if not (diceCount > 0 and diceSize > 0) then
+		diceCount, diceSize = launcher.diceCount, launcher.diceSize
+	elseif launcher.diceCount > 0 and launcher.diceSize == diceSize then
+		diceCount = diceCount + launcher.diceCount
+	end
+
+	return {
+		["diceCount"]   = diceCount,
+		["diceSize"]    = diceSize,
+		["bonus"]       = launcher.bonus + ammo.bonus,
+		["thac0Bonus"]  = launcher.thac0Bonus + ammo.thac0Bonus,
+		["speedFactor"] = launcher.speedFactor,
+		["ranged"]      = true,
+		["addStrength"] = launcher.addStrength or ammo.addStrength,
+	}
+end
+
 -- Returns the weapon style `sprite` fights in now, and the one it would fight in after equipping the item of `info`
 function ZJItemInfo_Private_GetStyleChange(sprite, info)
 
@@ -1210,9 +1270,13 @@ function ZJItemInfo_Private_GetComparisonLines(sprite, info)
 	local newExtra = newStrength == oldStrength and oldExtra or 0
 
 	-- The weapon as the character would use it, with its strength bonus, its proficiency in it, and the weapon style it
-	-- fights in with it. No weapon is a fist.
+	-- fights in with it. No weapon is a fist, a launcher fires the ammunition the character has for it.
 	local applyAll = function(weaponInfo, strength, extra, styleBonus)
 		local weapon = weaponInfo and weaponInfo.weapon or ZJItemInfo_Private_FistWeapon
+		if weapon.launcher then
+			local ammoInfo = ZJItemInfo_Private_GetAmmoInfo(sprite, weaponInfo)
+			weapon = ZJItemInfo_Private_ApplyAmmo(weapon, ammoInfo and ammoInfo.weapon or nil)
+		end
 		weapon = ZJItemInfo_Private_ApplyStrength(weapon, weapon.addStrength, strength, extra)
 		weapon = ZJItemInfo_Private_ApplyProficiency(sprite, weapon, weaponInfo and weaponInfo.weapon and weaponInfo.proficiencyType or nil)
 		return ZJItemInfo_Private_ApplyStyle(weapon, styleBonus)
