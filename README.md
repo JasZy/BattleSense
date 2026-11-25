@@ -65,6 +65,7 @@ For a potion, (or any item used on its owner), the popup shows what drinking it 
 
 Pick a spell, wand, scroll or throwable potion, (from the spellbook or a quick item slot), then hover the creature you want to target to open a popup with what it will do to that creature:
 
+- How far it is from the caster, next to the spell's range, and by how much it is out of range
 - Its magic resistance, or that the spell ignores it
 - The saving throws it gets, and the roll it needs to save
 - The spell's damage per element, with the creature's resistance to each

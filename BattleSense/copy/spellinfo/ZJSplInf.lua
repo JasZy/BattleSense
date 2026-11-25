@@ -76,6 +76,13 @@ ZJSpellInfo_Private_ShowImmunities = EEex_Options_Register("ZJSpellInfo_ShowImmu
 	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Spell Info Module: Show Immunities" }),
 }))
 
+ZJSpellInfo_Private_ShowDistance = EEex_Options_Register("ZJSpellInfo_ShowDistance", EEex_Options_Option.new({
+	["default"]  = 1,
+	["type"]     = EEex_Options_ToggleType.new(),
+	["accessor"] = EEex_Options_ClampedAccessor.new({ ["min"] = 0, ["max"] = 1 }),
+	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Spell Info Module: Show Distance" }),
+}))
+
 ZJSpellInfo_Private_ShowOnParty = EEex_Options_Register("ZJSpellInfo_ShowOnParty", EEex_Options_Option.new({
 	["default"]  = 1,
 	["type"]     = EEex_Options_ToggleType.new(),
@@ -144,6 +151,12 @@ EEex_Options_AddTab("ZJBattleSense_Options_TRANSLATION_SpellInfo_TabTitle", func
 			["optionID"]    = "ZJSpellInfo_ShowImmunities",
 			["label"]       = "ZJBattleSense_Options_TRANSLATION_SpellInfo_ShowImmunities",
 			["description"] = "ZJBattleSense_Options_TRANSLATION_SpellInfo_ShowImmunities_Description",
+			["widget"]      = EEex_Options_ToggleWidget.new(),
+		}),
+		EEex_Options_DisplayEntry.new({
+			["optionID"]    = "ZJSpellInfo_ShowDistance",
+			["label"]       = "ZJBattleSense_Options_TRANSLATION_SpellInfo_ShowDistance",
+			["description"] = "ZJBattleSense_Options_TRANSLATION_SpellInfo_ShowDistance_Description",
 			["widget"]      = EEex_Options_ToggleWidget.new(),
 		}),
 		EEex_Options_DisplayEntry.new({
@@ -367,7 +380,8 @@ function ZJSpellInfo_Private_ReadAbilityEffects(headerAddress, abilityAddress, o
 	end
 end
 
--- Appends the effects that the spell `resref` has for `caster`'s level to `effects`. Returns the spell's header, or nil.
+-- Appends the effects that the spell `resref` has for `caster`'s level to `effects`. Returns the spell's header and the
+-- address of the ability used, or nil.
 function ZJSpellInfo_Private_ReadSpell(resref, caster, effects, depth)
 
 	local spellHeader = EEex_Resource_Demand(resref, "SPL")
@@ -386,11 +400,13 @@ function ZJSpellInfo_Private_ReadSpell(resref, caster, effects, depth)
 		["secondaryType"] = EEex_ReadU8(headerAddress + 0x27),
 	}
 
-	ZJSpellInfo_Private_ReadAbilityEffects(headerAddress, EEex_UDToPtr(ability), origin, effects, depth, caster)
-	return spellHeader
+	local abilityAddress = EEex_UDToPtr(ability)
+	ZJSpellInfo_Private_ReadAbilityEffects(headerAddress, abilityAddress, origin, effects, depth, caster)
+	return spellHeader, abilityAddress
 end
 
--- Returns the name of what `caster` is about to use and its effects on a target, or nil if it isn't a spell / item ability
+-- Returns the name of what `caster` is about to use, its effects on a target and its range, (the ability's range field,
+-- 0x0E in both SPL and ITM abilities), or nil if it isn't a spell / item ability
 function ZJSpellInfo_Private_ReadUsed(caster)
 
 	local abilityId = caster.m_currentUseButton.m_abilityId
@@ -409,9 +425,12 @@ function ZJSpellInfo_Private_ReadUsed(caster)
 	end
 
 	-- A spell, (from the spellbook, a special ability, an innate)
-	if resref ~= "" and resref ~= itemResref and ZJSpellInfo_Private_ReadSpell(resref, caster, effects, 0) ~= nil then
-		local name = ZJSpellInfo_Private_GetSourceName(resref)
-		return name ~= "" and name or resref, effects
+	if resref ~= "" and resref ~= itemResref then
+		local spellHeader, spellAbilityAddress = ZJSpellInfo_Private_ReadSpell(resref, caster, effects, 0)
+		if spellHeader ~= nil then
+			local name = ZJSpellInfo_Private_GetSourceName(resref)
+			return name ~= "" and name or resref, effects, EEex_ReadU16(spellAbilityAddress + 0x0E)
+		end
 	end
 
 	-- An item ability, (a wand, a scroll, a potion thrown at someone)
@@ -430,7 +449,7 @@ function ZJSpellInfo_Private_ReadUsed(caster)
 
 	local name = ZJSpellInfo_Private_FetchString(itemHeader.identifiedName)
 	if name == "" then name = ZJSpellInfo_Private_FetchString(itemHeader.genericName) end
-	return name, effects
+	return name, effects, EEex_ReadU16(abilityAddress + 0x0E)
 end
 
 ------------
@@ -752,13 +771,33 @@ end
 -- Returns the popup's text for `caster` using what it is about to use on `target`, or nil if there is nothing to show
 function ZJSpellInfo_Private_BuildText(caster, target)
 
-	local name, effects = ZJSpellInfo_Private_ReadUsed(caster)
+	local name, effects, range = ZJSpellInfo_Private_ReadUsed(caster)
 	if name == nil then return nil end
 
 	local title = string.format(ZJSpellInfo_Private_T("Title"), name, target:getName())
 	local lines = ZJSpellInfo_Private_Describe(target, effects)
+	if ZJSpellInfo_Private_ShowDistance:get() ~= 0 then
+		table.insert(lines, 1, ZJSpellInfo_Private_DescribeDistance(caster, target, range))
+	end
 	table.insert(lines, 1, title)
 	return table.concat(lines, "\n")
+end
+
+-- Returns the line with how far `target` is from `caster`, and how far it is out of `range`, in the units of an ability's
+-- range field, (8 pixels each, tested in game: a spell with range 60 casts without walking from 480 pixels away). The
+-- engine measures distances in pixels, with the vertical axis stretched by 4/3, (see Attack Info's
+-- ZJAttackInfo_Private_IsInArea).
+function ZJSpellInfo_Private_DescribeDistance(caster, target, range)
+
+	local casterPos, targetPos = caster.m_pos, target.m_pos
+	local offsetX = targetPos.x - casterPos.x
+	local offsetY = (targetPos.y - casterPos.y) * 4 / 3
+	local distance = math.floor(math.sqrt(offsetX * offsetX + offsetY * offsetY) / 8 + 0.5)
+
+	local distanceStr = string.format(ZJSpellInfo_Private_T("Distance"), distance, range)
+	if distance <= range then return distanceStr end
+	return string.format("%s %s%s^-", distanceStr, ZJSpellInfo_Private_RedColorStr,
+		string.format(ZJSpellInfo_Private_T("OutOfRange"), distance - range))
 end
 
 ----------

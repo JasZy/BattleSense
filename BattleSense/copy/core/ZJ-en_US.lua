@@ -251,6 +251,14 @@ uiStrings["ZJBattleSense_Options_TRANSLATION_SpellInfo_ShowImmunities_Descriptio
 Displays why the creature would be unaffected by the spell: its immunities to the effect, the spell, the spell's level or school, the spell's own exclusions, (e.g. Sleep doesn't affect elves), and level limits.
 ]]
 
+uiStrings["ZJBattleSense_Options_TRANSLATION_SpellInfo_ShowDistance"] = "Show Distance"
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_SpellInfo_ShowDistance_Description"] = [[
+Shows how far the creature is from the caster, next to the range of the spell / item, e.g. "Distance: 12 (range 30)". When the creature is out of range, also shows by how much: the caster walks at least that far before casting, (usually a bit further, the caster walks along the area's walking grid).
+
+Distances are measured from the caster's center to the creature's center, in the same units as the range.
+]]
+
 uiStrings["ZJBattleSense_Options_TRANSLATION_SpellInfo_ShowOnParty"] = "Show On Party Members"
 
 uiStrings["ZJBattleSense_Options_TRANSLATION_SpellInfo_ShowOnParty_Description"] = [[
@@ -260,6 +268,8 @@ Turn this off to keep the popup out of the way while healing or buffing the part
 ]]
 
 uiStrings["ZJBattleSense_TRANSLATION_SpellInfo_Title"]              = "%s on %s"
+uiStrings["ZJBattleSense_TRANSLATION_SpellInfo_Distance"]           = "Distance: %d (range %d)"
+uiStrings["ZJBattleSense_TRANSLATION_SpellInfo_OutOfRange"]         = "%d out of range"
 uiStrings["ZJBattleSense_TRANSLATION_SpellInfo_MagicResistance"]    = "Magic resistance"
 uiStrings["ZJBattleSense_TRANSLATION_SpellInfo_Bypassed"]           = "this spell ignores it"
 uiStrings["ZJBattleSense_TRANSLATION_SpellInfo_SaveVs"]             = "Save vs."
