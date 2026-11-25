@@ -16,6 +16,9 @@
 +--------------------------------------------------------------------------------------------------+
 --]]
 
+-- The "Open On" option, (shared by every popup)
+Infinity_DoFile("ZJPopup")
+
 -------------
 -- Options --
 -------------
@@ -27,6 +30,8 @@ EEex_Options_Register("ZJItemInfo_Enable", EEex_Options_Option.new({
 	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Item Info" }),
 	["onChange"] = function(self, oldValue) ZJItemInfo_SetEnabled(self:get() ~= 0) end,
 }))
+
+ZJItemInfo_Private_OpenOn = ZJPopup_RegisterOpenOn("ZJItemInfo_OpenOn", "Item Info Module: Open On")
 
 ZJItemInfo_Private_FontPoint = EEex_Options_Register("ZJItemInfo_FontPoint", EEex_Options_Option.new({
 	["default"]  = 11,
@@ -99,6 +104,7 @@ EEex_Options_AddTab("ZJBattleSense_Options_TRANSLATION_ItemInfo_TabTitle", funct
 			["description"] = "ZJBattleSense_Options_TRANSLATION_ItemInfo_Enable_Description",
 			["widget"]      = EEex_Options_ToggleWidget.new(),
 		}),
+		ZJPopup_OpenOnDisplayEntry("ZJItemInfo_OpenOn"),
 		EEex_Options_DisplayEntry.new({
 			["optionID"]    = "ZJItemInfo_FontPoint",
 			["label"]       = "ZJBattleSense_Options_TRANSLATION_ItemInfo_FontPoint",
@@ -2605,6 +2611,11 @@ end
 function ZJItemInfo_Private_DoTick()
 
 	if not ZJItemInfo_Private_Enabled then return end
+
+	if not ZJPopup_IsOpenAllowed(ZJItemInfo_Private_OpenOn) then
+		ZJItemInfo_Private_Menu_SetOpen(false)
+		return
+	end
 
 	local hovered = ZJItemInfo_Private_FindHoveredItem()
 

@@ -1,0 +1,25 @@
+-- The screen popup, opened on top of a full screen menu while the cursor is over a row it describes (areas set in
+-- ZJPopup_ShowOnScreen()). It only draws while the module showing it does so every frame, see ZJPopup_Private_Screen_IsFresh().
+menu
+{
+	name "ZJPopup_Screen"
+	ignoreesc
+
+	label
+	{
+		name "ZJPopup_Screen_Background"
+		area 0 0 -1 -1
+		enabled "ZJPopup_Private_Screen_IsFresh()"
+	}
+
+	label
+	{
+		name "ZJPopup_Screen_Text"
+		area -1 -1 -1 -1
+		enabled "ZJPopup_Private_Screen_IsFresh()"
+		text style "normal"
+		text lua "ZJPopup_Private_Screen_Text"
+		text align left top
+		text color 255 255 255 255
+	}
+}

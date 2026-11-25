@@ -1,6 +1,26 @@
 
 -- Battle Sense - English strings. Translations go in ZJ-<language>.lua, (for example ZJ-de_DE.lua).
 
+------------
+-- Popups --
+------------
+
+-- The "Open On" option every popup has, (ZJPopup.lua)
+uiStrings["ZJBattleSense_Options_TRANSLATION_OpenOn"] = "Open On"
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_OpenOn_Description"] = [[
+The key that opens the popup: left / right Ctrl, Alt or Shift. Click to pick the next one.
+
+The popup only opens while that key is held down, with the cursor over what the popup describes. Letting go of the key closes the popup.
+]]
+
+uiStrings["ZJBattleSense_TRANSLATION_OpenOn_LeftCtrl"]      = "Left Ctrl"
+uiStrings["ZJBattleSense_TRANSLATION_OpenOn_LeftAlt"]       = "Left Alt"
+uiStrings["ZJBattleSense_TRANSLATION_OpenOn_LeftShift"]     = "Left Shift"
+uiStrings["ZJBattleSense_TRANSLATION_OpenOn_RightCtrl"]     = "Right Ctrl"
+uiStrings["ZJBattleSense_TRANSLATION_OpenOn_RightAlt"]      = "Right Alt"
+uiStrings["ZJBattleSense_TRANSLATION_OpenOn_RightShift"]    = "Right Shift"
+
 -----------------
 -- Attack Info --
 -----------------
@@ -12,7 +32,7 @@ uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_Enable"] = "Enabled"
 uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_Enable_Description"] = [[
 Enables the attack information popup.
 
-The popup opens when hovering a hostile creature, any creature with the attack cursor, or a party member or ally that is in a fight, (see "Enabled For Friendly").
+The popup opens when hovering any creature while its "Open On" key is held: a hostile or neutral creature, or a party member or ally, (see "Enabled For Friendly").
 
 It has two panels, with a row for each selected party member:
 
@@ -32,7 +52,7 @@ uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_ShowAllies"] = "Show All
 uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_ShowAllies_Description"] = [[
 Includes the party's summons and other allies, not just the party members, (companions).
 
-On: the popup over a creature lists the party's summons / allies that are fighting it, and hovering a summon / ally that is in a fight opens the compact popup, (see "Enabled For Friendly").
+On: the popup over a creature lists the party's summons / allies that are fighting it, and hovering a summon / ally opens the compact popup, (see "Enabled For Friendly").
 
 Off: the popup only lists party members, and the compact popup only opens over party members.
 ]]
@@ -162,7 +182,9 @@ The compact popup lists the creatures that the creature under the cursor is atta
 
 A creature is on the same row in both panels. If it is only attacking, or only being attacked, its row in the other panel is left empty.
 
-The compact popup opens by itself when hovering a party member or ally that is attacking, or being attacked by, another creature. Turn this off to not open a popup over them at all.
+Over a party member or ally that isn't fighting anyone, the compact popup only has its headers: the creature's weapon damage, its timers, its stoneskins / mirror images, and the spells affecting it with the time they have left.
+
+Turn this off to not open a popup over them at all.
 ]]
 
 uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_ShowSpellEffects"] = "Show Spell Effects"
@@ -584,11 +606,11 @@ uiStrings["ZJBattleSense_Options_TRANSLATION_AbilityInfo_TabTitle"] = "Battle Se
 uiStrings["ZJBattleSense_Options_TRANSLATION_AbilityInfo_Enable"] = "Enabled"
 
 uiStrings["ZJBattleSense_Options_TRANSLATION_AbilityInfo_Enable_Description"] = [[
-Enables the ability overview.
+Enables the ability popup.
 
-The overview is shown at the top of the help text of the abilities screen of character creation. It lists what each of the character's current ability scores gives: to-hit and damage bonus, armor class, hit points per level, chance to learn spells, bonus priest spells, lore, store prices, ...
+The popup opens when hovering an ability on the abilities screen of character creation, (see "Open On"). It lists what the character's current score in that ability gives: to-hit and damage bonus, armor class, hit points per level, chance to learn spells, bonus priest spells, lore, store prices, ...
 
-Values that only matter to some classes, (spells, thieving skills), are only listed for those classes. The overview follows the scores as they are rerolled or changed.
+Values that only matter to some classes, (spells, thieving skills), are only listed for those classes. The popup follows the score as it is rerolled or changed.
 ]]
 
 uiStrings["ZJBattleSense_TRANSLATION_AbilityInfo_None"] = "none"
@@ -624,9 +646,9 @@ uiStrings["ZJBattleSense_Options_TRANSLATION_ProficiencyInfo_TabTitle"] = "Battl
 uiStrings["ZJBattleSense_Options_TRANSLATION_ProficiencyInfo_Enable"] = "Enabled"
 
 uiStrings["ZJBattleSense_Options_TRANSLATION_ProficiencyInfo_Enable_Description"] = [[
-Enables the proficiency information.
+Enables the proficiency popup.
 
-On the proficiencies screen, at character creation and level up, the top of the help text gets two rows: the last weapon proficiency, and the last fighting style, that was clicked or changed. A row shows what the points give now, (values of 0 are left out).
+The popup opens when hovering a weapon proficiency or fighting style on the proficiencies screen, at character creation and level up, (see "Open On"). It shows what its points give now, (values of 0 are left out), and follows the points as they are changed.
 
 For a weapon: the to-hit and damage bonus, the speed factor, and the extra attacks per round the points add at the character's level, (with no points: the class's penalty for using it). For a fighting style: its damage, to-hit, armor class, speed factor and critical hit bonuses.
 ]]

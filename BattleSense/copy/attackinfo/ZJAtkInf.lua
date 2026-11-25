@@ -1,6 +1,8 @@
 
 -- The bar colors, (shared with Timer)
 Infinity_DoFile("ZJBarCol")
+-- The "Open On" option, (shared by every popup)
+Infinity_DoFile("ZJPopup")
 
 -------------
 -- Options --
@@ -13,6 +15,8 @@ EEex_Options_Register("ZJAttackInfo_Enable", EEex_Options_Option.new({
 	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Attack Info" }),
 	["onChange"] = function(self, oldValue) ZJAttackInfo_SetEnabled(self:get() ~= 0) end,
 }))
+
+ZJAttackInfo_Private_OpenOn = ZJPopup_RegisterOpenOn("ZJAttackInfo_OpenOn", "Attack Info Module: Open On")
 
 -- "Enabled For Friendly": the compact popup, over party members and allies that are in a fight
 ZJAttackInfo_Private_CompactForAllies = EEex_Options_Register("ZJAttackInfo_CompactForAllies", EEex_Options_Option.new({
@@ -120,6 +124,7 @@ EEex_Options_AddTab("ZJBattleSense_Options_TRANSLATION_AttackInfo_TabTitle", fun
 			["description"] = "ZJBattleSense_Options_TRANSLATION_AttackInfo_Enable_Description",
 			["widget"]      = EEex_Options_ToggleWidget.new(),
 		}),
+		ZJPopup_OpenOnDisplayEntry("ZJAttackInfo_OpenOn"),
 		EEex_Options_DisplayEntry.new({
 			["optionID"]    = "ZJAttackInfo_CompactForAllies",
 			["label"]       = "ZJBattleSense_Options_TRANSLATION_AttackInfo_CompactForAllies",
@@ -209,7 +214,6 @@ EEex_Options_AddTab("ZJBattleSense_Options_TRANSLATION_AttackInfo_TabTitle", fun
 
 ZJAttackInfo_Private_CombatantSearchRange = 896 -- Twice a sprite's default visual range
 ZJAttackInfo_Private_GoodCutoff = 30 -- EA.IDS, everything up to this value is on the party's side
-ZJAttackInfo_Private_EvilCutoff = 200 -- EA.IDS, everything from this value is hostile to the party
 ZJAttackInfo_Private_ObjectTypes = {} -- [script object string] = CAIObjectType
 ZJAttackInfo_Private_CurrentTargetID = -1
 ZJAttackInfo_Private_Enabled = false
@@ -2649,8 +2653,9 @@ function ZJAttackInfo_Private_Menu_Ticker_Tick()
 	local targetId = targetSprite.m_id
 	ZJAttackInfo_Private_LastTargetID = targetId
 
-	-- While a spell waits for a target, the Spell Info module's popup, (if installed), describes the creature instead
-	if ZJSpellInfo_IsOpen ~= nil and ZJSpellInfo_IsOpen() then
+	-- While a spell waits for a target, the Spell Info module's popup, (if installed), describes the creature instead.
+	-- It is asked whether it shows this frame, not whether it is open, so it doesn't matter which ticker runs first.
+	if ZJSpellInfo_WillOpen ~= nil and ZJSpellInfo_WillOpen() then
 		ZJAttackInfo_Private_Menu_SetOpen(false)
 		return
 	end
@@ -2668,19 +2673,17 @@ function ZJAttackInfo_Private_Menu_Ticker_Tick()
 
 	local selectedSprites, compact = ZJAttackInfo_Private_GetRowSprites(targetSprite, attackCursor)
 
-	if selectedSprites[1] == nil or not ZJAttackInfo_Private_IsPopupAllowed(compact, targetSprite) then
-		-- Hide the popup if no currently selected sprites are eligible, (compact), the ally isn't fighting anyone,
-		-- or the popup is turned off for this side
+	if (selectedSprites[1] == nil and not compact) or not ZJAttackInfo_Private_IsPopupAllowed(compact, targetSprite) then
+		-- Hide the popup if no currently selected sprites are eligible, or the popup is turned off for this side.
+		-- The compact popup also opens over an ally that isn't fighting anyone: it then only has its headers, (the
+		-- ally's weapon damage, timers and the spells affecting it).
 		ZJAttackInfo_Private_Menu_SetOpen(false)
 		return
 	end
 
-	-- The full popup always opens from an attack cursor, (whoever is under it), and over a hostile creature, the
-	-- compact popup opens whenever the hovered ally is in a fight
-	local shouldBeOpen = attackCursor or compact or targetSprite.m_typeAI.m_EnemyAlly >= ZJAttackInfo_Private_EvilCutoff
-
-	if not shouldBeOpen then
-		-- Hide the popup if the cursor shape isn't attempting to open it
+	-- While its "Open On" key is held the popup opens over any creature: the compact popup over an ally, the full one
+	-- over anyone else, (hostile or neutral, whatever the cursor's shape), and from an attack cursor
+	if not ZJPopup_IsOpenAllowed(ZJAttackInfo_Private_OpenOn) then
 		ZJAttackInfo_Private_Menu_SetOpen(false)
 		return
 	end
@@ -2703,7 +2706,9 @@ function ZJAttackInfo_Private_Menu_Ticker_Tick()
 			lastSelectedSprites, lastCompact = ZJAttackInfo_Private_GetRowSprites(lastTarget, attackCursor)
 		end
 
-		if lastSelectedSprites ~= nil and lastSelectedSprites[1] ~= nil and ZJAttackInfo_Private_IsPopupAllowed(lastCompact, lastTarget) then
+		if lastSelectedSprites ~= nil and (lastSelectedSprites[1] ~= nil or lastCompact)
+			and ZJAttackInfo_Private_IsPopupAllowed(lastCompact, lastTarget)
+		then
 			ZJAttackInfo_Private_Layout(lastSelectedSprites, lastTarget, lastCompact)
 		else
 			ZJAttackInfo_Private_Menu_SetOpen(false, true)

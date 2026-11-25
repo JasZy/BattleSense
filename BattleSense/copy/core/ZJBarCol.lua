@@ -93,7 +93,8 @@ end
 -- A button that shows the name of the option's color, in that color. Clicking it steps to the next color, and from
 -- the last one back to Off.
 --
--- Other modules subclass it for other values that step on click, by overriding _getCount, _getText and _getColor.
+-- Other modules subclass it for other values that step on click, by overriding _getCount, _getText and _getColor,
+-- (and _getMin, for values that don't start at 0).
 ZJBarColors_CycleWidget = {}
 ZJBarColors_CycleWidget.__index = ZJBarColors_CycleWidget
 setmetatable(ZJBarColors_CycleWidget, EEex_Options_Widget)
@@ -111,9 +112,14 @@ function ZJBarColors_CycleWidget:_init()
 	--   self._instanceData => The button in the options menu, (EEex_Options_TEMPLATE_TextButton instance)
 end
 
--- The values are 0, (Off), up to and including this
+-- The values are _getMin(), (0 = Off), up to and including this
 function ZJBarColors_CycleWidget:_getCount()
 	return #ZJBarColors_Colors
+end
+
+-- The first value, (clicking the last one steps back to it)
+function ZJBarColors_CycleWidget:_getMin()
+	return 0
 end
 
 function ZJBarColors_CycleWidget:_getText(value)
@@ -140,8 +146,9 @@ function ZJBarColors_CycleWidget:_buildLayout(displayEntry, menuName)
 
 	-- Wide enough for the longest text, so the options don't move around while clicking through the values
 	local count = self:_getCount()
+	local min = self:_getMin()
 	local maxW = 0
-	for value = 0, count do
+	for value = min, count do
 		local w = EEex_Options_Private_GetTextWidthHeight(style.font, style.point, self:_getText(value))
 		maxW = math.max(maxW, w)
 	end
@@ -150,13 +157,13 @@ function ZJBarColors_CycleWidget:_buildLayout(displayEntry, menuName)
 		["menuName"]      = menuName,
 		["font"]          = style.font,
 		["point"]         = style.point,
-		["color"]         = self:_getColor(0),
-		["text"]          = self:_getText(0),
+		["color"]         = self:_getColor(min),
+		["text"]          = self:_getText(min),
 		["width"]         = maxW,
 		["verticalAlign"] = EEex_Options_Private_LayoutText_VerticalAlign.CENTER,
 		["action"]        = function(instanceData)
 			local value = displayEntry:_getWorkingValue()
-			displayEntry:_setWorkingValue(value >= count and 0 or value + 1)
+			displayEntry:_setWorkingValue((value >= count or value < min) and min or value + 1)
 		end,
 	})
 

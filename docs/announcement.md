@@ -22,11 +22,13 @@ It has five components, and you can install any combination of them:
 
 Every component has its own tab under Options > EEex Options ("Battle Sense: ..."), where each part of it can be switched on or off.
 
+The three popups, (Attack Info, Item Info and Spell Info), only open while you hold a key, so they stay out of the way until you want them. The key is Left Ctrl by default; each popup's tab can change it to Right Ctrl, or the left or right Alt or Shift.
+
 ---
 
 ## 1. Attack Info
 
-Hover over an enemy and a popup opens with two panels.
+Hold Left Ctrl and hover over an enemy, and a popup opens with two panels.
 
 `[image: Attack Info with Resistances.jpg]`
 
@@ -54,7 +56,7 @@ Hover over an enemy and a popup opens with two panels.
 
 `[image: Attack Info with Item.jpg]`
 
-**Hovering over a friend** who is in a fight opens a compact form that lists who that character is fighting.
+**Hovering over a friend** opens a compact form that lists who that character is fighting. Outside a fight it shows just that character: their weapon damage, their timers, and the spells on them with the time they have left, which is handy to see which buffs are about to run out.
 
 ## 2. Timer
 
@@ -90,7 +92,7 @@ By default, lines are only printed when your party is involved, so the log stays
 
 ## 4. Item Info
 
-Hover an item in a store, an opened container, the quick loot bar or your inventory, and a popup shows its properties. If a character is selected, it also lists how their stats would change if they equipped it, in green for better and red for worse: armor class, (also against crushing, missile, piercing and slashing), THAC0, saves, ability scores, resistances, and for a weapon its damage, speed and the character's proficiency in it.
+Hold Left Ctrl and hover an item in a store, an opened container, the quick loot bar or your inventory, and a popup shows its properties. If a character is selected, it also lists how their stats would change if they equipped it, in green for better and red for worse: armor class, (also against crushing, missile, piercing and slashing), THAC0, saves, ability scores, resistances, and for a weapon its damage, speed and the character's proficiency in it.
 
 `[image: Store Weapon Popup.jpg]`
 
@@ -100,7 +102,7 @@ For a potion, the popup shows what drinking it would do to that character: hit p
 
 ## 5. Spell Info
 
-Pick a spell, wand, scroll or throwable potion, then hover the creature you want to target. Before you click, a popup shows what it will do:
+Pick a spell, wand, scroll or throwable potion, then hold Left Ctrl and hover the creature you want to target. Before you click, a popup shows what it will do:
 
 - **Magic resistance**, or that the spell ignores it
 - **Saving throws**: which save, the spell's bonus or penalty, and the roll the creature needs

@@ -14,9 +14,11 @@ Battle Sense is built on [EEex](https://github.com/Bubb13/EEex) and requires it.
 
 Each component can be installed on its own.
 
+The popups open while you hold a key and hover what they describe. The key is Left Ctrl by default, each popup's `Open On` setting picks another one: left or right Ctrl, Alt or Shift.
+
 ### Attack Info
 
-Hover over an enemy, (or any creature with the attack cursor), to open a popup with, for every selected character:
+Hover over an enemy or a neutral creature to open a popup with, for every selected character:
 
 - The chance to hit, as a percentage or as the minimum d20 roll
 - Damage per hit, with the target's resistances applied, and extra on-hit damage
@@ -24,7 +26,7 @@ Hover over an enemy, (or any creature with the attack cursor), to open a popup w
 - Whether the target is immune to the weapon
 - Timer bars for the attack round, spell casting, contingencies and modal actions
 
-The left panel shows the same for the creature attacking your party: the roll it needs to hit each of them and its damage. Hovering a party member or ally that is in a fight opens a compact popup listing who it is fighting.
+The left panel shows the same for the creature attacking your party: the roll it needs to hit each of them and its damage. Hovering a party member or ally opens a compact popup listing who it is fighting. Outside a fight it shows the character on its own: its weapon damage, timers, and the spells affecting it with the time they have left.
 
 This is an extended version of EEex's own "Attack Info" module, and replaces it.
 
@@ -70,7 +72,7 @@ Pick a spell, wand, scroll or throwable potion, (from the spellbook or a quick i
 
 ### Ability Info
 
-On the abilities screen of character creation, the top of the help text lists what each of the character's current scores gives a character of its class:
+On the abilities screen of character creation, hover an ability to open a popup with what the character's current score gives a character of its class:
 
 - Strength: to-hit and damage bonus, weight allowance, bend bars / lift gates
 - Dexterity: armor class, missile to-hit bonus, and thieving skills
@@ -79,16 +81,16 @@ On the abilities screen of character creation, the top of the help text lists wh
 - Wisdom: bonus priest spells, (priests, paladins and rangers), and lore
 - Charisma: store prices
 
-For example `Strength 16` with `To-hit bonus +0, Damage bonus +1, Weight allowance 150, Bend bars / lift gates 16%`. The overview follows the scores as you reroll them or change them with the + / - buttons.
+For example `Strength 16` with `To-hit bonus +0`, `Damage bonus +1`, `Weight allowance 150`, `Bend bars / lift gates 16%`. The popup follows the score as you reroll it or change it with the + / - buttons.
 
 ### Proficiency Info
 
-On the proficiencies screen, (character creation and level up), the top of the help text gets two rows: the last weapon proficiency, and the last fighting style, that you clicked or changed. A row shows what the points give now, (values of 0 are left out):
+On the proficiencies screen, (character creation and level up), hover a weapon proficiency or fighting style to open a popup with what its points give now, (values of 0 are left out):
 
 - A weapon: to-hit and damage bonus, speed factor, and the extra attacks per round the points add at the character's level, (with no points: the class's to-hit penalty for using it)
 - A fighting style: main hand / off-hand to-hit and damage, armor class, speed factor and critical hit range
 
-For example `Large Sword: 2 points: To-hit bonus +1, Damage bonus +2, Extra attacks per round +1/2`. The values come from the game's tables, so mods that change proficiencies or fighting styles are followed.
+For example `Large Sword: 2 points` with `To-hit bonus +1`, `Damage bonus +2`, `Extra attacks per round +1/2`. The popup follows the points as you change them. The values come from the game's tables, so mods that change proficiencies or fighting styles are followed.
 
 ## Installation
 
@@ -127,4 +129,5 @@ BattleSense/
 
 - `M_ZJBSen.lua` is run by the engine during startup and starts the installed modules.
 - `ZJ-en_US.lua` holds the English strings. A translation goes in a file named after the game's language code, for example `ZJ-de_DE.lua`, and only needs the strings it translates.
+- `ZJPopup.lua` holds what the popups share: the `Open On` option, and the popup of the abilities and proficiencies screens, (`ZJPopup.menu`).
 - `ZJSprite.lua` holds the functions that read the engine's casting and attack round state. They are also available as methods on `CGameSprite`, prefixed with `zj`.

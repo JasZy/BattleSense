@@ -20,6 +20,8 @@ ALWAYS
 			COPY ~BattleSense/copy/core/ZJ-en_US.lua~ ~override~
 			     ~BattleSense/copy/core/ZJSprite.lua~ ~override~
 			     ~BattleSense/copy/core/ZJBarCol.lua~ ~override~
+			     ~BattleSense/copy/core/ZJPopup.lua~ ~override~
+			     ~BattleSense/copy/core/ZJPopup.menu~ ~override~
 		END
 	END
 
@@ -104,7 +106,7 @@ REQUIRE_PREDICATE MOD_IS_INSTALLED ~EEex.tp2~ 1 @1001 // Battle Sense requires E
 	LAF ZJ_BATTLESENSE_ENABLE_MODULE STR_VAR module = ~ZJSplInf~ END
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Ability Info: What the ability scores give, in the help text of the abilities screen                //
+// Ability Info: What the ability scores give, in a popup on the abilities screen                      //
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 BEGIN @60 LABEL ~ZJ-BattleSense-Ability-Info~ DESIGNATED 60

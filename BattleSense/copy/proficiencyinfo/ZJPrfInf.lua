@@ -2,26 +2,30 @@
 +--------------------------------------------------------------------------------------------------+
 | ZJProficiencyInfo - What the proficiency points give, on the proficiencies screen                |
 +--------------------------------------------------------------------------------------------------+
-|   Adds two rows to the top of the help text of the proficiencies screen, (character creation and |
-|   level up): the last weapon proficiency, and the last fighting style, that was clicked or       |
-|   changed. A row shows what the points give now, (values of 0 are left out):                     |
+|   Hovering a weapon proficiency or fighting style on the proficiencies screen, (character        |
+|   creation and level up), opens a popup with what its points give now, (values of 0 are left    |
+|   out):                                                                                          |
 |                                                                                                  |
-|     Large Sword: 2 points: To-hit bonus +1, Damage bonus +2                                      |
-|     Two Weapon Style: 0 points: Main hand to-hit bonus -4, Off-hand to-hit bonus -8              |
+|     Large Sword: 2 points                                                                        |
+|     To-hit bonus +1                                                                              |
+|     Damage bonus +2                                                                              |
 |                                                                                                  |
 |     * A weapon: the to-hit and damage bonus and speed factor, (WSPECIAL.2DA, or the class's      |
 |       penalty without points), and the extra attacks per round the points add at the character's |
 |       level, (WSPATCK.2DA)                                                                       |
 |     * A fighting style: the bonuses of its STYLBONU.2DA row                                      |
 |                                                                                                  |
-|   Changes are found by comparing the points in the screen's list from one frame to the next, so  |
-|   nothing depends on where things are on the screen. The values come from the game's own tables, |
-|   so mods that change proficiencies or fighting styles are followed.                             |
+|   It follows the points as they are changed with the + / - buttons. The values come from the     |
+|   game's own tables, so mods that change proficiencies or fighting styles are followed.          |
 |                                                                                                  |
 |   Nothing in UI.menu is changed: the screen's help text comes from proficiencyOrGeneralHelp(),   |
-|   which is wrapped every time the UI loads.                                                      |
+|   which the screen asks for every frame. It is wrapped every time the UI loads, to update the    |
+|   popup.                                                                                         |
 +--------------------------------------------------------------------------------------------------+
 --]]
+
+-- The "Open On" option and the screen popup, (shared by every popup)
+Infinity_DoFile("ZJPopup")
 
 -------------
 -- Options --
@@ -35,6 +39,8 @@ EEex_Options_Register("ZJProficiencyInfo_Enable", EEex_Options_Option.new({
 	["onChange"] = function(self, oldValue) ZJProficiencyInfo_SetEnabled(self:get() ~= 0) end,
 }))
 
+ZJProficiencyInfo_Private_OpenOn = ZJPopup_RegisterOpenOn("ZJProficiencyInfo_OpenOn", "Proficiency Info Module: Open On")
+
 EEex_Options_AddTab("ZJBattleSense_Options_TRANSLATION_ProficiencyInfo_TabTitle", function() return {
 	{
 		EEex_Options_DisplayEntry.new({
@@ -43,6 +49,7 @@ EEex_Options_AddTab("ZJBattleSense_Options_TRANSLATION_ProficiencyInfo_TabTitle"
 			["description"] = "ZJBattleSense_Options_TRANSLATION_ProficiencyInfo_Enable_Description",
 			["widget"]      = EEex_Options_ToggleWidget.new(),
 		}),
+		ZJPopup_OpenOnDisplayEntry("ZJProficiencyInfo_OpenOn"),
 	},
 } end)
 
@@ -52,6 +59,9 @@ EEex_Options_AddTab("ZJBattleSense_Options_TRANSLATION_ProficiencyInfo_TabTitle"
 
 ZJProficiencyInfo_Private_Enabled = false
 ZJProficiencyInfo_Private_ErrorReported = false
+
+ZJProficiencyInfo_Private_MenuName   = "CHARGEN_PROFICIENCIES"
+ZJProficiencyInfo_Private_PopupOwner = "ZJProficiencyInfo" -- Who is showing the screen popup, (ZJPopup.lua)
 
 ZJProficiencyInfo_Private_TitleColorStr  = "^0xFF64D7FF"
 ZJProficiencyInfo_Private_ColorEndStr    = "^-"
@@ -100,10 +110,13 @@ ZJProficiencyInfo_Private_WarriorLevelIndex = {
 -- General --
 -------------
 
--- Temporarily changes whether the overview is shown.
+-- Temporarily changes whether the popup is shown.
 -- To persist this change, instead modify the "ZJProficiencyInfo_Enable" option.
 function ZJProficiencyInfo_SetEnabled(enabled)
 	ZJProficiencyInfo_Private_Enabled = enabled
+	if not enabled then
+		ZJPopup_HideOnScreen(ZJProficiencyInfo_Private_PopupOwner)
+	end
 end
 
 function ZJProficiencyInfo_Private_T(key)
@@ -282,81 +295,33 @@ function ZJProficiencyInfo_Private_FormatValue(value, format)
 	return string.format("%+d", value)
 end
 
----------------------
--- Change tracking --
----------------------
+-----------
+-- Popup --
+-----------
 
--- The screen gets two rows: the last weapon proficiency and the last fighting style that was clicked or changed
-ZJProficiencyInfo_Private_Points    = nil -- [proficiency id] = its points the last time they were looked at
-ZJProficiencyInfo_Private_Selected  = nil -- The row of the list that was selected the last time it was looked at
-ZJProficiencyInfo_Private_LastShown = {}  -- ["weapon" / "style"] = the id of the proficiency shown for that kind
+ZJProficiencyInfo_Private_PopupKey  = nil -- What the popup text was last built for
+ZJProficiencyInfo_Private_PopupText = nil
 
--- Forgets everything, (the screen was opened: for a new character, or a new level up)
-function ZJProficiencyInfo_Private_ResetTracking()
-	ZJProficiencyInfo_Private_Points = nil
-	ZJProficiencyInfo_Private_Selected = nil
-	ZJProficiencyInfo_Private_LastShown = {}
-end
-
-function ZJProficiencyInfo_Private_GetKind(id)
-	return ZJProficiencyInfo_Private_Styles[tonumber(id)] ~= nil and "style" or "weapon"
-end
-
--- Compares the points of every proficiency to the last time, and the selected row: a proficiency whose points changed,
--- or that was clicked, becomes the one shown for its kind. Only the values of the list are looked at, so this doesn't
--- care where anything is on the screen, or how the points were changed.
-function ZJProficiencyInfo_Private_TrackChanges()
-
-	local proficiencies = chargen.proficiency
-	local lastShown = ZJProficiencyInfo_Private_LastShown
-	local firstLook = ZJProficiencyInfo_Private_Points == nil
-
-	if firstLook then ZJProficiencyInfo_Private_Points = {} end
-
-	for _, rowEntry in ipairs(proficiencies) do
-		local id = rowEntry.id
-		local points = tonumber(rowEntry.value)
-		if id ~= nil and points ~= nil then
-			local old = ZJProficiencyInfo_Private_Points[id]
-			if not firstLook and old ~= nil and old ~= points then
-				lastShown[ZJProficiencyInfo_Private_GetKind(id)] = id
-			end
-			ZJProficiencyInfo_Private_Points[id] = points
-		end
-	end
-
-	-- A clicked proficiency is shown, (clicking + / - also selects the row)
-	local selected = currentChargenProficiency
-	if selected ~= ZJProficiencyInfo_Private_Selected then
-		ZJProficiencyInfo_Private_Selected = selected
-		local rowEntry = proficiencies[selected]
-		if type(rowEntry) == "table" and rowEntry.id ~= nil then
-			lastShown[ZJProficiencyInfo_Private_GetKind(rowEntry.id)] = rowEntry.id
-		end
-	end
-end
-
-----------
--- Text --
-----------
-
--- The row for the proficiency `shownID`, or nil if it isn't in the list, with what its points give now:
+-- What the points of the proficiency on `row` of the screen's list give now, or nil if it isn't known:
 --
---   Large Sword: 2 points: To-hit bonus +1, Damage bonus +2
-function ZJProficiencyInfo_Private_GetRow(shownID, class, level)
+--   Large Sword: 2 points
+--   To-hit bonus +1
+--   Damage bonus +2
+function ZJProficiencyInfo_Private_GetText(row)
 
-	local rowEntry = nil
-	for _, entry in ipairs(chargen.proficiency) do
-		if entry.id == shownID then
-			rowEntry = entry
-			break
-		end
-	end
-	if rowEntry == nil then return nil end
+	local rowEntry = chargen.proficiency[row]
+	if type(rowEntry) ~= "table" then return nil end
 
 	local id = tonumber(rowEntry.id)
 	local points = tonumber(rowEntry.value)
 	if id == nil or points == nil then return nil end
+
+	local okClass, class, level = pcall(ZJProficiencyInfo_Private_GetClassAndLevel)
+	if not okClass then class, level = nil, nil end
+
+	-- The popup is updated every frame, only build its text again when something changed
+	local key = string.format("%d|%d|%s|%s", id, points, tostring(class), tostring(level))
+	if key == ZJProficiencyInfo_Private_PopupKey then return ZJProficiencyInfo_Private_PopupText end
 
 	local T = ZJProficiencyInfo_Private_T
 
@@ -366,38 +331,42 @@ function ZJProficiencyInfo_Private_GetRow(shownID, class, level)
 		if okName and type(str) == "string" then name = str end
 	end
 
-	local title = string.format(T("Title"), name, points)
+	local lines = { ZJProficiencyInfo_Private_TitleColorStr..string.format(T("Title"), name, points)..ZJProficiencyInfo_Private_ColorEndStr }
 
-	local values = {}
-	for _, stat in ipairs(ZJProficiencyInfo_Private_GetStats(id, points, class, level)) do
-		table.insert(values, stat.label.." "..ZJProficiencyInfo_Private_FormatValue(stat.value, stat.format))
+	local stats = ZJProficiencyInfo_Private_GetStats(id, points, class, level)
+	for _, stat in ipairs(stats) do
+		table.insert(lines, stat.label.." "..ZJProficiencyInfo_Private_FormatValue(stat.value, stat.format))
+	end
+	if #stats == 0 then
+		table.insert(lines, T("NoBonus"))
 	end
 
-	local text = #values > 0 and table.concat(values, ", ") or T("NoBonus")
-	return ZJProficiencyInfo_Private_TitleColorStr..title..ZJProficiencyInfo_Private_ColorEndStr..": "..text
+	ZJProficiencyInfo_Private_PopupKey = key
+	ZJProficiencyInfo_Private_PopupText = table.concat(lines, "\n")
+	return ZJProficiencyInfo_Private_PopupText
 end
 
--- The rows for the last weapon proficiency and the last fighting style that was clicked or changed, or nil
-function ZJProficiencyInfo_Private_GetText()
+-- Shows the popup for the proficiency under the cursor, or closes it. Runs every frame the proficiencies screen is drawn.
+function ZJProficiencyInfo_Private_UpdatePopup()
 
-	if type(chargen) ~= "table" or type(chargen.proficiency) ~= "table" then return nil end
+	local owner = ZJProficiencyInfo_Private_PopupOwner
 
-	ZJProficiencyInfo_Private_TrackChanges()
-
-	local okClass, class, level = pcall(ZJProficiencyInfo_Private_GetClassAndLevel)
-	if not okClass then class, level = nil, nil end
-
-	local rows = {}
-	for _, kind in ipairs({ "weapon", "style" }) do
-		local shown = ZJProficiencyInfo_Private_LastShown[kind]
-		if shown ~= nil then
-			local row = ZJProficiencyInfo_Private_GetRow(shown, class, level)
-			if row ~= nil then table.insert(rows, row) end
-		end
+	if not ZJProficiencyInfo_Private_Enabled or type(chargen) ~= "table"
+		or not ZJPopup_IsOpenAllowed(ZJProficiencyInfo_Private_OpenOn)
+	then
+		ZJPopup_HideOnScreen(owner)
+		return
 	end
 
-	if #rows == 0 then return nil end
-	return table.concat(rows, "\n")
+	local row, _, rowY = ZJPopup_FindHoveredRow(ZJProficiencyInfo_Private_MenuName, chargen.proficiency)
+	local text = row and ZJProficiencyInfo_Private_GetText(row)
+
+	if text == nil then
+		ZJPopup_HideOnScreen(owner)
+		return
+	end
+
+	ZJPopup_ShowOnScreen(owner, text, rowY)
 end
 
 ---------------
@@ -407,7 +376,8 @@ end
 ZJProficiencyInfo_Private_HelpWrapper = nil
 
 -- The proficiencies screen shows proficiencyOrGeneralHelp() as its help text, (the description of the selected
--- proficiency). UI.menu defines it each time it loads, so it is wrapped again every time.
+-- proficiency), and asks for it every frame, which is what updates the popup. UI.menu defines it each time it loads, so
+-- it is wrapped again every time.
 function ZJProficiencyInfo_Private_WrapHelp()
 
 	local original = proficiencyOrGeneralHelp
@@ -415,22 +385,17 @@ function ZJProficiencyInfo_Private_WrapHelp()
 
 	ZJProficiencyInfo_Private_HelpWrapper = function(...)
 
-		local help = original(...)
-		if not ZJProficiencyInfo_Private_Enabled then return help end
-
-		local ok, text = pcall(ZJProficiencyInfo_Private_GetText)
+		local ok, err = pcall(ZJProficiencyInfo_Private_UpdatePopup)
 
 		if not ok then
+			pcall(ZJPopup_HideOnScreen, ZJProficiencyInfo_Private_PopupOwner)
 			if not ZJProficiencyInfo_Private_ErrorReported then
 				ZJProficiencyInfo_Private_ErrorReported = true
-				print("[Battle Sense] Proficiency Info: "..tostring(text))
+				print("[Battle Sense] Proficiency Info: "..tostring(err))
 			end
-			return help
 		end
 
-		if text == nil then return help end
-		if help == nil or help == "" then return text end
-		return text.."\n\n"..tostring(help)
+		return original(...)
 	end
 
 	proficiencyOrGeneralHelp = ZJProficiencyInfo_Private_HelpWrapper
@@ -438,17 +403,17 @@ end
 
 EEex_Menu_AddMainFileLoadedListener(function()
 
+	ZJProficiencyInfo_Private_PopupKey = nil
 	ZJProficiencyInfo_Private_WrapHelp()
-	ZJProficiencyInfo_Private_ResetTracking()
 
-	-- Start over every time the screen opens, (its own onOpen still runs first)
-	local menu = EEex_Menu_Find("CHARGEN_PROFICIENCIES")
+	-- The popup closes with the screen, (its own onClose still runs first)
+	local menu = EEex_Menu_Find(ZJProficiencyInfo_Private_MenuName)
 	if menu == nil then return end
 
-	local oldOnOpen = EEex_Menu_GetItemFunction(menu.reference_onOpen) or function() end
-	EEex_Menu_SetItemFunction(menu.reference_onOpen, function()
-		local toReturn = oldOnOpen()
-		ZJProficiencyInfo_Private_ResetTracking()
+	local oldOnClose = EEex_Menu_GetItemFunction(menu.reference_onClose) or function() end
+	EEex_Menu_SetItemFunction(menu.reference_onClose, function()
+		local toReturn = oldOnClose()
+		ZJPopup_HideOnScreen(ZJProficiencyInfo_Private_PopupOwner)
 		return toReturn
 	end)
 end)

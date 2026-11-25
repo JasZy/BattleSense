@@ -17,6 +17,9 @@
 +--------------------------------------------------------------------------------------------------------------+
 --]]
 
+-- The "Open On" option, (shared by every popup)
+Infinity_DoFile("ZJPopup")
+
 -------------
 -- Options --
 -------------
@@ -28,6 +31,8 @@ EEex_Options_Register("ZJSpellInfo_Enable", EEex_Options_Option.new({
 	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Spell Info" }),
 	["onChange"] = function(self, oldValue) ZJSpellInfo_SetEnabled(self:get() ~= 0) end,
 }))
+
+ZJSpellInfo_Private_OpenOn = ZJPopup_RegisterOpenOn("ZJSpellInfo_OpenOn", "Spell Info Module: Open On")
 
 ZJSpellInfo_Private_FontPoint = EEex_Options_Register("ZJSpellInfo_FontPoint", EEex_Options_Option.new({
 	["default"]  = 11,
@@ -86,6 +91,7 @@ EEex_Options_AddTab("ZJBattleSense_Options_TRANSLATION_SpellInfo_TabTitle", func
 			["description"] = "ZJBattleSense_Options_TRANSLATION_SpellInfo_Enable_Description",
 			["widget"]      = EEex_Options_ToggleWidget.new(),
 		}),
+		ZJPopup_OpenOnDisplayEntry("ZJSpellInfo_OpenOn"),
 		EEex_Options_DisplayEntry.new({
 			["optionID"]    = "ZJSpellInfo_FontPoint",
 			["label"]       = "ZJBattleSense_Options_TRANSLATION_SpellInfo_FontPoint",
@@ -835,7 +841,7 @@ function ZJSpellInfo_SetEnabled(enabled)
 end
 
 -- @bubb_doc { ZJSpellInfo_IsOpen }
--- @summary: Whether the popup is showing. The Attack Info module stays out of its way while it is.
+-- @summary: Whether the popup is showing.
 function ZJSpellInfo_IsOpen()
 	return ZJSpellInfo_Private_Menu_IsOpen
 end
@@ -844,6 +850,7 @@ end
 function ZJSpellInfo_Private_GetText()
 
 	if not ZJSpellInfo_Private_Enabled then return nil end
+	if not ZJPopup_IsOpenAllowed(ZJSpellInfo_Private_OpenOn) then return nil end
 
 	-- Only on the world screen, while a spell / item is waiting for a target,
 	-- (m_nState is 1 when it is aimed at a point, like Sleep, and 2 when it is aimed at a creature, like Command)
@@ -870,9 +877,31 @@ function ZJSpellInfo_Private_GetText()
 	return ZJSpellInfo_Private_BuildText(caster, target)
 end
 
+ZJSpellInfo_Private_FrameTextFrame = -1  -- The frame ZJSpellInfo_Private_FrameText was worked out in
+ZJSpellInfo_Private_FrameText      = nil
+
+-- ZJSpellInfo_Private_GetText(), worked out at most once per frame. Both this module's ticker and Attack Info's ask for
+-- it, in whichever order their menus run, and get the same answer.
+function ZJSpellInfo_Private_GetFrameText()
+	local frame = Infinity_GetFrameCounter()
+	if frame ~= ZJSpellInfo_Private_FrameTextFrame then
+		ZJSpellInfo_Private_FrameText = ZJSpellInfo_Private_GetText()
+		ZJSpellInfo_Private_FrameTextFrame = frame
+	end
+	return ZJSpellInfo_Private_FrameText
+end
+
+-- @bubb_doc { ZJSpellInfo_WillOpen }
+-- @summary: Whether the popup shows this frame, (even if its ticker hasn't run yet). The Attack Info module stays
+--           out of its way while it does.
+function ZJSpellInfo_WillOpen()
+	local ok, text = pcall(ZJSpellInfo_Private_GetFrameText)
+	return ok and text ~= nil
+end
+
 function ZJSpellInfo_Private_DoTick()
 
-	local text = ZJSpellInfo_Private_GetText()
+	local text = ZJSpellInfo_Private_GetFrameText()
 
 	if text == nil then
 		ZJSpellInfo_SetOpen(false)

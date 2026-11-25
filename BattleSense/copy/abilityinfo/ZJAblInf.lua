@@ -2,22 +2,28 @@
 +--------------------------------------------------------------------------------------------------+
 | ZJAbilityInfo - What the ability scores give, on the abilities screen                            |
 +--------------------------------------------------------------------------------------------------+
-|   Adds an overview to the top of the help text of the abilities screen, (character creation),    |
-|   with what each of the character's current scores gives a character of its class:              |
+|   Hovering an ability on the abilities screen, (character creation), opens a popup with what    |
+|   the character's current score gives a character of its class:                                 |
 |                                                                                                  |
 |     Strength 16                                                                                  |
-|     To-hit bonus +0, Damage bonus +1, Weight allowance 150, Bend bars / lift gates 16%           |
+|     To-hit bonus +0                                                                              |
+|     Damage bonus +1                                                                              |
+|     Weight allowance 150                                                                         |
+|     Bend bars / lift gates 16%                                                                   |
 |                                                                                                  |
-|   It follows the scores as they are rerolled or changed with the + / - buttons.                  |
+|   It follows the score as it is rerolled or changed with the + / - buttons.                      |
 |                                                                                                  |
 |   The values come from the game's own tables, (STRMOD, STRMODEX, DEXMOD, SKILLDEX, HPCONBON,     |
 |   INTMOD, LOREBON, MXSPLWIS, CHRMODST), so mods that change those tables are followed. Values    |
 |   that only matter to some classes, (spells, thieving skills), are only listed for those.        |
 |                                                                                                  |
 |   Nothing in UI.menu is changed: the screen's help text comes from abilityOrGeneralHelp(), which |
-|   is wrapped every time the UI loads.                                                            |
+|   the screen asks for every frame. It is wrapped every time the UI loads, to update the popup.   |
 +--------------------------------------------------------------------------------------------------+
 --]]
+
+-- The "Open On" option and the screen popup, (shared by every popup)
+Infinity_DoFile("ZJPopup")
 
 -------------
 -- Options --
@@ -31,6 +37,8 @@ EEex_Options_Register("ZJAbilityInfo_Enable", EEex_Options_Option.new({
 	["onChange"] = function(self, oldValue) ZJAbilityInfo_SetEnabled(self:get() ~= 0) end,
 }))
 
+ZJAbilityInfo_Private_OpenOn = ZJPopup_RegisterOpenOn("ZJAbilityInfo_OpenOn", "Ability Info Module: Open On")
+
 EEex_Options_AddTab("ZJBattleSense_Options_TRANSLATION_AbilityInfo_TabTitle", function() return {
 	{
 		EEex_Options_DisplayEntry.new({
@@ -39,6 +47,7 @@ EEex_Options_AddTab("ZJBattleSense_Options_TRANSLATION_AbilityInfo_TabTitle", fu
 			["description"] = "ZJBattleSense_Options_TRANSLATION_AbilityInfo_Enable_Description",
 			["widget"]      = EEex_Options_ToggleWidget.new(),
 		}),
+		ZJPopup_OpenOnDisplayEntry("ZJAbilityInfo_OpenOn"),
 	},
 } end)
 
@@ -48,6 +57,9 @@ EEex_Options_AddTab("ZJBattleSense_Options_TRANSLATION_AbilityInfo_TabTitle", fu
 
 ZJAbilityInfo_Private_Enabled = false
 ZJAbilityInfo_Private_ErrorReported = false
+
+ZJAbilityInfo_Private_MenuName    = "CHARGEN_ABILITIES"
+ZJAbilityInfo_Private_PopupOwner  = "ZJAbilityInfo" -- Who is showing the screen popup, (ZJPopup.lua)
 
 ZJAbilityInfo_Private_TitleColorStr = "^0xFF64D7FF"
 ZJAbilityInfo_Private_ColorEndStr   = "^-"
@@ -91,10 +103,13 @@ ZJAbilityInfo_Private_ThiefSkillsByClass = {
 -- General --
 -------------
 
--- Temporarily changes whether the overview is shown.
+-- Temporarily changes whether the popup is shown.
 -- To persist this change, instead modify the "ZJAbilityInfo_Enable" option.
 function ZJAbilityInfo_SetEnabled(enabled)
 	ZJAbilityInfo_Private_Enabled = enabled
+	if not enabled then
+		ZJPopup_HideOnScreen(ZJAbilityInfo_Private_PopupOwner)
+	end
 end
 
 function ZJAbilityInfo_Private_T(key)
@@ -254,53 +269,70 @@ function ZJAbilityInfo_Private_FormatScore(score, extra)
 	return tostring(score)
 end
 
---------------
--- Overview --
---------------
+-----------
+-- Popup --
+-----------
 
-ZJAbilityInfo_Private_OverviewKey  = nil -- What the overview was last built for
-ZJAbilityInfo_Private_OverviewText = nil
+ZJAbilityInfo_Private_PopupKey  = nil -- What the popup text was last built for
+ZJAbilityInfo_Private_PopupText = nil
 
--- The overview of what every current score gives, or nil if the scores aren't known
-function ZJAbilityInfo_Private_GetOverview()
+-- What the current score of the ability on `row` of the screen's list gives, or nil if it isn't known
+function ZJAbilityInfo_Private_GetText(row)
 
-	if type(chargen) ~= "table" or type(chargen.ability) ~= "table" then return nil end
+	local rowEntry = chargen.ability[row]
+	if type(rowEntry) ~= "table" then return nil end
 
 	local okClass, class = pcall(ZJAbilityInfo_Private_GetClass)
 	if not okClass then class = nil end
 
-	-- The help text is asked for every frame, only build the overview again when a score changed
-	local keyParts = { tostring(class) }
-	for _, rowEntry in ipairs(chargen.ability) do
-		table.insert(keyParts, tostring(rowEntry.roll))
-	end
-	local key = table.concat(keyParts, "|")
-	if key == ZJAbilityInfo_Private_OverviewKey then return ZJAbilityInfo_Private_OverviewText end
+	-- The popup is updated every frame, only build its text again when something changed
+	local key = string.format("%d|%s|%s", row, tostring(class), tostring(rowEntry.roll))
+	if key == ZJAbilityInfo_Private_PopupKey then return ZJAbilityInfo_Private_PopupText end
 
-	local parts = {}
+	local text = nil
 
-	for row, rowEntry in ipairs(chargen.ability) do
+	local ability = ZJAbilityInfo_Private_AbilityByLabel[rowEntry.name] or ZJAbilityInfo_Private_AbilityOrder[row]
+	local score, extra = ZJAbilityInfo_Private_ParseRoll(rowEntry.roll)
 
-		local ability = ZJAbilityInfo_Private_AbilityByLabel[rowEntry.name] or ZJAbilityInfo_Private_AbilityOrder[row]
-		local score, extra = ZJAbilityInfo_Private_ParseRoll(rowEntry.roll)
+	if ability ~= nil and score ~= nil then
 
-		if ability ~= nil and score ~= nil then
+		local name = type(rowEntry.name) == "string" and t(rowEntry.name) or ability
 
-			local name = type(rowEntry.name) == "string" and t(rowEntry.name) or ability
-
-			local values = {}
-			for _, stat in ipairs(ZJAbilityInfo_Private_GetStats(ability, score, extra, class)) do
-				table.insert(values, stat.label.." "..ZJAbilityInfo_Private_FormatValue(stat.value, stat.format))
-			end
-
-			table.insert(parts, ZJAbilityInfo_Private_TitleColorStr..name.." "..ZJAbilityInfo_Private_FormatScore(score, extra)
-				..ZJAbilityInfo_Private_ColorEndStr.."\n"..table.concat(values, ", "))
+		local values = {}
+		for _, stat in ipairs(ZJAbilityInfo_Private_GetStats(ability, score, extra, class)) do
+			table.insert(values, stat.label.." "..ZJAbilityInfo_Private_FormatValue(stat.value, stat.format))
 		end
+
+		text = ZJAbilityInfo_Private_TitleColorStr..name.." "..ZJAbilityInfo_Private_FormatScore(score, extra)
+			..ZJAbilityInfo_Private_ColorEndStr.."\n"..table.concat(values, "\n")
 	end
 
-	ZJAbilityInfo_Private_OverviewKey = key
-	ZJAbilityInfo_Private_OverviewText = #parts > 0 and table.concat(parts, "\n") or nil
-	return ZJAbilityInfo_Private_OverviewText
+	ZJAbilityInfo_Private_PopupKey = key
+	ZJAbilityInfo_Private_PopupText = text
+	return text
+end
+
+-- Shows the popup for the ability under the cursor, or closes it. Runs every frame the abilities screen is drawn.
+function ZJAbilityInfo_Private_UpdatePopup()
+
+	local owner = ZJAbilityInfo_Private_PopupOwner
+
+	if not ZJAbilityInfo_Private_Enabled or type(chargen) ~= "table"
+		or not ZJPopup_IsOpenAllowed(ZJAbilityInfo_Private_OpenOn)
+	then
+		ZJPopup_HideOnScreen(owner)
+		return
+	end
+
+	local row, _, rowY = ZJPopup_FindHoveredRow(ZJAbilityInfo_Private_MenuName, chargen.ability)
+	local text = row and ZJAbilityInfo_Private_GetText(row)
+
+	if text == nil then
+		ZJPopup_HideOnScreen(owner)
+		return
+	end
+
+	ZJPopup_ShowOnScreen(owner, text, rowY)
 end
 
 ---------------
@@ -309,8 +341,8 @@ end
 
 ZJAbilityInfo_Private_HelpWrapper = nil
 
--- The abilities screen shows abilityOrGeneralHelp() as its help text. UI.menu defines it each time it loads, so it is
--- wrapped again every time.
+-- The abilities screen shows abilityOrGeneralHelp() as its help text, and asks for it every frame, which is what
+-- updates the popup. UI.menu defines it each time it loads, so it is wrapped again every time.
 function ZJAbilityInfo_Private_WrapHelp()
 
 	local original = abilityOrGeneralHelp
@@ -318,28 +350,35 @@ function ZJAbilityInfo_Private_WrapHelp()
 
 	ZJAbilityInfo_Private_HelpWrapper = function(...)
 
-		local help = original(...)
-		if not ZJAbilityInfo_Private_Enabled then return help end
-
-		local ok, overview = pcall(ZJAbilityInfo_Private_GetOverview)
+		local ok, err = pcall(ZJAbilityInfo_Private_UpdatePopup)
 
 		if not ok then
+			pcall(ZJPopup_HideOnScreen, ZJAbilityInfo_Private_PopupOwner)
 			if not ZJAbilityInfo_Private_ErrorReported then
 				ZJAbilityInfo_Private_ErrorReported = true
-				print("[Battle Sense] Ability Info: "..tostring(overview))
+				print("[Battle Sense] Ability Info: "..tostring(err))
 			end
-			return help
 		end
 
-		if overview == nil then return help end
-		if help == nil or help == "" then return overview end
-		return overview.."\n\n"..tostring(help)
+		return original(...)
 	end
 
 	abilityOrGeneralHelp = ZJAbilityInfo_Private_HelpWrapper
 end
 
 EEex_Menu_AddMainFileLoadedListener(function()
-	ZJAbilityInfo_Private_OverviewKey = nil
+
+	ZJAbilityInfo_Private_PopupKey = nil
 	ZJAbilityInfo_Private_WrapHelp()
+
+	-- The popup closes with the screen, (its own onClose still runs first)
+	local menu = EEex_Menu_Find(ZJAbilityInfo_Private_MenuName)
+	if menu == nil then return end
+
+	local oldOnClose = EEex_Menu_GetItemFunction(menu.reference_onClose) or function() end
+	EEex_Menu_SetItemFunction(menu.reference_onClose, function()
+		local toReturn = oldOnClose()
+		ZJPopup_HideOnScreen(ZJAbilityInfo_Private_PopupOwner)
+		return toReturn
+	end)
 end)
