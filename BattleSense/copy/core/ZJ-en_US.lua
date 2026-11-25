@@ -199,6 +199,8 @@ uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_ShowSpellEffects"] = "Sh
 uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_ShowSpellEffects_Description"] = [[
 Lists the spells affecting the creature under the cursor in the right panel's header, one per line. A spell with a set duration shows the time it has left in turns and rounds, e.g. "Haste (1,5)".
 
+A condition from something else, (a creature's or weapon's attack, a hidden spell), is listed by the name of its portrait icon, as the character record shows it, e.g. "Confused".
+
 These are the spells EEex's Effect Menu module shows: spells from items, permanent spells and spells without an icon are left out. A sub-spell without a name of its own, like the one Chant casts on every creature around, is listed under its parent spell's name.
 ]]
 

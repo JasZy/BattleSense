@@ -1303,9 +1303,29 @@ function ZJAttackInfo_Private_ReadSpellEffectName(resref, casterLevel)
 	return name
 end
 
+-- The name of portrait icon `icon` as the character record shows it, (STATDESC.2DA), or false if it has none:
+-- [icon] = name / false
+ZJAttackInfo_Private_StatusIconNames = {}
+
+function ZJAttackInfo_Private_GetStatusIconName(icon)
+	local name = ZJAttackInfo_Private_StatusIconNames[icon]
+	if name ~= nil then return name end
+	name = false
+	local ok, strref = pcall(function() return tonumber(EEex_Resource_Load2DA("STATDESC"):getAtPoint(0, icon)) end)
+	if ok and strref ~= nil and strref >= 0 then
+		local str = Infinity_FetchString(strref)
+		if str ~= nil and str ~= "" then name = str end
+	end
+	ZJAttackInfo_Private_StatusIconNames[icon] = name
+	return name
+end
+
 -- Returns the names of the spells affecting `sprite`, sorted, with the same spells the Effect Menu module of EEex lists:
 -- no item effects, no permanent spells, no spells without an icon. Spells that give stoneskins or mirror images are left
 -- out, their count is shown on its own.
+--
+-- A condition from something that isn't listed, (a creature's or weapon's on-hit effect, a hidden spell), is listed by
+-- the name of its portrait icon instead, (op142, "Confused", "Feebleminded"), as the character record shows it.
 function ZJAttackInfo_Private_GetSpellEffectNames(sprite)
 
 	local names = {}
@@ -1313,8 +1333,21 @@ function ZJAttackInfo_Private_GetSpellEffectNames(sprite)
 	local skipResrefs = {}
 	local expiries = {}   -- [resref] = latest game time one of the spell's timed effects expires at
 	local openEnded = {}  -- [resref] = true if one of the spell's effects lasts until dispelled
+	local icons = {}      -- [icon] = { resref = the source, expiry = game time it expires at, or false if it has no end }
 
 	EEex_Utility_IterateCPtrList(sprite.m_timedEffectList, function(effect)
+
+		-- 142 = display portrait icon, 9 = permanent
+		if effect.m_effectId == 142 and effect.m_durationType ~= 9 then
+			local icon = effect.m_dWFlags
+			local expiry = effect.m_durationType == 0x1000 and effect.m_duration or false
+			local known = icons[icon]
+			if known == nil then
+				icons[icon] = { ["resref"] = effect.m_sourceRes:get(), ["expiry"] = expiry }
+			elseif known.expiry ~= false and (expiry == false or expiry > known.expiry) then
+				known.expiry = expiry
+			end
+		end
 
 		-- 2 = item
 		if effect.m_sourceType == 2 then return end
@@ -1369,6 +1402,25 @@ function ZJAttackInfo_Private_GetSpellEffectNames(sprite)
 				nameExpiries[name] = expiry
 			elseif known ~= false and (expiry == false or expiry > known) then
 				nameExpiries[name] = expiry
+			end
+		end
+	end
+
+	-- The conditions whose source isn't listed above, (a sub-spell counts as its parent spell, SPPR203D as SPPR203)
+	local isListed = function(resref)
+		return resref ~= nil and seenResrefs[resref] and not skipResrefs[resref]
+	end
+	for icon, entry in pairs(icons) do
+		if not isListed(entry.resref) and not isListed(entry.resref:match("^(.-%d)%a+$")) then
+			local name = ZJAttackInfo_Private_GetStatusIconName(icon)
+			if name then
+				local known = nameExpiries[name]
+				if known == nil then
+					table.insert(names, name)
+					nameExpiries[name] = entry.expiry
+				elseif known ~= false and (entry.expiry == false or entry.expiry > known) then
+					nameExpiries[name] = entry.expiry
+				end
 			end
 		end
 	end
