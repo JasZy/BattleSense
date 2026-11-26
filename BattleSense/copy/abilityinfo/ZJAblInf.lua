@@ -55,6 +55,13 @@ ZJAbilityInfo_Private_ShowNextScore = EEex_Options_Register("ZJAbilityInfo_ShowN
 	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Ability Info Module: Show Next Score" }),
 }))
 
+ZJAbilityInfo_Private_ShowPreviousScore = EEex_Options_Register("ZJAbilityInfo_ShowPreviousScore", EEex_Options_Option.new({
+	["default"]  = 1,
+	["type"]     = EEex_Options_ToggleType.new(),
+	["accessor"] = EEex_Options_ClampedAccessor.new({ ["min"] = 0, ["max"] = 1 }),
+	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Ability Info Module: Show Previous Score" }),
+}))
+
 EEex_Options_AddTab("ZJBattleSense_Options_TRANSLATION_AbilityInfo_TabTitle", function() return {
 	{
 		EEex_Options_DisplayEntry.new({
@@ -79,6 +86,12 @@ EEex_Options_AddTab("ZJBattleSense_Options_TRANSLATION_AbilityInfo_TabTitle", fu
 			["optionID"]    = "ZJAbilityInfo_ShowNextScore",
 			["label"]       = "ZJBattleSense_Options_TRANSLATION_AbilityInfo_ShowNextScore",
 			["description"] = "ZJBattleSense_Options_TRANSLATION_AbilityInfo_ShowNextScore_Description",
+			["widget"]      = EEex_Options_ToggleWidget.new(),
+		}),
+		EEex_Options_DisplayEntry.new({
+			["optionID"]    = "ZJAbilityInfo_ShowPreviousScore",
+			["label"]       = "ZJBattleSense_Options_TRANSLATION_AbilityInfo_ShowPreviousScore",
+			["description"] = "ZJBattleSense_Options_TRANSLATION_AbilityInfo_ShowPreviousScore_Description",
 			["widget"]      = EEex_Options_ToggleWidget.new(),
 		}),
 	},
@@ -297,32 +310,34 @@ function ZJAbilityInfo_Private_FormatScore(score, extra)
 	return tostring(score)
 end
 
+ZJAbilityInfo_Private_MinScore = 1
 ZJAbilityInfo_Private_MaxScore = 25
 
--- What one more point in `ability` would change: a heading, ("At 17:"), and the values that change, ("Damage bonus +0 ->
--- +1"), or "No change". A score of 18 with exceptional strength goes to 19. Nil at the highest score.
-function ZJAbilityInfo_Private_GetNextScoreLines(ability, score, extra, class)
+-- What one point more, (`step` 1), or less, (`step` -1), in `ability` would change: a heading, ("At 17:"), and the values
+-- that change, ("Damage bonus +0 -> +1"), or "No change". A score of 18 with exceptional strength goes to 19 or 17.
+-- Nil past the highest or lowest score.
+function ZJAbilityInfo_Private_GetScoreChangeLines(ability, score, extra, class, step)
 
 	local T = ZJAbilityInfo_Private_T
 	local format = ZJAbilityInfo_Private_FormatValue
 
-	local nextScore = score + 1
-	if nextScore > ZJAbilityInfo_Private_MaxScore then return nil end
+	local otherScore = score + step
+	if otherScore > ZJAbilityInfo_Private_MaxScore or otherScore < ZJAbilityInfo_Private_MinScore then return nil end
 
 	local currentValues = {} -- [label] = the value now, as shown
 	for _, stat in ipairs(ZJAbilityInfo_Private_GetStats(ability, score, extra, class)) do
 		currentValues[stat.label] = format(stat.value, stat.format)
 	end
 
-	local lines = { ZJAbilityInfo_Private_TitleColorStr..string.format(T("NextScore"), tostring(nextScore))..ZJAbilityInfo_Private_ColorEndStr }
+	local lines = { ZJAbilityInfo_Private_TitleColorStr..string.format(T("NextScore"), tostring(otherScore))..ZJAbilityInfo_Private_ColorEndStr }
 
-	for _, stat in ipairs(ZJAbilityInfo_Private_GetStats(ability, nextScore, 0, class)) do
-		local nextValue = format(stat.value, stat.format)
+	for _, stat in ipairs(ZJAbilityInfo_Private_GetStats(ability, otherScore, 0, class)) do
+		local otherValue = format(stat.value, stat.format)
 		local currentValue = currentValues[stat.label]
 		if currentValue == nil then
-			table.insert(lines, stat.label.." "..nextValue)
-		elseif currentValue ~= nextValue then
-			table.insert(lines, stat.label.." "..currentValue.." -> "..nextValue)
+			table.insert(lines, stat.label.." "..otherValue)
+		elseif currentValue ~= otherValue then
+			table.insert(lines, stat.label.." "..currentValue.." -> "..otherValue)
 		end
 	end
 
@@ -351,7 +366,9 @@ function ZJAbilityInfo_Private_GetText(row)
 
 	-- The popup is updated every frame, only build its text again when something changed
 	local showNextScore = ZJAbilityInfo_Private_ShowNextScore:get() ~= 0
-	local key = string.format("%d|%s|%s|%s", row, tostring(class), tostring(rowEntry.roll), tostring(showNextScore))
+	local showPreviousScore = ZJAbilityInfo_Private_ShowPreviousScore:get() ~= 0
+	local key = string.format("%d|%s|%s|%s|%s", row, tostring(class), tostring(rowEntry.roll), tostring(showNextScore),
+		tostring(showPreviousScore))
 	if key == ZJAbilityInfo_Private_PopupKey then return ZJAbilityInfo_Private_PopupText end
 
 	local text = nil
@@ -371,10 +388,13 @@ function ZJAbilityInfo_Private_GetText(row)
 		text = ZJAbilityInfo_Private_TitleColorStr..name.." "..ZJAbilityInfo_Private_FormatScore(score, extra)
 			..ZJAbilityInfo_Private_ColorEndStr.."\n"..table.concat(values, "\n")
 
-		if showNextScore then
-			local nextLines = ZJAbilityInfo_Private_GetNextScoreLines(ability, score, extra, class)
-			if nextLines ~= nil then
-				text = text.."\n\n"..table.concat(nextLines, "\n")
+		-- One point less, then one point more
+		for _, change in ipairs({ { showPreviousScore, -1 }, { showNextScore, 1 } }) do
+			if change[1] then
+				local changeLines = ZJAbilityInfo_Private_GetScoreChangeLines(ability, score, extra, class, change[2])
+				if changeLines ~= nil then
+					text = text.."\n\n"..table.concat(changeLines, "\n")
+				end
 			end
 		end
 	end

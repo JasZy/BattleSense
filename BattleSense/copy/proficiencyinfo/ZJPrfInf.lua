@@ -57,6 +57,13 @@ ZJProficiencyInfo_Private_ShowNextPoint = EEex_Options_Register("ZJProficiencyIn
 	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Proficiency Info Module: Show Next Point" }),
 }))
 
+ZJProficiencyInfo_Private_ShowPreviousPoint = EEex_Options_Register("ZJProficiencyInfo_ShowPreviousPoint", EEex_Options_Option.new({
+	["default"]  = 1,
+	["type"]     = EEex_Options_ToggleType.new(),
+	["accessor"] = EEex_Options_ClampedAccessor.new({ ["min"] = 0, ["max"] = 1 }),
+	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Proficiency Info Module: Show Previous Point" }),
+}))
+
 EEex_Options_AddTab("ZJBattleSense_Options_TRANSLATION_ProficiencyInfo_TabTitle", function() return {
 	{
 		EEex_Options_DisplayEntry.new({
@@ -81,6 +88,12 @@ EEex_Options_AddTab("ZJBattleSense_Options_TRANSLATION_ProficiencyInfo_TabTitle"
 			["optionID"]    = "ZJProficiencyInfo_ShowNextPoint",
 			["label"]       = "ZJBattleSense_Options_TRANSLATION_ProficiencyInfo_ShowNextPoint",
 			["description"] = "ZJBattleSense_Options_TRANSLATION_ProficiencyInfo_ShowNextPoint_Description",
+			["widget"]      = EEex_Options_ToggleWidget.new(),
+		}),
+		EEex_Options_DisplayEntry.new({
+			["optionID"]    = "ZJProficiencyInfo_ShowPreviousPoint",
+			["label"]       = "ZJBattleSense_Options_TRANSLATION_ProficiencyInfo_ShowPreviousPoint",
+			["description"] = "ZJBattleSense_Options_TRANSLATION_ProficiencyInfo_ShowPreviousPoint_Description",
 			["widget"]      = EEex_Options_ToggleWidget.new(),
 		}),
 	},
@@ -327,31 +340,34 @@ end
 ZJProficiencyInfo_Private_MaxWeaponPoints = 5
 ZJProficiencyInfo_Private_MaxStylePoints  = 3
 
--- What one more point in the proficiency `id` would change: a heading, ("Next point:"), and the values that change,
--- ("Damage bonus +2 -> +3"), or "No change". Nil at the most points the tables go up to.
-function ZJProficiencyInfo_Private_GetNextPointLines(id, points, class, level)
+-- What one point more, (`step` 1), or less, (`step` -1), in the proficiency `id` would change: a heading, ("Next point:"
+-- or "One point less:"), and the values that change, ("Damage bonus +2 -> +3"), or "No change". Nil past the most points
+-- the tables go up to, or below 0.
+function ZJProficiencyInfo_Private_GetPointChangeLines(id, points, class, level, step)
 
 	local T = ZJProficiencyInfo_Private_T
 	local format = ZJProficiencyInfo_Private_FormatValue
 
 	local maxPoints = ZJProficiencyInfo_Private_Styles[id] and ZJProficiencyInfo_Private_MaxStylePoints
 		or ZJProficiencyInfo_Private_MaxWeaponPoints
-	if points >= maxPoints then return nil end
+	local otherPoints = points + step
+	if otherPoints > maxPoints or otherPoints < 0 then return nil end
 
 	local currentValues = {} -- [label] = the value now, as shown
 	for _, stat in ipairs(ZJProficiencyInfo_Private_GetStats(id, points, class, level, true)) do
 		currentValues[stat.label] = format(stat.value, stat.format)
 	end
 
-	local lines = { ZJProficiencyInfo_Private_TitleColorStr..T("NextPoint")..ZJProficiencyInfo_Private_ColorEndStr }
+	local heading = step > 0 and T("NextPoint") or T("PreviousPoint")
+	local lines = { ZJProficiencyInfo_Private_TitleColorStr..heading..ZJProficiencyInfo_Private_ColorEndStr }
 
-	for _, stat in ipairs(ZJProficiencyInfo_Private_GetStats(id, points + 1, class, level, true)) do
-		local nextValue = format(stat.value, stat.format)
+	for _, stat in ipairs(ZJProficiencyInfo_Private_GetStats(id, otherPoints, class, level, true)) do
+		local otherValue = format(stat.value, stat.format)
 		local currentValue = currentValues[stat.label]
 		if currentValue == nil then
-			table.insert(lines, stat.label.." "..nextValue)
-		elseif currentValue ~= nextValue then
-			table.insert(lines, stat.label.." "..currentValue.." -> "..nextValue)
+			table.insert(lines, stat.label.." "..otherValue)
+		elseif currentValue ~= otherValue then
+			table.insert(lines, stat.label.." "..currentValue.." -> "..otherValue)
 		end
 	end
 
@@ -368,6 +384,17 @@ end
 
 ZJProficiencyInfo_Private_PopupKey  = nil -- What the popup text was last built for
 ZJProficiencyInfo_Private_PopupText = nil
+
+-- Whether the screen's minus button of `row` is enabled: the game's minusButtonClickable(), (UTIL.LUA: more points than
+-- the row's `min`, the points it had when the screen opened), so a UI mod that changes it is followed
+function ZJProficiencyInfo_Private_IsMinusClickable(row, rowEntry)
+	if type(minusButtonClickable) == "function" then
+		local ok, clickable = pcall(minusButtonClickable, row)
+		if ok then return clickable and true or false end
+	end
+	local points, minPoints = tonumber(rowEntry.value), tonumber(rowEntry.min)
+	return points ~= nil and minPoints ~= nil and points > minPoints
+end
 
 -- What the points of the proficiency on `row` of the screen's list give now, or nil if it isn't known:
 --
@@ -388,7 +415,10 @@ function ZJProficiencyInfo_Private_GetText(row)
 
 	-- The popup is updated every frame, only build its text again when something changed
 	local showNextPoint = ZJProficiencyInfo_Private_ShowNextPoint:get() ~= 0
-	local key = string.format("%d|%d|%s|%s|%s", id, points, tostring(class), tostring(level), tostring(showNextPoint))
+	local showPreviousPoint = ZJProficiencyInfo_Private_ShowPreviousPoint:get() ~= 0
+		and ZJProficiencyInfo_Private_IsMinusClickable(row, rowEntry)
+	local key = string.format("%d|%d|%s|%s|%s|%s", id, points, tostring(class), tostring(level), tostring(showNextPoint),
+		tostring(showPreviousPoint))
 	if key == ZJProficiencyInfo_Private_PopupKey then return ZJProficiencyInfo_Private_PopupText end
 
 	local T = ZJProficiencyInfo_Private_T
@@ -409,12 +439,15 @@ function ZJProficiencyInfo_Private_GetText(row)
 		table.insert(lines, T("NoBonus"))
 	end
 
-	if showNextPoint then
-		local nextLines = ZJProficiencyInfo_Private_GetNextPointLines(id, points, class, level)
-		if nextLines ~= nil then
-			table.insert(lines, "")
-			for _, line in ipairs(nextLines) do
-				table.insert(lines, line)
+	-- One point less, then one point more
+	for _, change in ipairs({ { showPreviousPoint, -1 }, { showNextPoint, 1 } }) do
+		if change[1] then
+			local changeLines = ZJProficiencyInfo_Private_GetPointChangeLines(id, points, class, level, change[2])
+			if changeLines ~= nil then
+				table.insert(lines, "")
+				for _, line in ipairs(changeLines) do
+					table.insert(lines, line)
+				end
 			end
 		end
 	end

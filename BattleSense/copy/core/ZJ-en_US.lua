@@ -665,6 +665,14 @@ Below what the current score gives, lists what one more point would change, e.g.
 Exceptional strength, (18/xx), goes to 19.
 ]]
 
+uiStrings["ZJBattleSense_Options_TRANSLATION_AbilityInfo_ShowPreviousScore"] = "Show Previous Score"
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_AbilityInfo_ShowPreviousScore_Description"] = [[
+Below what the current score gives, lists what one point less would change, e.g. "At 15: Damage bonus +0 -> -1", or "No change" if it changes nothing.
+
+Exceptional strength, (18/xx), goes to 17.
+]]
+
 uiStrings["ZJBattleSense_TRANSLATION_AbilityInfo_None"]      = "none"
 uiStrings["ZJBattleSense_TRANSLATION_AbilityInfo_NextScore"] = "At %s:"
 uiStrings["ZJBattleSense_TRANSLATION_AbilityInfo_NoChange"]  = "No change"
@@ -725,9 +733,18 @@ Below what the current points give, lists what one more point would change, e.g.
 It is shown up to 5 points for weapons and 3 for fighting styles, (what the game's tables go up to). Your class may allow fewer.
 ]]
 
+uiStrings["ZJBattleSense_Options_TRANSLATION_ProficiencyInfo_ShowPreviousPoint"] = "Show Previous Point"
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_ProficiencyInfo_ShowPreviousPoint_Description"] = [[
+Below what the current points give, lists what one point less would change, e.g. "One point less: Damage bonus +2 -> +1", or "No change" if it changes nothing.
+
+It is only shown while the proficiency's minus button can be clicked, (points added on this screen).
+]]
+
 uiStrings["ZJBattleSense_TRANSLATION_ProficiencyInfo_Title"]   = "%s: %d points"
 uiStrings["ZJBattleSense_TRANSLATION_ProficiencyInfo_NoBonus"] = "No bonuses or penalties"
 uiStrings["ZJBattleSense_TRANSLATION_ProficiencyInfo_NextPoint"] = "Next point:"
+uiStrings["ZJBattleSense_TRANSLATION_ProficiencyInfo_PreviousPoint"] = "One point less:"
 uiStrings["ZJBattleSense_TRANSLATION_ProficiencyInfo_NoChange"]  = "No change"
 
 uiStrings["ZJBattleSense_TRANSLATION_ProficiencyInfo_Stat_ToHit"]             = "To-hit bonus"
