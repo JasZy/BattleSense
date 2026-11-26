@@ -814,7 +814,7 @@ uiStrings["ZJBattleSense_Options_TRANSLATION_LockInfo_FontPoint_Description"] = 
 The size of the text in the lock popup.
 ]]
 
-uiStrings["ZJBattleSense_TRANSLATION_LockInfo_Lock"]           = "Lock difficulty %d (pick and force)"
+uiStrings["ZJBattleSense_TRANSLATION_LockInfo_Lock"]           = "Lock difficulty %d"
 uiStrings["ZJBattleSense_TRANSLATION_LockInfo_LockImpossible"] = "Lock difficulty 100: can't be picked or forced"
 uiStrings["ZJBattleSense_TRANSLATION_LockInfo_Trap"]           = "Trap difficulty %d"
 uiStrings["ZJBattleSense_TRANSLATION_LockInfo_TrapImpossible"] = "Trap difficulty 100: can't be disarmed"

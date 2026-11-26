@@ -7,7 +7,7 @@
 |   been detected, (on a container or door, or on the floor), adds its difficulty and each         |
 |   selected character's chance to disarm it. Undetected traps are never mentioned.                |
 |                                                                                                  |
-|     Lock difficulty 50 (pick and force)                                                          |
+|     Lock difficulty 50                                                                           |
 |     Imoen: pick 40% (45 + d10), force 0% (15 + d10)                                              |
 |     Minsc: force 0% (35 + d10)                                                                   |
 |                                                                                                  |
