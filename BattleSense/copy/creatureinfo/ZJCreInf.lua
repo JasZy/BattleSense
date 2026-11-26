@@ -1263,6 +1263,28 @@ function ZJCreatureInfo_Private_ReadSpellEffectName(resref, casterLevel)
 	return name
 end
 
+-- Whether the item `resref` is a potion, (ITM category 9): [resref] = true / false
+ZJCreatureInfo_Private_PotionResrefs = {}
+
+function ZJCreatureInfo_Private_IsPotion(resref)
+	local isPotion = ZJCreatureInfo_Private_PotionResrefs[resref]
+	if isPotion == nil then
+		local header = EEex_Resource_Demand(resref, "ITM")
+		isPotion = header ~= nil and header.itemType == 9
+		ZJCreatureInfo_Private_PotionResrefs[resref] = isPotion
+	end
+	return isPotion
+end
+
+-- The name of the potion `resref`, (its identified name, a drunk potion is known), or false if it has none
+function ZJCreatureInfo_Private_ReadPotionName(resref)
+	local header = EEex_Resource_Demand(resref, "ITM")
+	if header == nil then return false end
+	local name = Infinity_FetchString(header.identifiedName)
+	if name == "" then name = Infinity_FetchString(header.genericName) end
+	return name ~= "" and name or false
+end
+
 -- The name of portrait icon `icon` as the character record shows it, (STATDESC.2DA), or false if it has none:
 -- [icon] = name / false
 ZJCreatureInfo_Private_StatusIconNames = {}
@@ -1282,7 +1304,7 @@ end
 
 -- Returns the names of the spells affecting `sprite`, sorted, with the same spells the Effect Menu module of EEex lists:
 -- no item effects, no permanent spells, no spells without an icon. Spells that give stoneskins or mirror images are left
--- out, their count is shown on its own.
+-- out, their count is shown on its own. Unlike the Effect Menu, a drunk potion is listed too, by its name.
 --
 -- A condition from something that isn't listed, (a creature's or weapon's on-hit effect, a hidden spell), is listed by
 -- the name of its portrait icon instead, (op142, "Confused", "Feebleminded"), as the character record shows it.
@@ -1308,11 +1330,13 @@ function ZJCreatureInfo_Private_GetSpellEffectNames(sprite)
 			end
 		end
 
-		-- 2 = item
-		if effect.m_sourceType == 2 then return end
-
 		local resref = effect.m_sourceRes:get()
 		if resref == "" then return end
+
+		-- 2 = item: only a potion is listed, (by its name). Other items' effects are their equipped effects, or what a
+		-- weapon does on a hit, which is listed by its portrait icon below.
+		local isItem = effect.m_sourceType == 2
+		if isItem and not ZJCreatureInfo_Private_IsPotion(resref) then return end
 
 		-- 218 = stoneskin, 119 = mirror image
 		local effectId = effect.m_effectId
@@ -1333,11 +1357,15 @@ function ZJCreatureInfo_Private_GetSpellEffectNames(sprite)
 		if seenResrefs[resref] ~= nil then return end
 
 		local casterLevel = math.max(effect.m_casterLevel, 1)
-		local cacheKey = resref..":"..casterLevel
+		local cacheKey = isItem and "ITM:"..resref or resref..":"..casterLevel
 		local name = ZJCreatureInfo_Private_SpellEffectNames[cacheKey]
 
 		if name == nil then
-			name = ZJCreatureInfo_Private_ReadSpellEffectName(resref, casterLevel)
+			if isItem then
+				name = ZJCreatureInfo_Private_ReadPotionName(resref)
+			else
+				name = ZJCreatureInfo_Private_ReadSpellEffectName(resref, casterLevel)
+			end
 			ZJCreatureInfo_Private_SpellEffectNames[cacheKey] = name
 		end
 
