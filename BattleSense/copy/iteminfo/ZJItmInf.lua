@@ -433,6 +433,13 @@ ZJItemInfo_Private_OpcodeStats = {
 	[54]  = { ["stats"] = { "THAC0" }, ["sign"] = -1 },
 	[278] = { ["stats"] = { "THAC0" }, ["sign"] = -1 },
 	[73]  = { ["stats"] = { "DamageBonus" } },
+	-- Bonuses for one kind of attack, (not listed, they go into the THAC0 and damage of the weapon in hand)
+	[167] = { ["stats"] = { "MissileTHAC0" } },
+	[284] = { ["stats"] = { "MeleeTHAC0" } },
+	[288] = { ["stats"] = { "FistTHAC0" } },
+	[285] = { ["stats"] = { "MeleeDamage" } },
+	[286] = { ["stats"] = { "MissileDamage" } },
+	[289] = { ["stats"] = { "FistDamage" } },
 	[90]  = { ["stats"] = { "OpenLocks" },     ["canSet"] = true },
 	[91]  = { ["stats"] = { "FindTraps" },     ["canSet"] = true },
 	[92]  = { ["stats"] = { "PickPockets" },   ["canSet"] = true },
@@ -917,6 +924,45 @@ function ZJItemInfo_Private_ApplyStrength(weapon, addStrength, strength, extra)
 	}
 end
 
+ZJItemInfo_Private_DexterityMod = nil -- DEXMOD.2DA, loaded the first time it is needed
+
+-- The THAC0 bonus of a dexterity of `dexterity` with a ranged weapon, (DEXMOD.2DA)
+function ZJItemInfo_Private_GetDexterityMissileBonus(dexterity)
+	if ZJItemInfo_Private_DexterityMod == nil then
+		ZJItemInfo_Private_DexterityMod = EEex_Resource_Load2DA("DEXMOD")
+	end
+	return tonumber(ZJItemInfo_Private_DexterityMod:getAtLabels("MISSILE", tostring(dexterity))) or 0
+end
+
+-- Returns `weapon` with the bonuses of `side` for its kind of attack added to its THAC0 bonus and damage bonus:
+-- a ranged attack gets the dexterity missile bonus and the missile bonuses, (op167, op286), a melee one the melee
+-- bonuses, (op284, op285), and fists the fist bonuses too, (op288, op289).
+--
+--   side => dexterity, missileTHAC0, meleeTHAC0, fistTHAC0, missileDamage, meleeDamage, fistDamage
+--
+function ZJItemInfo_Private_ApplyAttackKind(weapon, kind, side)
+
+	local hit, damage = 0, 0
+	if kind == "ranged" then
+		local ok, dexHit = pcall(ZJItemInfo_Private_GetDexterityMissileBonus, side.dexterity)
+		hit = (ok and dexHit or 0) + side.missileTHAC0
+		damage = side.missileDamage
+	else
+		hit, damage = side.meleeTHAC0, side.meleeDamage
+		if kind == "fist" then
+			hit, damage = hit + side.fistTHAC0, damage + side.fistDamage
+		end
+	end
+
+	return {
+		["diceCount"]   = weapon.diceCount,
+		["diceSize"]    = weapon.diceSize,
+		["bonus"]       = weapon.bonus + damage,
+		["thac0Bonus"]  = weapon.thac0Bonus + hit,
+		["speedFactor"] = weapon.speedFactor,
+	}
+end
+
 -- Returns `weapon` with `styleBonus` added to its THAC0 bonus, damage bonus and speed factor
 function ZJItemInfo_Private_ApplyStyle(weapon, styleBonus)
 	return {
@@ -1111,6 +1157,7 @@ function ZJItemInfo_Private_GetComparisonLines(sprite, info)
 	-- The THAC0 line is added once the weapon in hand is worked out, (the stat leaves out its bonuses), at this index,
 	-- with the attacks per round line below it
 	local thac0LineIndex = nil
+	local damageLineIndex = nil -- Where the damage of the weapon in hand goes, for an item that isn't a weapon
 
 	-- On a weapon the armor class and maximum hit points are only listed when they change, on anything else, (armor,
 	-- bracers, rings, ...), the THAC0 and attacks per round
@@ -1168,6 +1215,9 @@ function ZJItemInfo_Private_GetComparisonLines(sprite, info)
 			thac0LineIndex = #lines + 1
 		elseif key == "DamageBonus" and info.weapon ~= nil and ZJItemInfo_Private_ShowWeaponStats:get() ~= 0 then
 			-- It is part of the weapon damage below
+		elseif key == "DamageBonus" and ZJItemInfo_Private_ShowWeaponStats:get() ~= 0 then
+			-- It is shown as the damage of the weapon in hand below, (where it would have been)
+			damageLineIndex = #lines + 1
 		elseif newValue ~= nil and newValue ~= oldValue then
 			table.insert(lines, ZJItemInfo_Private_FormatChangeLine(ZJItemInfo_Private_T("Stat_"..key), oldValue, newValue, stat.lowerIsBetter, stat.suffix))
 		elseif stat.always and (key == "ArmorClass") == isArmor and not (key == "MaxHitPoints" and isWeaponItem) then
@@ -1261,19 +1311,64 @@ function ZJItemInfo_Private_GetComparisonLines(sprite, info)
 
 	-- The weapon as the character would use it, with its strength bonus, its proficiency in it, and the weapon style it
 	-- fights in with it. No weapon is a fist, a launcher fires the ammunition the character has for it.
-	local applyAll = function(weaponInfo, strength, extra, styleBonus)
+	local applyAll = function(weaponInfo, strength, extra, styleBonus, side)
 		local weapon = weaponInfo and weaponInfo.weapon or ZJItemInfo_Private_FistWeapon
+		local kind = "fist"
+		if weaponInfo ~= nil and weaponInfo.weapon ~= nil then
+			kind = ZJItemInfo_Private_IsRangedWeapon(weaponInfo) and "ranged" or "melee"
+		end
 		if weapon.launcher then
 			local ammoInfo = ZJItemInfo_Private_GetAmmoInfo(sprite, weaponInfo)
 			weapon = ZJItemInfo_Private_ApplyAmmo(weapon, ammoInfo and ammoInfo.weapon or nil)
 		end
 		weapon = ZJItemInfo_Private_ApplyStrength(weapon, weapon.addStrength, strength, extra)
 		weapon = ZJItemInfo_Private_ApplyProficiency(sprite, weapon, weaponInfo and weaponInfo.weapon and weaponInfo.proficiencyType or nil)
+		weapon = ZJItemInfo_Private_ApplyAttackKind(weapon, kind, side)
 		return ZJItemInfo_Private_ApplyStyle(weapon, styleBonus)
 	end
 
-	local okOld, oldWeapon = pcall(applyAll, oldInfo, oldStrength, oldExtra, oldStyleBonus)
-	local okNew, newWeapon = pcall(applyAll, newInfo, newStrength, newExtra, newStyleBonus)
+	-- The character's bonuses for each kind of attack, now and with the item equipped
+	local oldSide = {
+		["dexterity"]     = stats.m_nDEX,
+		["missileTHAC0"]  = stats.m_nMissileTHAC0Bonus,
+		["meleeTHAC0"]    = stats.m_nMeleeTHAC0Bonus,
+		["fistTHAC0"]     = stats.m_nFistTHAC0Bonus,
+		["missileDamage"] = stats.m_nMissileDamageBonus,
+		["meleeDamage"]   = stats.m_nMeleeDamageBonus,
+		["fistDamage"]    = stats.m_nFistDamageBonus,
+	}
+	local newSide = {
+		["dexterity"]     = newValues["DEX"] or oldSide.dexterity,
+		["missileTHAC0"]  = oldSide.missileTHAC0 + (totals.add["MissileTHAC0"] or 0),
+		["meleeTHAC0"]    = oldSide.meleeTHAC0 + (totals.add["MeleeTHAC0"] or 0),
+		["fistTHAC0"]     = oldSide.fistTHAC0 + (totals.add["FistTHAC0"] or 0),
+		["missileDamage"] = oldSide.missileDamage + (totals.add["MissileDamage"] or 0),
+		["meleeDamage"]   = oldSide.meleeDamage + (totals.add["MeleeDamage"] or 0),
+		["fistDamage"]    = oldSide.fistDamage + (totals.add["FistDamage"] or 0),
+	}
+
+	local okOld, oldWeapon = pcall(applyAll, oldInfo, oldStrength, oldExtra, oldStyleBonus, oldSide)
+	local okNew, newWeapon = pcall(applyAll, newInfo, newStrength, newExtra, newStyleBonus, newSide)
+
+	-- An item that isn't a weapon: the damage of the weapon in hand, (its damage bonus and strength change it), in
+	-- place of the damage bonus line. It goes in before the THAC0 lines, which come before it.
+	if damageLineIndex ~= nil then
+		local oldDamageBonus = stats.m_nDamageBonus
+		local newDamageBonus = newValues["DamageBonus"] or oldDamageBonus
+		if okOld and okNew then
+			local oldShown = { diceCount = oldWeapon.diceCount, diceSize = oldWeapon.diceSize, bonus = oldWeapon.bonus + oldDamageBonus }
+			local newShown = { diceCount = newWeapon.diceCount, diceSize = newWeapon.diceSize, bonus = newWeapon.bonus + newDamageBonus }
+			local oldDamage = ZJItemInfo_Private_FormatWeaponDamage(oldShown)
+			local newDamage = ZJItemInfo_Private_FormatWeaponDamage(newShown)
+			if oldDamage ~= newDamage then
+				local change = ZJItemInfo_Private_GetWeaponAverageDamage(newShown) - ZJItemInfo_Private_GetWeaponAverageDamage(oldShown)
+				table.insert(lines, damageLineIndex, string.format("%s: %s -> %s", ZJItemInfo_Private_T("Weapon_Damage"), oldDamage,
+					ZJItemInfo_Private_ColorChange(string.format("%s (%+d)", newDamage, newShown.bonus - oldShown.bonus), change, false)))
+			end
+		elseif newDamageBonus ~= oldDamageBonus then
+			table.insert(lines, damageLineIndex, ZJItemInfo_Private_FormatChangeLine(ZJItemInfo_Private_T("Stat_DamageBonus"), oldDamageBonus, newDamageBonus))
+		end
+	end
 
 	-- THAC0, (the stat leaves out what the weapon in hand adds to it, as does the inventory screen's)
 	if thac0LineIndex ~= nil then
