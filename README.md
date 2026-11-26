@@ -150,5 +150,5 @@ BattleSense/
 
 - `M_ZJBSen.lua` is run by the engine during startup and starts the installed modules.
 - `ZJ-en_US.lua` holds the English strings. A translation goes in a file named after the game's language code, for example `ZJ-de_DE.lua`, and only needs the strings it translates.
-- `ZJPopup.lua` holds the one popup the modules share, and its key. While the key is held, the modules' panels are asked in order of priority whether they have something to say about what is under the cursor, and the first one that does fills the popup, (`ZJPopup_AddPanel()`). It also holds the popup of the abilities and proficiencies screens, (`ZJPopup.menu`).
+- `ZJPopup.lua` holds the one popup the modules share, and its key. While the key is held, the modules' panels are asked in order of priority whether they have something to say about what is under the cursor, and the first one that does fills the popup, (`ZJPopup_AddPanel()`). A text panel is shown in the popup's box of text, (`ZJPopup.menu`), a panel that draws itself, (Attack Info), opens its own menu.
 - `ZJSprite.lua` holds the functions that read the engine's casting and attack round state. They are also available as methods on `CGameSprite`, prefixed with `zj`.

@@ -32,7 +32,7 @@ Infinity_DoFile("ZJPopup")
 -------------
 
 -- The module's on / off switch, in the "Battle Sense Modules" tab
-ZJProficiencyInfo_Private_OpenOn = EEex_Options_Register("ZJProficiencyInfo_Enable", ZJPopup_NewSwitch("Proficiency Info", {
+EEex_Options_Register("ZJProficiencyInfo_Enable", ZJPopup_NewSwitch("Proficiency Info", {
 	["onChange"] = function(self, oldValue) ZJProficiencyInfo_SetEnabled(self:get() ~= 0) end,
 }))
 
@@ -91,10 +91,8 @@ EEex_Options_AddTab("ZJBattleSense_Options_TRANSLATION_ProficiencyInfo_TabTitle"
 -------------
 
 ZJProficiencyInfo_Private_Enabled = false
-ZJProficiencyInfo_Private_ErrorReported = false
 
 ZJProficiencyInfo_Private_MenuName   = "CHARGEN_PROFICIENCIES"
-ZJProficiencyInfo_Private_PopupOwner = "ZJProficiencyInfo" -- Who is showing the screen popup, (ZJPopup.lua)
 
 ZJProficiencyInfo_Private_TitleColorStr  = "^0xFF64D7FF"
 ZJProficiencyInfo_Private_ColorEndStr    = "^-"
@@ -143,13 +141,10 @@ ZJProficiencyInfo_Private_WarriorLevelIndex = {
 -- General --
 -------------
 
--- Temporarily changes whether the popup is shown.
+-- Temporarily changes whether the panel is shown.
 -- To persist this change, instead modify the "ZJProficiencyInfo_Enable" option.
 function ZJProficiencyInfo_SetEnabled(enabled)
 	ZJProficiencyInfo_Private_Enabled = enabled
-	if not enabled then
-		ZJPopup_HideOnScreen(ZJProficiencyInfo_Private_PopupOwner)
-	end
 end
 
 function ZJProficiencyInfo_Private_T(key)
@@ -429,27 +424,17 @@ function ZJProficiencyInfo_Private_GetText(row)
 	return ZJProficiencyInfo_Private_PopupText
 end
 
--- Shows the popup for the proficiency under the cursor, or closes it. Runs every frame the proficiencies screen is drawn.
-function ZJProficiencyInfo_Private_UpdatePopup()
+-- The panel's text, (see ZJPopup_AddPanel()): what the points of the proficiency under the cursor on the proficiencies
+-- screen give, and the height of its row to put the popup at, or nil
+function ZJProficiencyInfo_Private_GetPanelText()
 
-	local owner = ZJProficiencyInfo_Private_PopupOwner
-
-	if not ZJProficiencyInfo_Private_Enabled or type(chargen) ~= "table"
-		or not ZJPopup_IsOpenAllowed(ZJProficiencyInfo_Private_OpenOn)
-	then
-		ZJPopup_HideOnScreen(owner)
-		return
-	end
+	if not ZJProficiencyInfo_Private_Enabled or type(chargen) ~= "table" then return nil end
 
 	local row, _, rowY = ZJPopup_FindHoveredRow(ZJProficiencyInfo_Private_MenuName, chargen.proficiency)
 	local text = row and ZJProficiencyInfo_Private_GetText(row)
+	if text == nil then return nil end
 
-	if text == nil then
-		ZJPopup_HideOnScreen(owner)
-		return
-	end
-
-	ZJPopup_ShowOnScreen(owner, text, rowY, ZJProficiencyInfo_Private_FontPoint:get(), ZJProficiencyInfo_Private_BackgroundOpacity:get())
+	return text, rowY
 end
 
 ---------------
@@ -459,25 +444,15 @@ end
 ZJProficiencyInfo_Private_HelpWrapper = nil
 
 -- The proficiencies screen shows proficiencyOrGeneralHelp() as its help text, (the description of the selected
--- proficiency), and asks for it every frame, which is what updates the popup. UI.menu defines it each time it loads, so
--- it is wrapped again every time.
+-- proficiency), and asks for it every frame. Character creation may close the popup's ticker, so the popup is updated
+-- from here as well. UI.menu defines it each time it loads, so it is wrapped again every time.
 function ZJProficiencyInfo_Private_WrapHelp()
 
 	local original = proficiencyOrGeneralHelp
 	if type(original) ~= "function" or original == ZJProficiencyInfo_Private_HelpWrapper then return end
 
 	ZJProficiencyInfo_Private_HelpWrapper = function(...)
-
-		local ok, err = pcall(ZJProficiencyInfo_Private_UpdatePopup)
-
-		if not ok then
-			pcall(ZJPopup_HideOnScreen, ZJProficiencyInfo_Private_PopupOwner)
-			if not ZJProficiencyInfo_Private_ErrorReported then
-				ZJProficiencyInfo_Private_ErrorReported = true
-				print("[Battle Sense] Proficiency Info: "..tostring(err))
-			end
-		end
-
+		ZJPopup_Tick()
 		return original(...)
 	end
 
@@ -496,7 +471,17 @@ EEex_Menu_AddMainFileLoadedListener(function()
 	local oldOnClose = EEex_Menu_GetItemFunction(menu.reference_onClose) or function() end
 	EEex_Menu_SetItemFunction(menu.reference_onClose, function()
 		local toReturn = oldOnClose()
-		ZJPopup_HideOnScreen(ZJProficiencyInfo_Private_PopupOwner)
+		ZJPopup_Close()
 		return toReturn
 	end)
 end)
+
+-- Only ever over the proficiencies screen, so it never competes with the panels of the game world
+ZJPopup_AddPanel({
+	["name"]         = "Proficiency Info",
+	["priority"]     = 50,
+	["getText"]      = ZJProficiencyInfo_Private_GetPanelText,
+	["getFontPoint"] = function() return ZJProficiencyInfo_Private_FontPoint:get() end,
+	["getOpacity"]   = function() return ZJProficiencyInfo_Private_BackgroundOpacity:get() end,
+	["wrap"]         = true,
+})

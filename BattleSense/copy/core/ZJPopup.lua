@@ -7,11 +7,8 @@
 |   in order of priority whether they have something to say about what is under the cursor, and   |
 |   the first one that does fills the popup with its panel. If none does, there is no popup.       |
 |                                                                                                  |
-|   * The cursor popup, (ZJPopup.menu): a box of text beside the cursor in the game. Modules add a |
-|     panel with ZJPopup_AddPanel().                                                               |
-|                                                                                                  |
-|   * The screen popup, (ZJPopup.menu): a box of text beside the cursor, for the modules that      |
-|     describe a row of a list on a full screen menu, (the abilities and proficiencies screens).   |
+|   Modules add a panel with ZJPopup_AddPanel(): a text panel is shown in the popup's box of text  |
+|   beside the cursor, (ZJPopup.menu), a panel that draws itself opens a menu of its own.          |
 |                                                                                                  |
 |   Toward the player these stay separate modules: each has its own on / off switch in the        |
 |   "Battle Sense Modules" tab, and its own tab for its panel's settings.                          |
@@ -157,24 +154,130 @@ function ZJPopup_KeyDisplayEntry()
 	})
 end
 
-------------------
--- Screen popup --
-------------------
 
-ZJPopup_Private_Screen_IsOpen     = false
-ZJPopup_Private_Screen_Owner      = nil -- The module showing it
-ZJPopup_Private_Screen_Text       = ""
-ZJPopup_Private_Screen_TextUD     = nil -- uiItem
-ZJPopup_Private_Screen_ShownFrame = -1  -- The frame it was last shown in
+-----------
+-- Popup --
+-----------
 
-ZJPopup_Private_Screen_FontPoint = 11 -- Used if the module doesn't give one
-ZJPopup_Private_Screen_DefaultOpacity = 92 -- The background's opacity in percent, used if the module doesn't give one
-ZJPopup_Private_Screen_Opacity = ZJPopup_Private_Screen_DefaultOpacity
+-- The panels of the modules, in order of priority, (see ZJPopup_AddPanel())
+ZJPopup_Private_Panels = {}
 
--- Whether the screen popup was shown in this frame or the one before. A module shows it every frame from something its
--- screen draws, so once that screen is gone the popup stops drawing, even before anything closed it.
-function ZJPopup_Private_Screen_IsFresh()
-	return Infinity_GetFrameCounter() - ZJPopup_Private_Screen_ShownFrame <= 1
+-- Adds a module's panel to the popup. While the "Popup Key" is held, the panels are asked every frame in order of
+-- priority, and the first one that has something to say about what is under the cursor shows; the rest aren't asked.
+-- `panel` is a table:
+--
+--   "name"         - The module's name, (for ZJPopup_GetCursorPanel() and error messages).
+--   "priority"     - Lower is asked first. Spell Info = 10, (a spell waiting for a target, over a creature), Attack
+--                    Info = 20, (a creature), Lock Info = 30, (a container, door or trap), Ability Info = 40 and
+--                    Proficiency Info = 50, (a row of their character creation screen).
+--
+-- A text panel, shown in the popup's box of text:
+--
+--   "getText"      - function() returning the text of the panel for what is under the cursor, or nil if the module
+--                    has nothing to say about it. It may return a second value: the height, (in menu coordinates), to
+--                    put the top of the popup at, (the hovered row of a list), instead of the top of the cursor.
+--   "getFontPoint" - function() returning the size of the text, (optional).
+--   "getOpacity"   - function() returning the background's opacity in percent, (optional).
+--   "wrap"         - true to wrap the text at a width that follows the size of the text, (optional, otherwise the box
+--                    is as wide as the longest line).
+--
+-- A panel that draws itself, in a menu of its own, (Attack Info):
+--
+--   "show"         - function() that lays out and opens the module's menu and returns true, or returns false if the
+--                    module has nothing to say about what is under the cursor.
+--   "hide"         - function() that closes the module's menu. Called every frame that the panel doesn't show, (another
+--                    panel does, or the key isn't held), so it must be cheap when the menu is already closed.
+--
+-- The popup is updated by its ticker menu, which is open while a game is running. Screens that may close it, (the
+-- character creation screens), also call ZJPopup_Tick() themselves, every frame they are drawn.
+function ZJPopup_AddPanel(panel)
+	table.insert(ZJPopup_Private_Panels, panel)
+	table.sort(ZJPopup_Private_Panels, function(a, b) return a.priority < b.priority end)
+end
+
+ZJPopup_Private_IsOpen      = false
+ZJPopup_Private_Text        = ""
+ZJPopup_Private_TextUD      = nil -- uiItem
+ZJPopup_Private_FontPoint   = 11  -- Used if the panel doesn't give one
+ZJPopup_Private_Opacity     = 85  -- The background's opacity in percent, used if the panel doesn't give one
+ZJPopup_Private_ShownOpacity = ZJPopup_Private_Opacity
+ZJPopup_Private_ShownFrame  = -1  -- The frame the box was last laid out in
+ZJPopup_Private_ErrorShown  = {}  -- [panel name] = true once its error was reported
+
+ZJPopup_Private_ChoiceFrame = -1  -- The frame the choice below was made in
+ZJPopup_Private_Choice      = nil -- { panel, text, y }, or nil if no panel shows
+
+-- Reports an error of a panel, once, (this runs every frame, don't flood the log)
+function ZJPopup_Private_ReportError(name, err)
+	if not ZJPopup_Private_ErrorShown[name] then
+		ZJPopup_Private_ErrorShown[name] = true
+		print("[Battle Sense] "..tostring(name)..": "..tostring(err))
+	end
+end
+
+-- Asks `panel` whether it has something to say: returns nil, or { panel, text, y }, (text and y for a text panel)
+function ZJPopup_Private_Ask(panel)
+	if panel.getText ~= nil then
+		local ok, text, y = pcall(panel.getText)
+		if not ok then
+			ZJPopup_Private_ReportError(panel.name, text)
+			return nil
+		end
+		return text ~= nil and { ["panel"] = panel, ["text"] = text, ["y"] = y } or nil
+	end
+	local ok, shows = pcall(panel.show)
+	if not ok then
+		ZJPopup_Private_ReportError(panel.name, shows)
+		return nil
+	end
+	return shows == true and { ["panel"] = panel } or nil
+end
+
+-- The first panel, (in order of priority), with something to say, or nil. The panels that draw themselves and don't
+-- show this frame are told to close.
+function ZJPopup_Private_Choose()
+
+	local choice = nil
+
+	if ZJPopup_IsKeyDown() then
+		for _, panel in ipairs(ZJPopup_Private_Panels) do
+			choice = ZJPopup_Private_Ask(panel)
+			if choice ~= nil then break end
+		end
+	end
+
+	local chosen = choice and choice.panel
+	for _, panel in ipairs(ZJPopup_Private_Panels) do
+		if panel ~= chosen and panel.hide ~= nil then
+			local ok, err = pcall(panel.hide)
+			if not ok then ZJPopup_Private_ReportError(panel.name, err) end
+		end
+	end
+
+	return choice
+end
+
+-- ZJPopup_Private_Choose(), worked out at most once per frame, so every caller gets the same answer whichever menu or
+-- screen asks first
+function ZJPopup_Private_GetChoice()
+	local frame = Infinity_GetFrameCounter()
+	if frame ~= ZJPopup_Private_ChoiceFrame then
+		ZJPopup_Private_ChoiceFrame = frame
+		ZJPopup_Private_Choice = ZJPopup_Private_Choose()
+	end
+	return ZJPopup_Private_Choice
+end
+
+-- The name of the module whose panel the popup shows this frame, or nil
+function ZJPopup_GetCursorPanel()
+	local choice = ZJPopup_Private_GetChoice()
+	return choice and choice.panel.name
+end
+
+-- Whether the box was laid out in this frame or the one before. Whatever updates it does so every frame, so once that
+-- stops, (its screen is gone), the box stops drawing, even before anything closed it.
+function ZJPopup_Private_IsFresh()
+	return Infinity_GetFrameCounter() - ZJPopup_Private_ShownFrame <= 1
 end
 
 function ZJPopup_Private_StripColors(text)
@@ -221,76 +324,136 @@ function ZJPopup_FindHoveredRow(menuName, listTable)
 	return nil
 end
 
--- Shows `text` in the screen popup, beside the cursor, at the height of `rowY`. `owner` is the module showing it,
--- `fontPoint` the size of the text and `opacity` the background's opacity in percent, (both optional). Called every
--- frame while it should be showing.
-function ZJPopup_ShowOnScreen(owner, text, rowY, fontPoint, opacity)
 
+-- The cursor's hotspot and size, (in menu coordinates), so the popup can go beside the cursor image
+function ZJPopup_GetCursorRenderData()
+
+	local vidMode = EngineGlobals.g_pBaldurChitin.cVideo.pCurrentMode
+	local cursorCell = vidMode.pPointerVidCell
+	if cursorCell == nil then return end
+
+	local centerX, centerY = cursorCell:GetCurrentCenterPoint()
+	local w, h = cursorCell:GetCurrentFrameSize()
+	return EEex_Menu_ScaleX(centerX), EEex_Menu_ScaleY(centerY), EEex_Menu_ScaleX(w), EEex_Menu_ScaleY(h)
+end
+
+-- Lays out the box of `choice`, (a text panel): beside the cursor image, with its top at the top of the cursor, or at
+-- the height the panel gave
+function ZJPopup_Private_Layout(choice)
+
+	local panel = choice.panel
+	local fontPoint = panel.getFontPoint ~= nil and panel.getFontPoint() or ZJPopup_Private_FontPoint
 	local style = styles["normal"]
-	fontPoint = fontPoint or ZJPopup_Private_Screen_FontPoint
-	ZJPopup_Private_Screen_Opacity = opacity or ZJPopup_Private_Screen_DefaultOpacity
+	local text = choice.text
+	local plainText = ZJPopup_Private_StripColors(text)
 
-	local pad = 10
-	local gap = 8 -- Between the popup and the cursor
-	local cursorRoom = 32
-	local wrapWidth = fontPoint * 32
+	ZJPopup_Private_Text = text
+	ZJPopup_Private_ShownOpacity = panel.getOpacity ~= nil and panel.getOpacity() or ZJPopup_Private_Opacity
+	if ZJPopup_Private_TextUD ~= nil then
+		ZJPopup_Private_TextUD.text.point = fontPoint
+	end
 
-	local textW, textH = EEex_Menu_GetTextWidthHeight(ZJPopup_Private_StripColors(text), style.font, fontPoint, style.useFontZoom, wrapWidth)
-	textW = math.min(math.ceil(textW), wrapWidth)
+	local textW = 0
+	for line in (plainText.."\n"):gmatch("(.-)\n") do
+		textW = math.max(textW, (EEex_Menu_GetTextWidthHeight(line, style.font, fontPoint, style.useFontZoom)))
+	end
+	if panel.wrap then
+		textW = math.min(textW, fontPoint * 32)
+	end
+	textW = math.ceil(textW) + 2 -- Room for rounding, so the engine doesn't wrap a line that just fits
+
+	local _, textH = EEex_Menu_GetTextWidthHeight(plainText, style.font, fontPoint, style.useFontZoom, textW)
 	textH = math.ceil(textH)
 
-	local width = textW + pad * 2
-	local height = textH + pad * 2
+	local pad = 12
+	local backgroundW = textW + pad * 2
+	local backgroundH = textH + pad * 2
 
-	ZJPopup_Private_Screen_Text = text
-	if ZJPopup_Private_Screen_TextUD ~= nil then
-		ZJPopup_Private_Screen_TextUD.text.point = fontPoint
-	end
+	local cursorX, cursorY = EEex_Menu_GetMousePos()
+	local cursorCenterX, cursorCenterY, cursorW = ZJPopup_GetCursorRenderData()
+	cursorCenterX, cursorCenterY, cursorW = cursorCenterX or 0, cursorCenterY or 0, cursorW or 0
 
-	Infinity_SetArea("ZJPopup_Screen_Background", 0, 0, width, height)
-	Infinity_SetArea("ZJPopup_Screen_Text", pad, pad, wrapWidth, textH)
+	local cursorRenderX = cursorX - cursorCenterX
+	local backgroundX = cursorRenderX + cursorW + 5
+	local backgroundY = choice.y or (cursorY - cursorCenterY)
 
 	local screenW, screenH = Infinity_GetScreenSize()
-	local mouseX = EEex_Menu_GetMousePos()
-
-	local x = mouseX + cursorRoom
-	if x + width > screenW then
-		x = mouseX - gap - width
+	if backgroundX + backgroundW > screenW then
+		backgroundX = cursorRenderX - backgroundW - 5
 	end
+	backgroundX = math.max(0, math.min(backgroundX, screenW - backgroundW))
+	backgroundY = math.max(0, math.min(backgroundY, screenH - backgroundH))
 
-	x = math.max(0, math.min(x, screenW - width))
-	local y = math.max(0, math.min(rowY, screenH - height))
+	Infinity_SetOffset("ZJPopup_Cursor", math.floor(backgroundX), math.floor(backgroundY))
+	Infinity_SetArea("ZJPopup_Cursor_Background", 0, 0, backgroundW, backgroundH)
+	Infinity_SetArea("ZJPopup_Cursor_Text", pad, pad, textW, textH)
 
-	Infinity_SetOffset("ZJPopup_Screen", math.floor(x), math.floor(y))
+	ZJPopup_Private_ShownFrame = Infinity_GetFrameCounter()
+end
 
-	ZJPopup_Private_Screen_Owner = owner
-	ZJPopup_Private_Screen_ShownFrame = Infinity_GetFrameCounter()
-
-	if not ZJPopup_Private_Screen_IsOpen then
-		Infinity_PushMenu("ZJPopup_Screen")
-		ZJPopup_Private_Screen_IsOpen = true
+function ZJPopup_Private_SetOpen(open)
+	if open then
+		if not ZJPopup_Private_IsOpen then
+			Infinity_PushMenu("ZJPopup_Cursor")
+			ZJPopup_Private_IsOpen = true
+		end
+	elseif ZJPopup_Private_IsOpen then
+		ZJPopup_Private_IsOpen = false
+		ZJPopup_Private_ShownFrame = -1
+		Infinity_PopMenu("ZJPopup_Cursor")
 	end
 end
 
--- Closes the screen popup if `owner` is showing it, (any module if nil)
-function ZJPopup_HideOnScreen(owner)
-	if not ZJPopup_Private_Screen_IsOpen then return end
-	if owner ~= nil and owner ~= ZJPopup_Private_Screen_Owner then return end
-	Infinity_PopMenu("ZJPopup_Screen")
-	ZJPopup_Private_Screen_IsOpen = false
-	ZJPopup_Private_Screen_Owner = nil
-	ZJPopup_Private_Screen_ShownFrame = -1
+-- Whether the popup's box of text is showing
+function ZJPopup_IsCursorPopupOpen()
+	return ZJPopup_Private_IsOpen
 end
 
--- UI.menu often closes its screen with Infinity_PopMenu() without a name, which closes the menu on top. While the
--- screen popup is open over that screen, that would close the popup instead and leave the screen open, so the popup is
--- closed first.
+-- Closes the popup's box of text, (a screen with a text panel that closes, before the next update)
+function ZJPopup_Close()
+	ZJPopup_Private_SetOpen(false)
+end
+
+function ZJPopup_Private_DoTick()
+
+	local choice = ZJPopup_Private_GetChoice()
+
+	-- The box of text is only for text panels, a panel that draws itself has opened its own menu
+	if choice == nil or choice.panel.getText == nil then
+		ZJPopup_Private_SetOpen(false)
+		return
+	end
+
+	ZJPopup_Private_SetOpen(true)
+	ZJPopup_Private_Layout(choice)
+end
+
+-- Updates the popup: asks the panels, (at most once per frame), and opens, lays out or closes the box. Called every
+-- frame by the ticker menu, and by the screens that may close the ticker, (any number of times per frame).
+function ZJPopup_Tick()
+	local ok, err = pcall(ZJPopup_Private_DoTick)
+	if not ok then
+		pcall(ZJPopup_Private_SetOpen, false)
+		ZJPopup_Private_ReportError("Popup", err)
+	end
+end
+
+-- The ticker is always open while a game is running, (only once a module added a panel)
+function ZJPopup_Private_PushTicker()
+	if ZJPopup_Private_Panels[1] == nil then return end
+	if not Infinity_IsMenuOnStack("ZJPopup_Cursor_Ticker") then
+		Infinity_PushMenu("ZJPopup_Cursor_Ticker")
+	end
+end
+
+-- UI.menu often closes its screen with Infinity_PopMenu() without a name, which closes the menu on top. While the box
+-- is open over that screen, that would close the box instead and leave the screen open, so the box is closed first.
 EEex_Utility_NewScope(function()
 	local popMenu = Infinity_PopMenu
 	if type(popMenu) ~= "function" then return end
 	Infinity_PopMenu = function(...)
-		if select("#", ...) == 0 and ZJPopup_Private_Screen_IsOpen then
-			pcall(ZJPopup_HideOnScreen, nil)
+		if select("#", ...) == 0 and ZJPopup_Private_IsOpen then
+			pcall(ZJPopup_Private_SetOpen, false)
 		end
 		return popMenu(...)
 	end
@@ -298,10 +461,13 @@ end)
 
 EEex_Menu_AddMainFileLoadedListener(function()
 	EEex_Menu_LoadFile("ZJPopup")
-	ZJPopup_Private_Screen_IsOpen = false
-	ZJPopup_Private_Screen_Owner = nil
-	ZJPopup_Private_Screen_TextUD = EEex_Menu_GetItem("ZJPopup_Screen_Text")
+	ZJPopup_Private_IsOpen = false
+	ZJPopup_Private_ShownFrame = -1
+	ZJPopup_Private_TextUD = EEex_Menu_GetItem("ZJPopup_Cursor_Text")
 end)
+
+EEex_GameState_AddInitializedListener(ZJPopup_Private_PushTicker)
+EEex_Menu_AddAfterMainFileReloadedListener(ZJPopup_Private_PushTicker)
 
 EEex.RegisterSlicedRect("ZJPopup_BackgroundRect", {
 	["topLeft"]     = {  0,  0, 32, 32 },
@@ -318,248 +484,14 @@ EEex.RegisterSlicedRect("ZJPopup_BackgroundRect", {
 	["flags"]       = 0,
 })
 
-EEex_Menu_AddBeforeUIItemRenderListener("ZJPopup_Screen_Background", function(item)
-	EEex.DrawSlicedRect("ZJPopup_BackgroundRect", { item:getArea() }, math.floor(255 * ZJPopup_Private_Screen_Opacity / 100))
-end)
-
-------------------
--- Cursor popup --
-------------------
-
--- The panels of the modules, in order of priority, (see ZJPopup_AddPanel())
-ZJPopup_Private_Panels = {}
-
--- Adds a module's panel to the cursor popup. While the "Popup Key" is held, the panels are asked every frame in order of
--- priority, and the first one that has something to say about what is under the cursor shows; the rest aren't asked.
--- `panel` is a table:
---
---   "name"         - The module's name, (for ZJPopup_GetCursorPanel() and error messages).
---   "priority"     - Lower is asked first. Spell Info = 10, (a spell waiting for a target, over a creature), Attack
---                    Info = 20, (a creature), Lock Info = 30, (a container, door or trap).
---
--- A text panel, shown in the popup's box of text:
---
---   "getText"      - function() returning the text of the panel for what is under the cursor, or nil if the module
---                    has nothing to say about it.
---   "getFontPoint" - function() returning the size of the text, (optional).
---
--- A panel that draws itself, in a menu of its own, (Attack Info):
---
---   "show"         - function() that lays out and opens the module's menu and returns true, or returns false if the
---                    module has nothing to say about what is under the cursor.
---   "hide"         - function() that closes the module's menu. Called every frame that the panel doesn't show, (another
---                    panel does, or the key isn't held), so it must be cheap when the menu is already closed.
---
-function ZJPopup_AddPanel(panel)
-	table.insert(ZJPopup_Private_Panels, panel)
-	table.sort(ZJPopup_Private_Panels, function(a, b) return a.priority < b.priority end)
-end
-
-ZJPopup_Private_Cursor_IsOpen     = false
-ZJPopup_Private_Cursor_Text       = ""
-ZJPopup_Private_Cursor_TextUD     = nil -- uiItem
-ZJPopup_Private_Cursor_FontPoint  = 11  -- Used if the panel doesn't give one
-ZJPopup_Private_Cursor_Opacity    = 85  -- The background's opacity in percent
-ZJPopup_Private_Cursor_ErrorShown = {}  -- [panel name] = true once its error was reported
-
-ZJPopup_Private_Cursor_ChoiceFrame = -1  -- The frame the choice below was made in
-ZJPopup_Private_Cursor_ChoicePanel = nil
-ZJPopup_Private_Cursor_ChoiceText  = nil
-
--- Reports an error of a panel, once, (this runs every frame, don't flood the log)
-function ZJPopup_Private_Cursor_ReportError(panel, err)
-	if not ZJPopup_Private_Cursor_ErrorShown[panel.name] then
-		ZJPopup_Private_Cursor_ErrorShown[panel.name] = true
-		print("[Battle Sense] "..tostring(panel.name)..": "..tostring(err))
-	end
-end
-
--- Asks `panel` whether it has something to say: returns whether it shows, and the text of a text panel
-function ZJPopup_Private_Cursor_Ask(panel)
-	if panel.getText ~= nil then
-		local ok, text = pcall(panel.getText)
-		if not ok then
-			ZJPopup_Private_Cursor_ReportError(panel, text)
-			return false
-		end
-		return text ~= nil, text
-	end
-	local ok, shows = pcall(panel.show)
-	if not ok then
-		ZJPopup_Private_Cursor_ReportError(panel, shows)
-		return false
-	end
-	return shows == true
-end
-
--- The first panel, (in order of priority), with something to say, and its text if it is a text panel, or nil. The
--- panels that draw themselves and don't show this frame are told to close.
-function ZJPopup_Private_Cursor_Choose()
-
-	local chosen, chosenText = nil, nil
-
-	if ZJPopup_IsKeyDown() then
-		for _, panel in ipairs(ZJPopup_Private_Panels) do
-			local shows, text = ZJPopup_Private_Cursor_Ask(panel)
-			if shows then
-				chosen, chosenText = panel, text
-				break
-			end
-		end
-	end
-
-	for _, panel in ipairs(ZJPopup_Private_Panels) do
-		if panel ~= chosen and panel.hide ~= nil then
-			local ok, err = pcall(panel.hide)
-			if not ok then ZJPopup_Private_Cursor_ReportError(panel, err) end
-		end
-	end
-
-	return chosen, chosenText
-end
-
--- ZJPopup_Private_Cursor_Choose(), worked out at most once per frame, so every caller gets the same answer whichever
--- menu runs first
-function ZJPopup_Private_Cursor_GetChoice()
-	local frame = Infinity_GetFrameCounter()
-	if frame ~= ZJPopup_Private_Cursor_ChoiceFrame then
-		ZJPopup_Private_Cursor_ChoiceFrame = frame
-		ZJPopup_Private_Cursor_ChoicePanel, ZJPopup_Private_Cursor_ChoiceText = ZJPopup_Private_Cursor_Choose()
-	end
-	return ZJPopup_Private_Cursor_ChoicePanel, ZJPopup_Private_Cursor_ChoiceText
-end
-
--- The name of the module whose panel the cursor popup shows this frame, or nil
-function ZJPopup_GetCursorPanel()
-	local panel = ZJPopup_Private_Cursor_GetChoice()
-	return panel and panel.name
-end
-
--- The cursor's hotspot and size, (in menu coordinates), so the popup can go beside the cursor image
-function ZJPopup_GetCursorRenderData()
-
-	local vidMode = EngineGlobals.g_pBaldurChitin.cVideo.pCurrentMode
-	local cursorCell = vidMode.pPointerVidCell
-	if cursorCell == nil then return end
-
-	local centerX, centerY = cursorCell:GetCurrentCenterPoint()
-	local w, h = cursorCell:GetCurrentFrameSize()
-	return EEex_Menu_ScaleX(centerX), EEex_Menu_ScaleY(centerY), EEex_Menu_ScaleX(w), EEex_Menu_ScaleY(h)
-end
-
-function ZJPopup_Private_Cursor_Layout(fontPoint)
-
-	local style = styles["normal"]
-	local text = ZJPopup_Private_Cursor_Text
-
-	if ZJPopup_Private_Cursor_TextUD ~= nil then
-		ZJPopup_Private_Cursor_TextUD.text.point = fontPoint
-	end
-
-	local textW = 0
-	for line in (text.."\n"):gmatch("(.-)\n") do
-		textW = math.max(textW, (EEex_Menu_GetTextWidthHeight(ZJPopup_Private_StripColors(line), style.font, fontPoint, style.useFontZoom)))
-	end
-	textW = textW + 2 -- Room for rounding, so the engine doesn't wrap a line that just fits
-
-	local _, textH = EEex_Menu_GetTextWidthHeight(ZJPopup_Private_StripColors(text), style.font, fontPoint, style.useFontZoom, textW)
-
-	local pad = 12
-	local backgroundW = textW + pad * 2
-	local backgroundH = textH + pad * 2
-
-	-- Beside the cursor image
-	local cursorX, cursorY = EEex_Menu_GetMousePos()
-	local cursorCenterX, cursorCenterY, cursorW = ZJPopup_GetCursorRenderData()
-	cursorCenterX, cursorCenterY, cursorW = cursorCenterX or 0, cursorCenterY or 0, cursorW or 0
-
-	local cursorRenderX = cursorX - cursorCenterX
-	local backgroundX = cursorRenderX + cursorW + 5
-	local backgroundY = cursorY - cursorCenterY
-
-	local screenW, screenH = Infinity_GetScreenSize()
-	if backgroundX + backgroundW > screenW then
-		backgroundX = math.max(0, cursorRenderX - backgroundW - 5)
-	end
-	if backgroundY + backgroundH > screenH then
-		backgroundY = math.max(0, screenH - backgroundH)
-	end
-
-	Infinity_SetOffset("ZJPopup_Cursor", backgroundX, backgroundY)
-	Infinity_SetArea("ZJPopup_Cursor_Background", 0, 0, backgroundW, backgroundH)
-	Infinity_SetArea("ZJPopup_Cursor_Text", pad, pad, textW, textH)
-end
-
-function ZJPopup_Private_Cursor_SetOpen(open)
-	if open then
-		if not ZJPopup_Private_Cursor_IsOpen then
-			Infinity_PushMenu("ZJPopup_Cursor")
-			ZJPopup_Private_Cursor_IsOpen = true
-		end
-	elseif ZJPopup_Private_Cursor_IsOpen then
-		Infinity_PopMenu("ZJPopup_Cursor")
-		ZJPopup_Private_Cursor_IsOpen = false
-	end
-end
-
--- Whether the cursor popup is showing
-function ZJPopup_IsCursorPopupOpen()
-	return ZJPopup_Private_Cursor_IsOpen
-end
-
-function ZJPopup_Private_Cursor_DoTick()
-
-	local panel, text = ZJPopup_Private_Cursor_GetChoice()
-
-	-- The box of text is only for text panels, a panel that draws itself has opened its own menu
-	if panel == nil or panel.getText == nil then
-		ZJPopup_Private_Cursor_SetOpen(false)
-		return
-	end
-
-	local fontPoint = panel.getFontPoint ~= nil and panel.getFontPoint() or ZJPopup_Private_Cursor_FontPoint
-
-	ZJPopup_Private_Cursor_Text = text
-	ZJPopup_Private_Cursor_SetOpen(true)
-	ZJPopup_Private_Cursor_Layout(fontPoint)
-end
-
--- Called every frame by the ticker menu
-function ZJPopup_Private_Cursor_Tick()
-	local ok, err = pcall(ZJPopup_Private_Cursor_DoTick)
-	if not ok then
-		pcall(ZJPopup_Private_Cursor_SetOpen, false)
-		if not ZJPopup_Private_Cursor_ErrorShown["popup"] then
-			ZJPopup_Private_Cursor_ErrorShown["popup"] = true
-			print("[Battle Sense] Popup: "..tostring(err))
-		end
-	end
-end
-
--- The ticker is always open while a game is running, (only once a module added a panel)
-function ZJPopup_Private_Cursor_PushTicker()
-	if ZJPopup_Private_Panels[1] == nil then return end
-	if not Infinity_IsMenuOnStack("ZJPopup_Cursor_Ticker") then
-		Infinity_PushMenu("ZJPopup_Cursor_Ticker")
-	end
-end
-
-EEex_Menu_AddMainFileLoadedListener(function()
-	ZJPopup_Private_Cursor_IsOpen = false
-	ZJPopup_Private_Cursor_TextUD = EEex_Menu_GetItem("ZJPopup_Cursor_Text")
-end)
-
-EEex_GameState_AddInitializedListener(ZJPopup_Private_Cursor_PushTicker)
-EEex_Menu_AddAfterMainFileReloadedListener(ZJPopup_Private_Cursor_PushTicker)
-
 EEex_Menu_AddBeforeUIItemRenderListener("ZJPopup_Cursor_Background", function(item)
-	EEex.DrawSlicedRect("ZJPopup_BackgroundRect", { item:getArea() }, math.floor(255 * ZJPopup_Private_Cursor_Opacity / 100))
+	EEex.DrawSlicedRect("ZJPopup_BackgroundRect", { item:getArea() }, math.floor(255 * ZJPopup_Private_ShownOpacity / 100))
 end)
 
 -- A creature's own tooltip would sit under the popup
 EEex_Utility_NewScope(function()
 	local old = EEex_Sprite_Hook_CheckSuppressTooltip
 	EEex_Sprite_Hook_CheckSuppressTooltip = function()
-		return ZJPopup_Private_Cursor_IsOpen or old()
+		return ZJPopup_Private_IsOpen or old()
 	end
 end)
