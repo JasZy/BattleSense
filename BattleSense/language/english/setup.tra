@@ -11,6 +11,7 @@
 @50 = ~Spell Info: Show what a spell, wand or scroll will do to a creature, (magic resistance, saving throws, damage, immunities), when hovering it while the spell waits for a target~
 @60 = ~Ability Info: Show what an ability score gives, (to-hit, armor class, hit points, spells, ...), when hovering it on the abilities screen of character creation~
 @70 = ~Proficiency Info: Show what the points of a weapon proficiency or fighting style give, (to-hit, damage, speed, attacks per round, style bonuses), when hovering it on the proficiencies screen at character creation and level up~
+@80 = ~Container Colors: Outline locked containers red and empty containers gray (replaces EEex's empty container module)~
 
 // Error messages
 @1000 = ~Game not supported. Battle Sense requires BG:EE, BG2:EE, EET or IWD:EE.~

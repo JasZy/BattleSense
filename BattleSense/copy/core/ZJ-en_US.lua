@@ -749,3 +749,38 @@ uiStrings["ZJBattleSense_TRANSLATION_ProficiencyInfo_Stat_OffHandDamage"]     = 
 uiStrings["ZJBattleSense_TRANSLATION_ProficiencyInfo_Stat_ArmorClass"]        = "Armor Class modifier"
 uiStrings["ZJBattleSense_TRANSLATION_ProficiencyInfo_AgainstMissiles"]        = "(%+d against missiles)"
 uiStrings["ZJBattleSense_TRANSLATION_ProficiencyInfo_Stat_CriticalRange"]     = "Critical hit range"
+
+----------------------
+-- Container Colors --
+----------------------
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_ContainerColors_TabTitle"] = "Battle Sense: Container Colors"
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_ContainerColors_Enable"] = "Enable Container Colors Module"
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_ContainerColors_Enable_Description"] = [[
+Changes the color of a container's outline, (normally cyan): locked containers are outlined red, and empty containers gray. A container that is both gets the locked color. Both colors can be changed, or set to "None", in the "Battle Sense: Container Colors" tab.
+
+The green outline the game shows when a thieving, spell or item cursor can target the container is left alone.
+
+-----------
+
+This replaces the "Empty Container" module that comes with EEex. Battle Sense turns that module off by itself when the game starts, which takes effect from the next time the game is started.
+]]
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_ContainerColors_LockedColor"] = "Locked Containers"
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_ContainerColors_LockedColor_Description"] = [[
+The outline color of locked containers. Click to pick the next color, "None" leaves them the game's own cyan.
+
+A locked container that is also empty gets this color, unless it is "None".
+]]
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_ContainerColors_EmptyColor"] = "Empty Containers"
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_ContainerColors_EmptyColor_Description"] = [[
+The outline color of containers with nothing in them. Click to pick the next color, "None" leaves them the game's own cyan.
+]]
+
+uiStrings["ZJBattleSense_TRANSLATION_ContainerColors_None"] = "None"
+uiStrings["ZJBattleSense_TRANSLATION_ContainerColors_Gray"] = "Gray"

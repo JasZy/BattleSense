@@ -26,6 +26,7 @@ ZJBattleSense_Modules = {
 	["ZJAblInf"] = false,
 	["ZJAtkInf"] = false,
 	["ZJCmbLog"] = false,
+	["ZJCntCol"] = false,
 	["ZJItmInf"] = false,
 	["ZJPrfInf"] = false,
 	["ZJSplInf"] = false,
@@ -33,20 +34,22 @@ ZJBattleSense_Modules = {
 }
 
 -- The order the modules are started in
-ZJBattleSense_Private_ModuleOrder = { "ZJAblInf", "ZJAtkInf", "ZJCmbLog", "ZJItmInf", "ZJPrfInf", "ZJSplInf", "ZJTimer" }
+ZJBattleSense_Private_ModuleOrder = { "ZJAblInf", "ZJAtkInf", "ZJCmbLog", "ZJCntCol", "ZJItmInf", "ZJPrfInf", "ZJSplInf", "ZJTimer" }
 
--- Three of the modules are extended versions of a module that ships with EEex, (the Combat Log one only with the EEex
+-- Four of the modules are extended versions of a module that ships with EEex, (the Combat Log one only with the EEex
 -- fork Battle Sense started in). Running both versions at once would draw / print everything twice, so the EEex
 -- version is switched off when it is there:
 --
 --   "option" - The EEex option that enables its version. It is turned off, which EEex applies on the next launch.
 --   "tick"   - The function that drives EEex's version, (or that all of its output goes through). It is emptied,
---              which silences it until that next launch.
+--              which silences it until that next launch. Container Colors has none: it takes over the function of
+--              EEex's version itself, (see ZJCntCol.lua).
 --
 ZJBattleSense_Private_Replaces = {
-	["ZJAtkInf"] = { ["option"] = "EEex_Module_AttackInfo", ["tick"] = "B3AttackInfo_Private_Menu_Ticker_Tick" },
-	["ZJCmbLog"] = { ["option"] = "EEex_Module_CombatLog",  ["tick"] = "B3CombatLog_Private_Say"               },
-	["ZJTimer"]  = { ["option"] = "EEex_Module_Timer",      ["tick"] = "B3Timer_Private_Menu_Tick"             },
+	["ZJAtkInf"] = { ["option"] = "EEex_Module_AttackInfo",     ["tick"] = "B3AttackInfo_Private_Menu_Ticker_Tick" },
+	["ZJCmbLog"] = { ["option"] = "EEex_Module_CombatLog",      ["tick"] = "B3CombatLog_Private_Say"               },
+	["ZJCntCol"] = { ["option"] = "EEex_Module_EmptyContainer"                                                     },
+	["ZJTimer"]  = { ["option"] = "EEex_Module_Timer",          ["tick"] = "B3Timer_Private_Menu_Tick"             },
 }
 
 function ZJBattleSense_Private_ReplaceEEexModule(replaces)
@@ -56,7 +59,7 @@ function ZJBattleSense_Private_ReplaceEEexModule(replaces)
 
 	option:set(0)
 
-	if type(_G[replaces.tick]) == "function" then
+	if replaces.tick ~= nil and type(_G[replaces.tick]) == "function" then
 		_G[replaces.tick] = function() end
 	end
 end
@@ -192,6 +195,7 @@ ZJBattleSense_Private_ModuleToggles = {
 	["ZJAblInf"] = { ["optionID"] = "ZJAbilityInfo_Enable",     ["key"] = "Ability Info",     ["name"] = "AbilityInfo"     },
 	["ZJAtkInf"] = { ["optionID"] = "ZJAttackInfo_Enable",      ["key"] = "Attack Info",      ["name"] = "AttackInfo"      },
 	["ZJCmbLog"] = { ["optionID"] = "ZJCombatLog_Enable",       ["key"] = "Combat Log",       ["name"] = "CombatLog"       },
+	["ZJCntCol"] = { ["optionID"] = "ZJContainerColors_Enable", ["key"] = "Container Colors", ["name"] = "ContainerColors" },
 	["ZJItmInf"] = { ["optionID"] = "ZJItemInfo_Enable",        ["key"] = "Item Info",        ["name"] = "ItemInfo"        },
 	["ZJPrfInf"] = { ["optionID"] = "ZJProficiencyInfo_Enable", ["key"] = "Proficiency Info", ["name"] = "ProficiencyInfo" },
 	["ZJSplInf"] = { ["optionID"] = "ZJSpellInfo_Enable",       ["key"] = "Spell Info",       ["name"] = "SpellInfo"       },

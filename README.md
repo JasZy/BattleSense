@@ -93,6 +93,15 @@ On the proficiencies screen, (character creation and level up), hover a weapon p
 
 For example `Large Sword: 2 points` with `To-hit bonus +1`, `Damage bonus +2`, `Extra attacks per round +1/2`. The popup follows the points as you change them. The values come from the game's tables, so mods that change proficiencies or fighting styles are followed.
 
+### Container Colors
+
+Changes the color of a container's outline, (normally cyan), so you can see at a glance which ones are worth a visit:
+
+- Locked containers are outlined red
+- Empty containers are outlined gray, (as EEex's Empty Container module does)
+
+A container that is both is outlined red. The green outline the game shows when a thieving, spell or item cursor can target a container is left alone. Both colors can be changed, and "None" leaves those containers the game's own cyan.
+
 ## Installation
 
 1. Install EEex.
@@ -103,7 +112,7 @@ The settings of each component are in the game under Options > EEex Options. The
 
 ## Good to know
 
-- **EEex's own modules are switched off.** When the Attack Info or Timer component is installed and EEex's module of the same name is enabled, Battle Sense turns the EEex one off, so that nothing is drawn twice. If you uninstall Battle Sense, turn EEex's module back on under Options > EEex Options > Modules.
+- **EEex's own modules are switched off.** When the Attack Info, Timer or Container Colors component is installed and EEex's module of the same name, (Empty Container for Container Colors), is enabled, Battle Sense turns the EEex one off, so that nothing is drawn twice. If you uninstall Battle Sense, turn EEex's module back on under Options > EEex Options > Modules.
 - **Battle Sense has its own settings.** They are stored separately from EEex's; settings you changed for EEex's Attack Info or Timer module are not carried over.
 - **The Combat Log component changes save games.** To report why a spell did nothing, it adds a hidden effect to every creature, and that effect is saved with the creature. Keep the component installed for saves that were made with it.
 
