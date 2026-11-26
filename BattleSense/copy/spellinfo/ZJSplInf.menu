@@ -37,6 +37,20 @@ menu
 		ignoreEvents
 	}
 
+	-- A cone, (one sequence per width, one frame per direction)
+	label
+	{
+		name "ZJSpellInfo_Menu_AreaCone"
+		area -1 -1 -1 -1
+		enabled "ZJSpellInfo_Private_Menu_Cone_Enabled()"
+		bam "ZJSPLCON"
+		scaleToClip
+		sequence lua "ZJSpellInfo_Private_Menu_Cone.sequence"
+		frame lua "ZJSpellInfo_Private_Menu_Cone.frame"
+		opacity lua "ZJSpellInfo_Private_Menu_AreaOpacity"
+		ignoreEvents
+	}
+
 	label
 	{
 		opacity lua "ZJSpellInfo_Private_Menu_AreaDrawEnd()"

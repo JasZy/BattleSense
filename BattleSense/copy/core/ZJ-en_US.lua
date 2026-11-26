@@ -289,7 +289,9 @@ Over a button of the action bar it marks:
   - a spell that is cast on the caster, like Chant, around the character, in blue
   - turn undead and find traps around the character, in gold, (half the character's sight; turn undead only affects the undead the character can see)
 
-An area affects whoever stands in it when the spell is released, it doesn't stay on the ground. Cone shaped areas aren't marked.
+A cone, like Burning Hands or Cone of Cold, is marked from the caster towards the creature under the cursor, or towards the cursor.
+
+An area affects whoever stands in it when the spell is released, it doesn't stay on the ground.
 ]]
 
 uiStrings["ZJBattleSense_TRANSLATION_SpellInfo_Title"]              = "%s on %s"

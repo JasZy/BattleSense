@@ -64,7 +64,7 @@ end
 
 -- A spell / item ability without an area of its own can cast a sub-spell that has one, (op146 "Cast spell", op148
 -- "Cast spell at point"): Chant casts SPPR203D / SPPR203E on the priest, which affect everyone around the priest.
--- Returns the area of the first such sub-spell, with `onCaster` set if it is cast on the caster itself, false if there
+-- Returns the area of the first such sub-spell, with `onCaster` set if op146 casts it on the caster itself, false if there
 -- is none, or nil if that can't be determined.
 function ZJArea_Private_ReadSubSpellArea(headerAddress, abilityAddress)
 
@@ -95,8 +95,9 @@ function ZJArea_Private_ReadSubSpellArea(headerAddress, abilityAddress)
 					return {
 						["range"]    = area.range,
 						["coneSize"] = area.coneSize,
-						-- The effect's target, (0x02): 1 = the caster itself
-						["onCaster"] = EEex_ReadU8(effectAddress + 0x2) == 1,
+						-- op146 with the effect's target, (0x02), 1 = cast on the caster itself. op148 with target 1 only
+						-- means the caster casts it, it still lands on the point aimed at, (a Web scroll, SCRL99).
+						["onCaster"] = opcode == 146 and EEex_ReadU8(effectAddress + 0x2) == 1,
 					}
 				end
 			end

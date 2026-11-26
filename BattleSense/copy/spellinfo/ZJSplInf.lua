@@ -973,10 +973,16 @@ end
 --   * Over an action bar button: a spell cast on the caster, (Chant), around the character, and turn undead / find
 --     traps around the character
 --
--- Both only while the "Open On" key is held. Cone shaped areas aren't drawn.
+-- Both only while the "Open On" key is held. A cone, (from the caster, while it is aimed), is drawn by its own label.
 
 ZJSpellInfo_Private_AreaSequences = { ["spell"] = 0, ["modal"] = 1 } -- In ZJSPLARE.BAM
 ZJSpellInfo_Private_Menu_Area = { ["enabled"] = false, ["sequence"] = 0 }
+
+-- ZJSPLCON.BAM has one sequence per cone width, (the widths of the game's cone projectiles, a cone of any other width
+-- uses the closest), with a frame per direction, (see tools/make-cone-bam.ps1)
+ZJSpellInfo_Private_ConeWidths = { 45, 90, 120, 140 }
+ZJSpellInfo_Private_ConeDirections = 64
+ZJSpellInfo_Private_Menu_Cone = { ["enabled"] = false, ["sequence"] = 0, ["frame"] = 0 }
 ZJSpellInfo_Private_Menu_AreaDrawing = false -- True while ZJSpellInfo_Menu_Area is being drawn
 ZJSpellInfo_Private_Menu_AreaOpacity = 170 -- Of 255, on top of the see-through fill of ZJSPLARE.BAM
 
@@ -1040,7 +1046,8 @@ function ZJSpellInfo_Private_IsDrawableArea(area)
 	return area and area.range > 0 and not ZJArea_IsCone(area)
 end
 
--- The area of the spell / item waiting for a target: { gameX, gameY } or { uiX, uiY }, range, sequence; or nil
+-- The area of the spell / item waiting for a target: { gameX, gameY } or { uiX, uiY }, range, sequence; or nil.
+-- A cone also has coneSize and aimUIX, aimUIY, (the point it is aimed at), and gameX, gameY is the caster.
 function ZJSpellInfo_Private_GetAimArea()
 
 	-- 1 = aimed at a point, 2 = aimed at a creature
@@ -1057,12 +1064,21 @@ function ZJSpellInfo_Private_GetAimArea()
 	if headerAddress == nil then return nil end
 
 	local area = ZJArea_ReadAbilityArea(headerAddress, abilityAddress, missileType)
-	if not ZJSpellInfo_Private_IsDrawableArea(area) then return nil end
+	if not area or area.range <= 0 then return nil end
 
 	local result = { ["range"] = area.range, ["sequence"] = ZJSpellInfo_Private_AreaSequences.spell }
 
 	local target = EEex_GameObject_GetUnderCursor()
-	if area.onCaster then
+	if ZJArea_IsCone(area) then
+		-- A cone starts at the caster and points at the creature / point it is aimed at
+		result.coneSize = area.coneSize
+		result.gameX, result.gameY = caster.m_pos.x, caster.m_pos.y
+		if state == 2 and EEex_GameObject_IsSprite(target) then
+			result.aimUIX, result.aimUIY = EEex_Menu_TranslateXYFromGame(target.m_pos.x, target.m_pos.y)
+		else
+			result.aimUIX, result.aimUIY = EEex_Menu_GetMousePos()
+		end
+	elseif area.onCaster then
 		result.gameX, result.gameY = caster.m_pos.x, caster.m_pos.y
 	elseif state == 2 and EEex_GameObject_IsSprite(target) then
 		-- The projectile explodes where the creature stands
@@ -1187,7 +1203,11 @@ end
 function ZJSpellInfo_Private_UpdateArea()
 
 	local entry = ZJSpellInfo_Private_Menu_Area
+	local cone = ZJSpellInfo_Private_Menu_Cone
 	local area = nil
+
+	entry.enabled = false
+	cone.enabled = false
 
 	-- Only while the "Open On" key is held, like the popup
 	if ZJSpellInfo_Private_Enabled and ZJSpellInfo_Private_ShowAreas:get() ~= 0 and e:GetActiveEngine() == worldScreen
@@ -1196,10 +1216,7 @@ function ZJSpellInfo_Private_UpdateArea()
 		area = ZJSpellInfo_Private_GetAimArea() or ZJSpellInfo_Private_GetHoverArea()
 	end
 
-	if area == nil then
-		entry.enabled = false
-		return
-	end
+	if area == nil then return end
 
 	-- Game pixels to menu pixels, (the vertical axis is stretched by 4/3, so the engine's circles are 4:3 ellipses)
 	local originX = EEex_Menu_TranslateXYFromGame(0, 0)
@@ -1212,8 +1229,38 @@ function ZJSpellInfo_Private_UpdateArea()
 		centerX, centerY = EEex_Menu_TranslateXYFromGame(area.gameX, area.gameY)
 	end
 
-	Infinity_SetArea("ZJSpellInfo_Menu_AreaLabel", centerX - radiusX, centerY - radiusY, radiusX * 2, radiusY * 2)
-	entry.enabled = radiusX > 0
+	if radiusX <= 0 then return end
+	local x, y, w, h = centerX - radiusX, centerY - radiusY, radiusX * 2, radiusY * 2
+
+	if area.coneSize ~= nil then
+
+		-- The direction in the engine's stretched space, (the vertical axis stretched by 4/3)
+		local aimX = area.aimUIX - centerX
+		local aimY = (area.aimUIY - centerY) * 4 / 3
+
+		-- Aimed at the caster's own spot the engine has no direction, and treats the cone as a circle, (see
+		-- Attack Info's ZJAttackInfo_Private_IsCastingSpellAt())
+		if aimX ~= 0 or aimY ~= 0 then
+
+			local angle = (math.atan2 or math.atan)(aimY, aimX)
+			local directions = ZJSpellInfo_Private_ConeDirections
+			cone.frame = math.floor(angle / (2 * math.pi) * directions + 0.5) % directions
+
+			local closest, closestDiff = 1, math.huge
+			for i, width in ipairs(ZJSpellInfo_Private_ConeWidths) do
+				local diff = math.abs(width - area.coneSize)
+				if diff < closestDiff then closest, closestDiff = i, diff end
+			end
+			cone.sequence = closest - 1
+
+			Infinity_SetArea("ZJSpellInfo_Menu_AreaCone", x, y, w, h)
+			cone.enabled = true
+			return
+		end
+	end
+
+	Infinity_SetArea("ZJSpellInfo_Menu_AreaLabel", x, y, w, h)
+	entry.enabled = true
 	entry.sequence = area.sequence
 end
 
@@ -1232,6 +1279,10 @@ end
 
 function ZJSpellInfo_Private_Menu_Area_Enabled()
 	return ZJSpellInfo_Private_Menu_AreaDrawing and ZJSpellInfo_Private_Menu_Area.enabled
+end
+
+function ZJSpellInfo_Private_Menu_Cone_Enabled()
+	return ZJSpellInfo_Private_Menu_AreaDrawing and ZJSpellInfo_Private_Menu_Cone.enabled
 end
 
 function ZJSpellInfo_Private_DoTick()
@@ -1254,6 +1305,7 @@ function ZJSpellInfo_Private_Tick()
 	-- The area is extra, never let it take the popup down
 	if not pcall(ZJSpellInfo_Private_UpdateArea) then
 		ZJSpellInfo_Private_Menu_Area.enabled = false
+		ZJSpellInfo_Private_Menu_Cone.enabled = false
 	end
 
 	local ok, err = pcall(ZJSpellInfo_Private_DoTick)
