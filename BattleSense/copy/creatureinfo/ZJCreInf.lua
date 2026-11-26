@@ -1292,7 +1292,6 @@ function ZJCreatureInfo_Private_GetSpellEffectNames(sprite)
 	local seenResrefs = {}
 	local skipResrefs = {}
 	local expiries = {}   -- [resref] = latest game time one of the spell's timed effects expires at
-	local openEnded = {}  -- [resref] = true if one of the spell's effects lasts until dispelled
 	local icons = {}      -- [icon] = { resref = the source, expiry = game time it expires at, or false if it has no end }
 
 	EEex_Utility_IterateCPtrList(sprite.m_timedEffectList, function(effect)
@@ -1325,12 +1324,10 @@ function ZJCreatureInfo_Private_GetSpellEffectNames(sprite)
 		local durationType = effect.m_durationType
 		if durationType == 9 then return end
 
-		-- 0x1000 = applied timed effect, which stores the game time it expires at; 1 = lasts until dispelled or death
+		-- 0x1000 = applied timed effect, which stores the game time it expires at
 		if durationType == 0x1000 then
 			local expiry = effect.m_duration
 			if expiries[resref] == nil or expiry > expiries[resref] then expiries[resref] = expiry end
-		elseif durationType == 1 then
-			openEnded[resref] = true
 		end
 
 		if seenResrefs[resref] ~= nil then return end
@@ -1353,8 +1350,10 @@ function ZJCreatureInfo_Private_GetSpellEffectNames(sprite)
 	for resref, name in pairs(seenResrefs) do
 		if name and not skipResrefs[resref] then
 
+			-- A spell with a timed effect lasts as long as that effect: its "until dispelled" effects are often only
+			-- visuals that go with it, (Invisibility's glow). Only a spell with nothing timed has no end.
 			local expiry = expiries[resref]
-			if openEnded[resref] or expiry == nil then expiry = false end
+			if expiry == nil then expiry = false end
 
 			local known = nameExpiries[name]
 			if known == nil then

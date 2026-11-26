@@ -105,7 +105,9 @@ function ZJLockInfo_Private_GetTrapDifficulty(object)
 	end
 	if (ZJLockInfo_Private_Field(object, "m_trapActivated") or 0) == 0 then return nil end
 	if (ZJLockInfo_Private_Field(object, "m_trapDetected") or 0) == 0 then return nil end
+	-- A container / door names it m_trapRemovalDifficulty, a trap on the floor, (a trigger), m_trapDisarmingDifficulty
 	return ZJLockInfo_Private_Field(object, "m_trapRemovalDifficulty")
+		or ZJLockInfo_Private_Field(object, "m_trapDisarmingDifficulty")
 end
 
 -------------
