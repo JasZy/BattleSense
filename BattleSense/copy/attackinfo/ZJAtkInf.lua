@@ -1,7 +1,7 @@
 
 -- The bar colors, (shared with Timer)
 Infinity_DoFile("ZJBarCol")
--- The switch that opens the popup, (shared by every popup)
+-- The popup and its key, (shared by every module with a popup)
 Infinity_DoFile("ZJPopup")
 -- The areas of spells / items, (shared with Spell Info)
 Infinity_DoFile("ZJArea")
@@ -10,8 +10,8 @@ Infinity_DoFile("ZJArea")
 -- Options --
 -------------
 
--- The module's switch, (Off or the key that opens the popup), in the "Battle Sense Modules" tab
-ZJAttackInfo_Private_OpenOn = EEex_Options_Register("ZJAttackInfo_Enable", ZJPopup_NewSwitch("Attack Info", {
+-- The module's on / off switch, in the "Battle Sense Modules" tab
+EEex_Options_Register("ZJAttackInfo_Enable", ZJPopup_NewSwitch("Attack Info", {
 	["onChange"] = function(self, oldValue) ZJAttackInfo_SetEnabled(self:get() ~= 0) end,
 }))
 
@@ -224,7 +224,7 @@ ZJAttackInfo_Private_OpenDelayTarget = -1
 
 function ZJAttackInfo_SetEnabled(enabled)
 	ZJAttackInfo_Private_Enabled = enabled
-	ZJAttackInfo_Private_Menu_Ticker_SetOpen(ZJAttackInfo_Private_Menu_Ticker_ShouldBeOpen and enabled)
+	if not enabled then ZJAttackInfo_Private_Menu_SetOpen(false) end
 end
 
 -- Whether `sprite` is a party member, (has a portrait), as opposed to a summon or other ally
@@ -1406,12 +1406,12 @@ function ZJAttackInfo_Private_FormatRemaining(ticks)
 	return string.format("(%d,%d)", math.floor(totalRounds / 10), totalRounds % 10)
 end
 
-------------------------------
--- ZJAttackInfo_Menu_Ticker --
-------------------------------
+-----------
+-- Panel --
+-----------
 
-ZJAttackInfo_Private_Menu_Ticker_IsOpen = false
-ZJAttackInfo_Private_Menu_Ticker_ShouldBeOpen = false
+-- Whether the world screen's action bar is open: the panel only shows while it is, (see the listeners at the end)
+ZJAttackInfo_Private_ActionbarOpen = false
 
 -- The popup has two panels next to each other: the left one lists the attacks of `targetSprite` on `selectedSprites`,
 -- the right one lists their attacks on the target.
@@ -2644,7 +2644,17 @@ function ZJAttackInfo_Private_Layout(selectedSprites, targetSprite, compact)
 	end
 end
 
-function ZJAttackInfo_Private_Menu_Ticker_Tick()
+-- The panel's "show", (see ZJPopup_AddPanel()): called every frame while the "Popup Key" is held and no panel that
+-- comes first, (Spell Info), shows. Lays out and opens the popup over the creature under the cursor and returns true, or
+-- closes it and returns false if there is nothing to show. The popup opens over any creature: the compact popup over an
+-- ally, the full one over anyone else, (hostile or neutral, whatever the cursor's shape).
+function ZJAttackInfo_Private_Panel_Show()
+
+	-- Only on the world screen, while its action bar is open
+	if not ZJAttackInfo_Private_Enabled or not ZJAttackInfo_Private_ActionbarOpen then
+		ZJAttackInfo_Private_Menu_SetOpen(false)
+		return false
+	end
 
 	local targetSprite = EEex_GameObject_GetUnderCursor()
 
@@ -2652,26 +2662,19 @@ function ZJAttackInfo_Private_Menu_Ticker_Tick()
 		-- Hide the popup if no sprite is under the cursor
 		ZJAttackInfo_Private_LastTargetID = -1
 		ZJAttackInfo_Private_Menu_SetOpen(false)
-		return
+		return false
 	end
 
 	local lastTargetId = ZJAttackInfo_Private_LastTargetID
 	local targetId = targetSprite.m_id
 	ZJAttackInfo_Private_LastTargetID = targetId
 
-	-- While a spell waits for a target, the Spell Info module's popup, (if installed), describes the creature instead.
-	-- It is asked whether it shows this frame, not whether it is open, so it doesn't matter which ticker runs first.
-	if ZJSpellInfo_WillOpen ~= nil and ZJSpellInfo_WillOpen() then
-		ZJAttackInfo_Private_Menu_SetOpen(false)
-		return
-	end
-
 	local chitin = EngineGlobals.g_pBaldurChitin
 
 	if (chitin.m_pObjectGame.m_nState ~= 2 and EEex_Key_IsDown(SDL_Keycode.SDLK_TAB)) or (B3EffectMenu_IsOpen ~= nil and B3EffectMenu_IsOpen()) then
 		-- Hide the popup if a tooltip is being forced or the effect menu popup is open
 		ZJAttackInfo_Private_Menu_SetOpen(false)
-		return
+		return false
 	end
 
 	local nCurrentCursor = chitin.m_pObjectCursor.nCurrentCursor
@@ -2684,14 +2687,7 @@ function ZJAttackInfo_Private_Menu_Ticker_Tick()
 		-- The compact popup also opens over an ally that isn't fighting anyone: it then only has its headers, (the
 		-- ally's weapon damage, timers and the spells affecting it).
 		ZJAttackInfo_Private_Menu_SetOpen(false)
-		return
-	end
-
-	-- While its "Open On" key is held the popup opens over any creature: the compact popup over an ally, the full one
-	-- over anyone else, (hostile or neutral, whatever the cursor's shape), and from an attack cursor
-	if not ZJPopup_IsOpenAllowed(ZJAttackInfo_Private_OpenOn) then
-		ZJAttackInfo_Private_Menu_SetOpen(false)
-		return
+		return false
 	end
 
 	local waiting = true
@@ -2720,38 +2716,19 @@ function ZJAttackInfo_Private_Menu_Ticker_Tick()
 			ZJAttackInfo_Private_Menu_SetOpen(false, true)
 		end
 
-		return
+		-- The creature is this panel's, even while it waits: no panel after it describes creatures
+		return true
 	end
 
 	ZJAttackInfo_Private_CurrentTargetID = targetId
 	ZJAttackInfo_Private_Layout(selectedSprites, targetSprite, compact)
 	ZJAttackInfo_Private_Menu_SetOpen(true)
+	return true
 end
 
-function ZJAttackInfo_Private_Menu_Ticker_Open()
-	Infinity_PushMenu("ZJAttackInfo_Menu_Ticker")
-	ZJAttackInfo_Private_Menu_Ticker_IsOpen = true
-end
-
-function ZJAttackInfo_Private_Menu_Ticker_Close()
+-- The panel's "hide": another panel shows, or the "Popup Key" isn't held
+function ZJAttackInfo_Private_Panel_Hide()
 	ZJAttackInfo_Private_Menu_SetOpen(false)
-	Infinity_PopMenu("ZJAttackInfo_Menu_Ticker")
-	ZJAttackInfo_Private_Menu_Ticker_IsOpen = false
-end
-
-function ZJAttackInfo_Private_Menu_Ticker_SetOpen(open)
-	if open then
-		if ZJAttackInfo_Private_Enabled and not ZJAttackInfo_Private_Menu_Ticker_IsOpen then
-			ZJAttackInfo_Private_Menu_Ticker_Open()
-		end
-	elseif ZJAttackInfo_Private_Menu_Ticker_IsOpen then
-		ZJAttackInfo_Private_Menu_Ticker_Close()
-	end
-end
-
-function ZJAttackInfo_Private_Menu_Ticker_SetShouldBeOpen(open)
-	ZJAttackInfo_Private_Menu_Ticker_SetOpen(open)
-	ZJAttackInfo_Private_Menu_Ticker_ShouldBeOpen = open
 end
 
 -----------------------
@@ -2862,11 +2839,12 @@ end
 ---------------------
 
 function ZJAttackInfo_Private_OnActionbarOpened()
-	ZJAttackInfo_Private_Menu_Ticker_SetShouldBeOpen(true)
+	ZJAttackInfo_Private_ActionbarOpen = true
 end
 
 function ZJAttackInfo_Private_OnActionbarClosed()
-	ZJAttackInfo_Private_Menu_Ticker_SetShouldBeOpen(false)
+	ZJAttackInfo_Private_ActionbarOpen = false
+	ZJAttackInfo_Private_Menu_SetOpen(false)
 end
 
 EEex_Menu_AddMainFileLoadedListener(function()
@@ -2962,3 +2940,11 @@ EEex_Utility_NewScope(function()
 		return ZJAttackInfo_Private_Menu_IsOpen or old()
 	end
 end)
+
+-- Between Spell Info, (a spell waiting for a target describes the creature instead), and Lock Info, (never a creature)
+ZJPopup_AddPanel({
+	["name"]     = "Attack Info",
+	["priority"] = 20,
+	["show"]     = ZJAttackInfo_Private_Panel_Show,
+	["hide"]     = ZJAttackInfo_Private_Panel_Hide,
+})

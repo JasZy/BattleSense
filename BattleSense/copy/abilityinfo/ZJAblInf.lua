@@ -22,14 +22,14 @@
 +--------------------------------------------------------------------------------------------------+
 --]]
 
--- The switch that opens the popup and the screen popup, (shared by every popup)
+-- The popup key and the screen popup, (shared by every module with a popup)
 Infinity_DoFile("ZJPopup")
 
 -------------
 -- Options --
 -------------
 
--- The module's switch, (Off or the key that opens the popup), in the "Battle Sense Modules" tab
+-- The module's on / off switch, in the "Battle Sense Modules" tab
 ZJAbilityInfo_Private_OpenOn = EEex_Options_Register("ZJAbilityInfo_Enable", ZJPopup_NewSwitch("Ability Info", {
 	["onChange"] = function(self, oldValue) ZJAbilityInfo_SetEnabled(self:get() ~= 0) end,
 }))

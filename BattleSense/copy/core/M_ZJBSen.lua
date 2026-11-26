@@ -189,8 +189,8 @@ end
 --   "optionID" - The option the module registers for its switch.
 --   "key"      - Where that option is stored, (the "Battle Sense" section of Baldur.lua).
 --   "name"     - The module's part of the strings' names, (ZJBattleSense_Options_TRANSLATION_<name>_Enable).
---   "openOn"   - Only for the modules with a popup: their switch is also the key that opens the popup, (Off, Left Ctrl,
---                ...), see ZJPopup_NewSwitch(). This is where its separate "Open On" option used to be stored.
+--   "openOn"   - Only for the modules with a popup: where the module's own "Open On" key used to be stored. Battle Sense
+--                now has a single "Popup Key", the old settings are moved over to it, (see ZJPopup_MigrateSwitch()).
 --
 ZJBattleSense_Private_ToggleSection = "Battle Sense"
 
@@ -216,10 +216,6 @@ end
 -- Stands in for the switch of a module that wasn't loaded, so that it can still be switched on. It is stored in the
 -- same place as the module's own switch, and applies on the next launch, (EEex shows that next to it).
 function ZJBattleSense_Private_RegisterUnloadedToggle(toggle)
-	if toggle.openOn ~= nil then
-		EEex_Options_Register(toggle.optionID, ZJPopup_NewSwitch(toggle.key, { ["requiresRestart"] = true }))
-		return
-	end
 	EEex_Options_Register(toggle.optionID, EEex_Options_Option.new({
 		["default"]         = 1,
 		["type"]            = EEex_Options_ToggleType.new(),
@@ -230,16 +226,34 @@ function ZJBattleSense_Private_RegisterUnloadedToggle(toggle)
 end
 
 Infinity_DoFile("ZJSprite")
-Infinity_DoFile("ZJPopup") -- The switch of the modules with a popup, (also for a module that isn't loaded)
+Infinity_DoFile("ZJPopup") -- The popup and its key, shared by the modules with a popup
+
+-- Whether a module with a popup is installed
+function ZJBattleSense_Private_HasPopupModule()
+	for _, moduleFile in ipairs(ZJBattleSense_Private_ModuleOrder) do
+		local toggle = ZJBattleSense_Private_ModuleToggles[moduleFile]
+		if ZJBattleSense_Modules[moduleFile] and toggle ~= nil and toggle.openOn ~= nil then return true end
+	end
+	return false
+end
+
+-- The modules with a popup used to have a key each: move those settings over to the one "Popup Key" before any switch
+-- or the key itself is read
+for _, moduleFile in ipairs(ZJBattleSense_Private_ModuleOrder) do
+	local toggle = ZJBattleSense_Private_ModuleToggles[moduleFile]
+	if ZJBattleSense_Modules[moduleFile] and toggle.openOn ~= nil then
+		EEex_Utility_TryIgnore(ZJPopup_MigrateSwitch, toggle.key, toggle.openOn)
+	end
+end
+
+if ZJBattleSense_Private_HasPopupModule() then
+	ZJPopup_RegisterKey()
+end
 
 for _, moduleFile in ipairs(ZJBattleSense_Private_ModuleOrder) do
 	if ZJBattleSense_Modules[moduleFile] then
 
 		local toggle = ZJBattleSense_Private_ModuleToggles[moduleFile]
-
-		if toggle.openOn ~= nil then
-			EEex_Utility_TryIgnore(ZJPopup_MoveOldOpenOn, toggle.key, toggle.openOn)
-		end
 
 		if ZJBattleSense_Private_IsModuleSwitchedOn(toggle) then
 
@@ -260,8 +274,8 @@ end
 --------------------------
 
 -- Every module's on / off switch is in one "Battle Sense Modules" tab, like EEex's "Modules" tab, instead of in the
--- module's own tab. Only the modules that are installed are listed. A module with a popup shows a button that steps
--- through Off and the keys that can open the popup, the others a toggle.
+-- module's own tab. Only the modules that are installed are listed. If a module with a popup is installed, the
+-- "Popup Key" that opens the popup of all of them comes first.
 function ZJBattleSense_Private_InstalledModuleToggles()
 	local toggles = {}
 	for _, moduleFile in ipairs(ZJBattleSense_Private_ModuleOrder) do
@@ -276,12 +290,15 @@ end
 if #ZJBattleSense_Private_InstalledModuleToggles() > 0 then
 	EEex_Options_AddTab(ZJBattleSense_Private_ModulesTabLabel, function()
 		local entries = {}
+		if EEex_Options_Get(ZJPopup_KeyOptionID) ~= nil then
+			table.insert(entries, ZJPopup_KeyDisplayEntry())
+		end
 		for _, toggle in ipairs(ZJBattleSense_Private_InstalledModuleToggles()) do
 			table.insert(entries, EEex_Options_DisplayEntry.new({
 				["optionID"]    = toggle.optionID,
 				["label"]       = "ZJBattleSense_Options_TRANSLATION_"..toggle.name.."_Enable",
 				["description"] = "ZJBattleSense_Options_TRANSLATION_"..toggle.name.."_Enable_Description",
-				["widget"]      = toggle.openOn ~= nil and ZJPopup_OpenOnWidget.new() or EEex_Options_ToggleWidget.new(),
+				["widget"]      = EEex_Options_ToggleWidget.new(),
 			}))
 		end
 		return { entries }

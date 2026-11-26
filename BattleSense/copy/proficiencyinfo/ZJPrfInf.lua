@@ -24,14 +24,14 @@
 +--------------------------------------------------------------------------------------------------+
 --]]
 
--- The switch that opens the popup and the screen popup, (shared by every popup)
+-- The popup key and the screen popup, (shared by every module with a popup)
 Infinity_DoFile("ZJPopup")
 
 -------------
 -- Options --
 -------------
 
--- The module's switch, (Off or the key that opens the popup), in the "Battle Sense Modules" tab
+-- The module's on / off switch, in the "Battle Sense Modules" tab
 ZJProficiencyInfo_Private_OpenOn = EEex_Options_Register("ZJProficiencyInfo_Enable", ZJPopup_NewSwitch("Proficiency Info", {
 	["onChange"] = function(self, oldValue) ZJProficiencyInfo_SetEnabled(self:get() ~= 0) end,
 }))

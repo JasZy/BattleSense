@@ -1,15 +1,6 @@
 
-menu
-{
-	name "ZJAttackInfo_Menu_Ticker"
-	ignoreesc
-
-	label
-	{
-		opacity lua "ZJAttackInfo_Private_Menu_Ticker_Tick()"
-	}
-}
-
+-- The popup, opened and laid out by the panel, (ZJAttackInfo_Private_Panel_Show()), which the Battle Sense popup asks
+-- every frame while its key is held, (ZJPopup.lua)
 menu
 {
 	name "ZJAttackInfo_Menu"

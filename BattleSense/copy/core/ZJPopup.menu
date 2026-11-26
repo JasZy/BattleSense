@@ -23,3 +23,40 @@ menu
 		text color 255 255 255 255
 	}
 }
+
+-- Always open while a game is running: while the "Popup Key" is held, asks the modules' panels for what is under the
+-- cursor, (ZJPopup_Private_Cursor_Tick())
+menu
+{
+	name "ZJPopup_Cursor_Ticker"
+	ignoreesc
+
+	label
+	{
+		opacity lua "ZJPopup_Private_Cursor_Tick()"
+	}
+}
+
+-- The cursor popup, opened on top of everything else while a panel has something to say (areas set in
+-- ZJPopup_Private_Cursor_Layout())
+menu
+{
+	name "ZJPopup_Cursor"
+	ignoreesc
+
+	label
+	{
+		name "ZJPopup_Cursor_Background"
+		area 0 0 -1 -1
+	}
+
+	label
+	{
+		name "ZJPopup_Cursor_Text"
+		area -1 -1 -1 -1
+		text style "normal"
+		text lua "ZJPopup_Private_Cursor_Text"
+		text color 255 255 255 255
+		text align left top
+	}
+}

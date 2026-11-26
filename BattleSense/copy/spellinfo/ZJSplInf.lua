@@ -17,7 +17,7 @@
 +--------------------------------------------------------------------------------------------------------------+
 --]]
 
--- The switch that opens the popup, (shared by every popup)
+-- The popup this module adds its panel to, (shared by every module with a popup)
 Infinity_DoFile("ZJPopup")
 -- The areas of spells / items, (shared with Attack Info)
 Infinity_DoFile("ZJArea")
@@ -26,7 +26,7 @@ Infinity_DoFile("ZJArea")
 -- Options --
 -------------
 
--- The module's switch, (Off or the key that opens the popup), in the "Battle Sense Modules" tab
+-- The module's on / off switch, in the "Battle Sense Modules" tab
 ZJSpellInfo_Private_OpenOn = EEex_Options_Register("ZJSpellInfo_Enable", ZJPopup_NewSwitch("Spell Info", {
 	["onChange"] = function(self, oldValue) ZJSpellInfo_SetEnabled(self:get() ~= 0) end,
 }))
@@ -268,9 +268,6 @@ ZJSpellInfo_Private_SplprotRelations = {
 
 ZJSpellInfo_Private_Enabled       = false -- Set by the "ZJSpellInfo_Enable" option, (the "Battle Sense Modules" tab), once the file has loaded
 ZJSpellInfo_Private_ErrorReported = false
-ZJSpellInfo_Private_Menu_IsOpen = false
-ZJSpellInfo_Private_Menu_Text   = ""
-ZJSpellInfo_Private_Menu_TextUD = nil -- uiItem
 ZJSpellInfo_Private_Splprot     = nil -- C2DArray, loaded the first time it is needed
 ZJSpellInfo_Private_NameCache   = {}  -- [resref] = display name ("" if none)
 
@@ -818,96 +815,26 @@ function ZJSpellInfo_Private_DescribeDistance(caster, target, range)
 		string.format(ZJSpellInfo_Private_T("OutOfRange"), distance - reach))
 end
 
-----------
--- Menu --
-----------
-
--- The cursor's hotspot and size, (in menu coordinates), so the popup can go beside the cursor image
-function ZJSpellInfo_Private_GetCursorRenderData()
-
-	local vidMode = EngineGlobals.g_pBaldurChitin.cVideo.pCurrentMode
-	local cursorCell = vidMode.pPointerVidCell
-	if cursorCell == nil then return end
-
-	local centerX, centerY = cursorCell:GetCurrentCenterPoint()
-	local w, h = cursorCell:GetCurrentFrameSize()
-	return EEex_Menu_ScaleX(centerX), EEex_Menu_ScaleY(centerY), EEex_Menu_ScaleX(w), EEex_Menu_ScaleY(h)
-end
-
-function ZJSpellInfo_Private_Layout()
-
-	local fontPoint = ZJSpellInfo_Private_FontPoint:get()
-	local style = styles["normal"]
-	local text = ZJSpellInfo_Private_Menu_Text
-
-	ZJSpellInfo_Private_Menu_TextUD.text.point = fontPoint
-
-	local textW = 0
-	for line in (text.."\n"):gmatch("(.-)\n") do
-		textW = math.max(textW, (EEex_Menu_GetTextWidthHeight(line, style.font, fontPoint, style.useFontZoom)))
-	end
-	textW = textW + 2 -- Room for rounding, so the engine doesn't wrap a line that just fits
-
-	local _, textH = EEex_Menu_GetTextWidthHeight(text, style.font, fontPoint, style.useFontZoom, textW)
-
-	local pad = 12
-	local backgroundW = textW + pad * 2
-	local backgroundH = textH + pad * 2
-
-	-- Beside the cursor, like the attack popup
-	local cursorX, cursorY = EEex_Menu_GetMousePos()
-	local cursorCenterX, cursorCenterY, cursorW = ZJSpellInfo_Private_GetCursorRenderData()
-	cursorCenterX, cursorCenterY, cursorW = cursorCenterX or 0, cursorCenterY or 0, cursorW or 0
-
-	local cursorRenderX = cursorX - cursorCenterX
-	local backgroundX = cursorRenderX + cursorW + 5
-	local backgroundY = cursorY - cursorCenterY
-
-	local screenW, screenH = Infinity_GetScreenSize()
-	if backgroundX + backgroundW > screenW then
-		backgroundX = math.max(0, cursorRenderX - backgroundW - 5)
-	end
-	if backgroundY + backgroundH > screenH then
-		backgroundY = math.max(0, screenH - backgroundH)
-	end
-
-	Infinity_SetOffset("ZJSpellInfo_Menu", backgroundX, backgroundY)
-	Infinity_SetArea("ZJSpellInfo_Menu_BackgroundRect", 0, 0, backgroundW, backgroundH)
-	Infinity_SetArea("ZJSpellInfo_Menu_Text", pad, pad, textW, textH)
-end
-
--- @bubb_doc { ZJSpellInfo_SetOpen }
--- @summary: Opens / closes the spell info popup.
-function ZJSpellInfo_SetOpen(open)
-	if open then
-		if not ZJSpellInfo_Private_Menu_IsOpen then
-			Infinity_PushMenu("ZJSpellInfo_Menu")
-			ZJSpellInfo_Private_Menu_IsOpen = true
-		end
-	elseif ZJSpellInfo_Private_Menu_IsOpen then
-		Infinity_PopMenu("ZJSpellInfo_Menu")
-		ZJSpellInfo_Private_Menu_IsOpen = false
-	end
-end
+-----------
+-- Panel --
+-----------
 
 -- @bubb_doc { ZJSpellInfo_SetEnabled }
--- @summary: Temporarily turns the popup on / off. To persist this, change the ``ZJSpellInfo_Enable`` option instead.
+-- @summary: Temporarily turns the panel on / off. To persist this, change the ``ZJSpellInfo_Enable`` option instead.
 function ZJSpellInfo_SetEnabled(enabled)
 	ZJSpellInfo_Private_Enabled = enabled
-	if not enabled then ZJSpellInfo_SetOpen(false) end
 end
 
 -- @bubb_doc { ZJSpellInfo_IsOpen }
--- @summary: Whether the popup is showing.
+-- @summary: Whether the popup shows this module's panel.
 function ZJSpellInfo_IsOpen()
-	return ZJSpellInfo_Private_Menu_IsOpen
+	return ZJPopup_GetCursorPanel() == "Spell Info"
 end
 
--- The text of the popup for the creature under the cursor, or nil if it shouldn't be showing
+-- The text of the panel for the creature under the cursor, or nil if this module has nothing to say about it
 function ZJSpellInfo_Private_GetText()
 
 	if not ZJSpellInfo_Private_Enabled then return nil end
-	if not ZJPopup_IsOpenAllowed(ZJSpellInfo_Private_OpenOn) then return nil end
 
 	-- Only on the world screen, while a spell / item is waiting for a target,
 	-- (m_nState is 1 when it is aimed at a point, like Sleep, and 2 when it is aimed at a creature, like Command)
@@ -934,27 +861,13 @@ function ZJSpellInfo_Private_GetText()
 	return ZJSpellInfo_Private_BuildText(caster, target)
 end
 
-ZJSpellInfo_Private_FrameTextFrame = -1  -- The frame ZJSpellInfo_Private_FrameText was worked out in
-ZJSpellInfo_Private_FrameText      = nil
-
--- ZJSpellInfo_Private_GetText(), worked out at most once per frame. Both this module's ticker and Attack Info's ask for
--- it, in whichever order their menus run, and get the same answer.
-function ZJSpellInfo_Private_GetFrameText()
-	local frame = Infinity_GetFrameCounter()
-	if frame ~= ZJSpellInfo_Private_FrameTextFrame then
-		ZJSpellInfo_Private_FrameText = ZJSpellInfo_Private_GetText()
-		ZJSpellInfo_Private_FrameTextFrame = frame
-	end
-	return ZJSpellInfo_Private_FrameText
-end
-
--- @bubb_doc { ZJSpellInfo_WillOpen }
--- @summary: Whether the popup shows this frame, (even if its ticker hasn't run yet). The Attack Info module stays
---           out of its way while it does.
-function ZJSpellInfo_WillOpen()
-	local ok, text = pcall(ZJSpellInfo_Private_GetFrameText)
-	return ok and text ~= nil
-end
+-- First: while a spell waits for a target, it describes the creature under the cursor instead of Attack Info
+ZJPopup_AddPanel({
+	["name"]         = "Spell Info",
+	["priority"]     = 10,
+	["getText"]      = ZJSpellInfo_Private_GetText,
+	["getFontPoint"] = function() return ZJSpellInfo_Private_FontPoint:get() end,
+})
 
 -----------
 -- Areas --
@@ -967,7 +880,7 @@ end
 --   * Over an action bar button: a spell cast on the caster, (Chant), around the character, and turn undead / find
 --     traps around the character
 --
--- Both only while the "Open On" key is held. A cone, (from the caster, while it is aimed), is drawn by its own label.
+-- Both only while the "Popup Key" is held. A cone, (from the caster, while it is aimed), is drawn by its own label.
 
 ZJSpellInfo_Private_AreaSequences = { ["spell"] = 0, ["modal"] = 1 } -- In ZJSPLARE.BAM
 ZJSpellInfo_Private_Menu_Area = { ["enabled"] = false, ["sequence"] = 0 }
@@ -1132,7 +1045,7 @@ function ZJSpellInfo_Private_FindSpellByTooltip(sprite, text)
 	return best
 end
 
--- The area of the action bar button under the cursor while the "Open On" key is held, see ZJSpellInfo_Private_GetAimArea()
+-- The area of the action bar button under the cursor while the "Popup Key" is held, see ZJSpellInfo_Private_GetAimArea()
 function ZJSpellInfo_Private_GetHoverArea()
 
 	if not Infinity_IsMenuOnStack(ZJSpellInfo_Private_ActionbarMenuName) then return nil end
@@ -1203,7 +1116,7 @@ function ZJSpellInfo_Private_UpdateArea()
 	entry.enabled = false
 	cone.enabled = false
 
-	-- Only while the "Open On" key is held, like the popup
+	-- Only while the "Popup Key" is held, like the popup
 	if ZJSpellInfo_Private_Enabled and ZJSpellInfo_Private_ShowAreas:get() ~= 0 and e:GetActiveEngine() == worldScreen
 		and ZJPopup_IsOpenAllowed(ZJSpellInfo_Private_OpenOn)
 	then
@@ -1279,33 +1192,12 @@ function ZJSpellInfo_Private_Menu_Cone_Enabled()
 	return ZJSpellInfo_Private_Menu_AreaDrawing and ZJSpellInfo_Private_Menu_Cone.enabled
 end
 
-function ZJSpellInfo_Private_DoTick()
-
-	local text = ZJSpellInfo_Private_GetFrameText()
-
-	if text == nil then
-		ZJSpellInfo_SetOpen(false)
-		return
-	end
-
-	ZJSpellInfo_Private_Menu_Text = text
-	ZJSpellInfo_SetOpen(true)
-	ZJSpellInfo_Private_Layout()
-end
-
--- Called every frame by the ticker menu
+-- Called every frame by the ticker menu, (the popup's text is asked for by the popup itself, see ZJPopup_AddPanel())
 function ZJSpellInfo_Private_Tick()
-
-	-- The area is extra, never let it take the popup down
-	if not pcall(ZJSpellInfo_Private_UpdateArea) then
+	local ok, err = pcall(ZJSpellInfo_Private_UpdateArea)
+	if not ok then
 		ZJSpellInfo_Private_Menu_Area.enabled = false
 		ZJSpellInfo_Private_Menu_Cone.enabled = false
-	end
-
-	local ok, err = pcall(ZJSpellInfo_Private_DoTick)
-
-	if not ok then
-		pcall(ZJSpellInfo_SetOpen, false)
 		-- This runs every frame, don't flood the log
 		if not ZJSpellInfo_Private_ErrorReported then
 			ZJSpellInfo_Private_ErrorReported = true
@@ -1319,7 +1211,7 @@ end
 ---------------
 
 function ZJSpellInfo_Private_PushTicker()
-	-- Pushed first, so the area is drawn below the popup
+	-- Pushed before the popup is opened, so the area is drawn below it
 	if not Infinity_IsMenuOnStack("ZJSpellInfo_Menu_Area") then
 		Infinity_PushMenu("ZJSpellInfo_Menu_Area")
 	end
@@ -1330,41 +1222,10 @@ end
 
 EEex_Menu_AddMainFileLoadedListener(function()
 	EEex_Menu_LoadFile("ZJSplInf")
-	ZJSpellInfo_Private_Menu_IsOpen = false
 	-- The UI was (re)loaded, its items are new
 	ZJSpellInfo_Private_ActionbarButtons = nil
-	ZJSpellInfo_Private_Menu_TextUD = EEex_Menu_GetItem("ZJSpellInfo_Menu_Text")
 end)
 
 -- The ticker is always open while a game is running
 EEex_GameState_AddInitializedListener(ZJSpellInfo_Private_PushTicker)
 EEex_Menu_AddAfterMainFileReloadedListener(ZJSpellInfo_Private_PushTicker)
-
-EEex.RegisterSlicedRect("ZJSpellInfo_BackgroundRect", {
-	["topLeft"]     = {  0,  0, 32, 32 },
-	["top"]         = { 16,  0, 32, 32 },
-	["topRight"]    = { 32,  0, 32, 32 },
-	["right"]       = { 32, 16, 32, 32 },
-	["bottomRight"] = { 32, 32, 32, 32 },
-	["bottom"]      = { 16, 32, 32, 32 },
-	["bottomLeft"]  = {  0, 32, 32, 32 },
-	["left"]        = {  0, 16, 32, 32 },
-	["center"]      = { 16, 16, 32, 32 },
-	["dimensions"]  = { 64, 64 },
-	["resref"]      = "X-OPTBOX",
-	["flags"]       = 0,
-})
-
-function ZJSpellInfo_Private_Background_Render(item)
-	EEex.DrawSlicedRect("ZJSpellInfo_BackgroundRect", { item:getArea() }, 255 * 0.85)
-end
-
-EEex_Menu_AddBeforeUIItemRenderListener("ZJSpellInfo_Menu_BackgroundRect", ZJSpellInfo_Private_Background_Render)
-
--- The creature's own tooltip would sit under the popup
-EEex_Utility_NewScope(function()
-	local old = EEex_Sprite_Hook_CheckSuppressTooltip
-	EEex_Sprite_Hook_CheckSuppressTooltip = function()
-		return ZJSpellInfo_Private_Menu_IsOpen or old()
-	end
-end)

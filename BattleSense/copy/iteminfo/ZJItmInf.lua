@@ -16,14 +16,14 @@
 +--------------------------------------------------------------------------------------------------+
 --]]
 
--- The switch that opens the popup, (shared by every popup)
+-- The popup and its key, (shared by every module with a popup)
 Infinity_DoFile("ZJPopup")
 
 -------------
 -- Options --
 -------------
 
--- The module's switch, (Off or the key that opens the popup), in the "Battle Sense Modules" tab
+-- The module's on / off switch, in the "Battle Sense Modules" tab
 ZJItemInfo_Private_OpenOn = EEex_Options_Register("ZJItemInfo_Enable", ZJPopup_NewSwitch("Item Info", {
 	["onChange"] = function(self, oldValue) ZJItemInfo_SetEnabled(self:get() ~= 0) end,
 }))

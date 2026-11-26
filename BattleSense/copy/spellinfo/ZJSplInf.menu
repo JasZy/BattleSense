@@ -1,5 +1,5 @@
 
--- Always open while a game is running, looks for a spell / item waiting for a target and a creature under the cursor
+-- Always open while a game is running, updates the area below, (the popup's panel is asked for by the popup itself)
 menu
 {
 	name "ZJSpellInfo_Menu_Ticker"
@@ -54,29 +54,5 @@ menu
 	label
 	{
 		opacity lua "ZJSpellInfo_Private_Menu_AreaDrawEnd()"
-	}
-}
-
--- The popup, opened on top of everything else while it has something to say (areas set in ZJSpellInfo_Private_Layout())
-menu
-{
-	name "ZJSpellInfo_Menu"
-	ignoreesc
-
-	label
-	{
-		name "ZJSpellInfo_Menu_BackgroundRect"
-		area 0 0 -1 -1
-	}
-
-	-- Everything the popup says, one line per fact
-	label
-	{
-		name "ZJSpellInfo_Menu_Text"
-		area -1 -1 -1 -1
-		text style "normal"
-		text lua "ZJSpellInfo_Private_Menu_Text"
-		text color 255 255 255 255
-		text align left top
 	}
 }
