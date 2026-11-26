@@ -278,6 +278,20 @@ Also opens the popup when the creature under the cursor is a party member, or on
 Turn this off to keep the popup out of the way while healing or buffing the party.
 ]]
 
+uiStrings["ZJBattleSense_Options_TRANSLATION_SpellInfo_ShowAreas"] = "Show Areas"
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_SpellInfo_ShowAreas_Description"] = [[
+Marks the ground a spell / item will affect, while the "Open On" key is held.
+
+While a spell / item with an area waits for a target, its area is marked in blue around the creature under the cursor, or around the cursor. A spell that affects the area around the caster, like Chant, is marked around the caster.
+
+Over a button of the action bar it marks:
+  - a spell that is cast on the caster, like Chant, around the character, in blue
+  - turn undead and find traps around the character, in gold, (half the character's sight; turn undead only affects the undead the character can see)
+
+An area affects whoever stands in it when the spell is released, it doesn't stay on the ground. Cone shaped areas aren't marked.
+]]
+
 uiStrings["ZJBattleSense_TRANSLATION_SpellInfo_Title"]              = "%s on %s"
 uiStrings["ZJBattleSense_TRANSLATION_SpellInfo_Distance"]           = "Distance: %d (range %d)"
 uiStrings["ZJBattleSense_TRANSLATION_SpellInfo_DistanceSight"]      = "Distance: %d (range %d, sight %d)"

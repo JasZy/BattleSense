@@ -19,6 +19,8 @@
 
 -- The "Open On" option, (shared by every popup)
 Infinity_DoFile("ZJPopup")
+-- The areas of spells / items, (shared with Attack Info)
+Infinity_DoFile("ZJArea")
 
 -------------
 -- Options --
@@ -90,6 +92,13 @@ ZJSpellInfo_Private_ShowOnParty = EEex_Options_Register("ZJSpellInfo_ShowOnParty
 	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Spell Info Module: Show On Party" }),
 }))
 
+ZJSpellInfo_Private_ShowAreas = EEex_Options_Register("ZJSpellInfo_ShowAreas", EEex_Options_Option.new({
+	["default"]  = 1,
+	["type"]     = EEex_Options_ToggleType.new(),
+	["accessor"] = EEex_Options_ClampedAccessor.new({ ["min"] = 0, ["max"] = 1 }),
+	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Spell Info Module: Show Areas" }),
+}))
+
 EEex_Options_AddTab("ZJBattleSense_Options_TRANSLATION_SpellInfo_TabTitle", function() return {
 	{
 		ZJPopup_OpenOnDisplayEntry("ZJSpellInfo_OpenOn"),
@@ -157,6 +166,12 @@ EEex_Options_AddTab("ZJBattleSense_Options_TRANSLATION_SpellInfo_TabTitle", func
 			["optionID"]    = "ZJSpellInfo_ShowOnParty",
 			["label"]       = "ZJBattleSense_Options_TRANSLATION_SpellInfo_ShowOnParty",
 			["description"] = "ZJBattleSense_Options_TRANSLATION_SpellInfo_ShowOnParty_Description",
+			["widget"]      = EEex_Options_ToggleWidget.new(),
+		}),
+		EEex_Options_DisplayEntry.new({
+			["optionID"]    = "ZJSpellInfo_ShowAreas",
+			["label"]       = "ZJBattleSense_Options_TRANSLATION_SpellInfo_ShowAreas",
+			["description"] = "ZJBattleSense_Options_TRANSLATION_SpellInfo_ShowAreas_Description",
 			["widget"]      = EEex_Options_ToggleWidget.new(),
 		}),
 	},
@@ -947,6 +962,278 @@ function ZJSpellInfo_WillOpen()
 	return ok and text ~= nil
 end
 
+-----------
+-- Areas --
+-----------
+
+-- The ground a spell / item ability will affect, drawn by ZJSpellInfo_Menu_Area:
+--
+--   * While a spell / item waits for a target: around the creature under the cursor, (or the cursor itself), or around
+--     the caster if it casts its area on itself, (Chant)
+--   * Over an action bar button: a spell cast on the caster, (Chant), around the character, and turn undead / find
+--     traps around the character
+--
+-- Both only while the "Open On" key is held. Cone shaped areas aren't drawn.
+
+ZJSpellInfo_Private_AreaSequences = { ["spell"] = 0, ["modal"] = 1 } -- In ZJSPLARE.BAM
+ZJSpellInfo_Private_Menu_Area = { ["enabled"] = false, ["sequence"] = 0 }
+ZJSpellInfo_Private_Menu_AreaDrawing = false -- True while ZJSpellInfo_Menu_Area is being drawn
+ZJSpellInfo_Private_Menu_AreaOpacity = 170 -- Of 255, on top of the see-through fill of ZJSPLARE.BAM
+
+-- The action bar's button types, (EEex_Actionbar_ButtonType), whose modal action covers ZJArea_GetModalRange()
+ZJSpellInfo_Private_ModalButtonTypes = {
+	[4]  = true, -- FIND_TRAPS
+	[13] = true, -- TURN_UNDEAD
+}
+
+-- An ability's target, (0x0C), that is the caster itself
+ZJSpellInfo_Private_SelfTargets = {
+	[5] = true, -- Caster
+	[7] = true, -- Caster, (instant)
+}
+
+ZJSpellInfo_Private_ActionbarMenuName = "WORLD_ACTIONBAR"
+ZJSpellInfo_Private_ActionbarButtons = nil -- Array of { item, index }, the buttons of the action bar
+ZJSpellInfo_Private_HoverSpellCache = { ["key"] = nil, ["resref"] = nil }
+
+-- Returns the address of the header and of the ability of what `caster` is about to use, and the ability's missile
+-- type, (see ZJSpellInfo_Private_ReadUsed()), or nil
+function ZJSpellInfo_Private_GetUsedAbility(caster)
+
+	local abilityId = caster.m_currentUseButton.m_abilityId
+	local resref = abilityId.m_res:get():upper()
+
+	local itemResref = ""
+	local itemNum = abilityId.m_itemNum
+	if itemNum >= 0 then
+		local ok, slotItem = pcall(function() return caster.m_equipment.m_items:get(itemNum) end)
+		if ok and slotItem ~= nil then
+			itemResref = slotItem.cResRef:get():upper()
+		end
+	end
+
+	if resref ~= "" and resref ~= itemResref then
+		local spellHeader = EEex_Resource_Demand(resref, "SPL")
+		if spellHeader ~= nil then
+			local casterLevel = math.max(caster:getCasterLevelForSpell(resref, true), 1)
+			local ability = spellHeader:getAbilityForLevel(casterLevel) or spellHeader:getAbility(0)
+			if ability == nil then return nil end
+			local abilityAddress = EEex_UDToPtr(ability)
+			return EEex_UDToPtr(spellHeader), abilityAddress, EEex_ReadU16(abilityAddress + 0x26)
+		end
+	end
+
+	if itemResref == "" then return nil end
+	local itemHeader = EEex_Resource_Demand(itemResref, "ITM")
+	if itemHeader == nil then return nil end
+
+	local abilityNum = abilityId.m_abilityNum
+	if abilityNum < 0 or abilityNum >= itemHeader.abilityCount then return nil end
+
+	local headerAddress = EEex_UDToPtr(itemHeader)
+	local abilityAddress = headerAddress + itemHeader.abilityOffset + 0x38 * abilityNum
+	return headerAddress, abilityAddress, EEex_ReadU16(abilityAddress + 0x2A)
+end
+
+-- Whether `area` can be drawn as a circle
+function ZJSpellInfo_Private_IsDrawableArea(area)
+	return area and area.range > 0 and not ZJArea_IsCone(area)
+end
+
+-- The area of the spell / item waiting for a target: { gameX, gameY } or { uiX, uiY }, range, sequence; or nil
+function ZJSpellInfo_Private_GetAimArea()
+
+	-- 1 = aimed at a point, 2 = aimed at a creature
+	local state = EngineGlobals.g_pBaldurChitin.m_pObjectGame.m_nState
+	if state ~= 1 and state ~= 2 then return nil end
+
+	local caster = nil
+	EEex_Sprite_IterateSelected(function(sprite)
+		if caster == nil then caster = sprite end
+	end)
+	if caster == nil then return nil end
+
+	local headerAddress, abilityAddress, missileType = ZJSpellInfo_Private_GetUsedAbility(caster)
+	if headerAddress == nil then return nil end
+
+	local area = ZJArea_ReadAbilityArea(headerAddress, abilityAddress, missileType)
+	if not ZJSpellInfo_Private_IsDrawableArea(area) then return nil end
+
+	local result = { ["range"] = area.range, ["sequence"] = ZJSpellInfo_Private_AreaSequences.spell }
+
+	local target = EEex_GameObject_GetUnderCursor()
+	if area.onCaster then
+		result.gameX, result.gameY = caster.m_pos.x, caster.m_pos.y
+	elseif state == 2 and EEex_GameObject_IsSprite(target) then
+		-- The projectile explodes where the creature stands
+		result.gameX, result.gameY = target.m_pos.x, target.m_pos.y
+	else
+		result.uiX, result.uiY = EEex_Menu_GetMousePos()
+	end
+
+	return result
+end
+
+-- The buttons of the action bar, (the ones with an "actionBar <index>"), see Item Info's version
+function ZJSpellInfo_Private_GetActionbarButtons()
+
+	local buttons = ZJSpellInfo_Private_ActionbarButtons
+	if buttons ~= nil then return buttons end
+
+	buttons = {}
+	local menu = EEex_Menu_Find(ZJSpellInfo_Private_ActionbarMenuName)
+	if menu ~= nil then
+		local item = menu.items
+		while item do
+			local actionBar = item.button.actionBar
+			if actionBar then
+				local ok, index = pcall(EEex_Menu_GetItemVariant, actionBar)
+				if ok and type(index) == "number" then
+					table.insert(buttons, { ["item"] = item, ["index"] = index })
+				end
+			end
+			item = item.next
+		end
+	end
+
+	ZJSpellInfo_Private_ActionbarButtons = buttons
+	return buttons
+end
+
+-- Returns the resref of the spell / innate of `sprite` whose name is in the tooltip `text` of an action bar button,
+-- (the engine's button data isn't in EEex's bindings, its tooltip is), the longest name that matches, or nil
+function ZJSpellInfo_Private_FindSpellByTooltip(sprite, text)
+
+	local best, bestLength = nil, 0
+
+	-- 2 = spells, 4 = innates / special abilities
+	for _, buttonType in ipairs({ 2, 4 }) do
+		local list = sprite:GetQuickButtons(buttonType, false)
+		EEex_Utility_IterateCPtrList(list, function(buttonData)
+			local resref = buttonData.m_abilityId.m_res:get():upper()
+			local name = ZJSpellInfo_Private_GetSourceName(resref)
+			if name ~= "" and #name > bestLength and text:find(name, 1, true) then
+				best, bestLength = resref, #name
+			end
+		end)
+		EEex_Utility_FreeCPtrList(list)
+	end
+
+	return best
+end
+
+-- The area of the action bar button under the cursor while the "Open On" key is held, see ZJSpellInfo_Private_GetAimArea()
+function ZJSpellInfo_Private_GetHoverArea()
+
+	if not Infinity_IsMenuOnStack(ZJSpellInfo_Private_ActionbarMenuName) then return nil end
+
+	local index = nil
+	for _, button in ipairs(ZJSpellInfo_Private_GetActionbarButtons()) do
+		local x, y, w, h = button.item:getArea()
+		if EEex_Menu_IsCursorWithinRect(x, y, w, h) then
+			index = button.index
+			break
+		end
+	end
+	if index == nil then return nil end
+
+	local sprite = EEex_Sprite_GetSelected()
+	if not EEex_GameObject_IsSprite(sprite) then return nil end
+	local pos = sprite.m_pos
+
+	local buttonType = EEex_Actionbar_GetArray().m_buttonTypes:get(index)
+	if ZJSpellInfo_Private_ModalButtonTypes[buttonType] then
+		return {
+			["gameX"] = pos.x, ["gameY"] = pos.y,
+			["range"] = ZJArea_GetModalRange(sprite),
+			["sequence"] = ZJSpellInfo_Private_AreaSequences.modal,
+		}
+	end
+
+	-- A spell button, (in the spell list, or a quick spell): found by its name
+	local text = actionBarTooltip ~= nil and actionBarTooltip[index] or nil
+	if type(text) ~= "string" or text == "" then return nil end
+
+	local cache = ZJSpellInfo_Private_HoverSpellCache
+	local key = string.format("%d:%d:%s", sprite.m_id, index, text)
+	if cache.key ~= key then
+		cache.key = key
+		cache.resref = ZJSpellInfo_Private_FindSpellByTooltip(sprite, text)
+	end
+	local resref = cache.resref
+	if resref == nil then return nil end
+
+	local spellHeader = EEex_Resource_Demand(resref, "SPL")
+	if spellHeader == nil then return nil end
+	local casterLevel = math.max(sprite:getCasterLevelForSpell(resref, true), 1)
+	local ability = spellHeader:getAbilityForLevel(casterLevel) or spellHeader:getAbility(0)
+	if ability == nil then return nil end
+	local abilityAddress = EEex_UDToPtr(ability)
+
+	-- A spell aimed elsewhere shows its area while it is being aimed
+	if not ZJSpellInfo_Private_SelfTargets[EEex_ReadU8(abilityAddress + 0x0C)] then return nil end
+
+	local area = ZJArea_ReadAbilityArea(EEex_UDToPtr(spellHeader), abilityAddress, EEex_ReadU16(abilityAddress + 0x26))
+	if not ZJSpellInfo_Private_IsDrawableArea(area) then return nil end
+
+	return {
+		["gameX"] = pos.x, ["gameY"] = pos.y,
+		["range"] = area.range,
+		["sequence"] = ZJSpellInfo_Private_AreaSequences.spell,
+	}
+end
+
+-- Shows / hides the area label for this frame
+function ZJSpellInfo_Private_UpdateArea()
+
+	local entry = ZJSpellInfo_Private_Menu_Area
+	local area = nil
+
+	-- Only while the "Open On" key is held, like the popup
+	if ZJSpellInfo_Private_Enabled and ZJSpellInfo_Private_ShowAreas:get() ~= 0 and e:GetActiveEngine() == worldScreen
+		and ZJPopup_IsOpenAllowed(ZJSpellInfo_Private_OpenOn)
+	then
+		area = ZJSpellInfo_Private_GetAimArea() or ZJSpellInfo_Private_GetHoverArea()
+	end
+
+	if area == nil then
+		entry.enabled = false
+		return
+	end
+
+	-- Game pixels to menu pixels, (the vertical axis is stretched by 4/3, so the engine's circles are 4:3 ellipses)
+	local originX = EEex_Menu_TranslateXYFromGame(0, 0)
+	local edgeX = EEex_Menu_TranslateXYFromGame(area.range, 0)
+	local radiusX = edgeX - originX
+	local radiusY = math.floor(radiusX * 3 / 4 + 0.5)
+
+	local centerX, centerY = area.uiX, area.uiY
+	if area.gameX ~= nil then
+		centerX, centerY = EEex_Menu_TranslateXYFromGame(area.gameX, area.gameY)
+	end
+
+	Infinity_SetArea("ZJSpellInfo_Menu_AreaLabel", centerX - radiusX, centerY - radiusY, radiusX * 2, radiusY * 2)
+	entry.enabled = radiusX > 0
+	entry.sequence = area.sequence
+end
+
+-- Over an enabled item the engine doesn't pick the creature under the cursor, and a spell can't be cast on it. The
+-- area is only enabled while its menu is being drawn, (see ZJSplInf.menu), so whenever the engine checks the mouse it
+-- finds the area disabled.
+function ZJSpellInfo_Private_Menu_AreaDrawBegin()
+	ZJSpellInfo_Private_Menu_AreaDrawing = true
+	return 0
+end
+
+function ZJSpellInfo_Private_Menu_AreaDrawEnd()
+	ZJSpellInfo_Private_Menu_AreaDrawing = false
+	return 0
+end
+
+function ZJSpellInfo_Private_Menu_Area_Enabled()
+	return ZJSpellInfo_Private_Menu_AreaDrawing and ZJSpellInfo_Private_Menu_Area.enabled
+end
+
 function ZJSpellInfo_Private_DoTick()
 
 	local text = ZJSpellInfo_Private_GetFrameText()
@@ -963,6 +1250,11 @@ end
 
 -- Called every frame by the ticker menu
 function ZJSpellInfo_Private_Tick()
+
+	-- The area is extra, never let it take the popup down
+	if not pcall(ZJSpellInfo_Private_UpdateArea) then
+		ZJSpellInfo_Private_Menu_Area.enabled = false
+	end
 
 	local ok, err = pcall(ZJSpellInfo_Private_DoTick)
 
@@ -981,6 +1273,10 @@ end
 ---------------
 
 function ZJSpellInfo_Private_PushTicker()
+	-- Pushed first, so the area is drawn below the popup
+	if not Infinity_IsMenuOnStack("ZJSpellInfo_Menu_Area") then
+		Infinity_PushMenu("ZJSpellInfo_Menu_Area")
+	end
 	if not Infinity_IsMenuOnStack("ZJSpellInfo_Menu_Ticker") then
 		Infinity_PushMenu("ZJSpellInfo_Menu_Ticker")
 	end
@@ -989,6 +1285,8 @@ end
 EEex_Menu_AddMainFileLoadedListener(function()
 	EEex_Menu_LoadFile("ZJSplInf")
 	ZJSpellInfo_Private_Menu_IsOpen = false
+	-- The UI was (re)loaded, its items are new
+	ZJSpellInfo_Private_ActionbarButtons = nil
 	ZJSpellInfo_Private_Menu_TextUD = EEex_Menu_GetItem("ZJSpellInfo_Menu_Text")
 end)
 

@@ -3,6 +3,8 @@
 Infinity_DoFile("ZJBarCol")
 -- The "Open On" option, (shared by every popup)
 Infinity_DoFile("ZJPopup")
+-- The areas of spells / items, (shared with Spell Info)
+Infinity_DoFile("ZJArea")
 
 -------------
 -- Options --
@@ -962,46 +964,11 @@ function ZJAttackInfo_Private_GetActionName(sprite)
 	return ok and name or nil
 end
 
--- The area a projectile affects where it lands, read once per projectile:
--- [missile type] = { range, coneSize } / false if it has no area
-ZJAttackInfo_Private_ProjectileAreas = {}
-ZJAttackInfo_Private_ProjectileIDS = nil -- PROJECTL.IDS, loaded when first needed
-
--- Returns nil if the projectile can't be determined
-function ZJAttackInfo_Private_ReadProjectileArea(missileType)
-
-	-- 1 = no projectile
-	if missileType <= 1 then return false end
-
-	if ZJAttackInfo_Private_ProjectileIDS == nil then
-		ZJAttackInfo_Private_ProjectileIDS = EEex_Resource_LoadIDS("PROJECTL")
-	end
-
-	-- A missile type is its PROJECTL.IDS value + 1, the symbol is the resref of the .PRO
-	local resref = ZJAttackInfo_Private_ProjectileIDS:getStart(missileType - 1)
-	if resref == nil then return nil end
-
-	resref = resref:gsub("%s+", ""):upper()
-	if resref == "" then return nil end
-
-	local projectile = EEex_Resource_Demand(resref, "PRO")
-	if projectile == nil then return nil end
-
-	-- 3 = area of effect
-	if projectile.m_wFileType ~= 3 then return false end
-
-	return {
-		["range"]    = projectile.m_explosionRange,
-		-- Bit 11 = cone shaped, the cone starts at the caster
-		["coneSize"] = EEex_IsBitSet(projectile.m_dwAreaFlags, 11) and projectile.m_coneSize or nil,
-	}
-end
-
 -- Reading an area demands the spell / item, so it is kept for as long as the sprite executes the same action
 ZJAttackInfo_Private_ActionAreaCaches = {} -- [sprite id] = { key, area }, emptied when the popup closes
 
--- Returns the area, (see ZJAttackInfo_Private_ProjectileAreas), of the spell `sprite` is casting / the item it is using
--- at a point, false if it has none, or nil if that can't be determined.
+-- Returns the area, (see ZJArea.lua), of the spell `sprite` is casting / the item it is using, false if it has none,
+-- or nil if that can't be determined.
 function ZJAttackInfo_Private_ReadActionArea(sprite)
 
 	local curAction = sprite.m_curAction
@@ -1022,8 +989,9 @@ function ZJAttackInfo_Private_ReadActionArea(sprite)
 	ZJAttackInfo_Private_ActionAreaCaches[id] = cache
 
 	local missileType = nil
+	local header, ability = nil, nil
 
-	if actionID == 97 then -- UseItemPoint()
+	if actionID == 97 or actionID == 34 then -- UseItemPoint(), UseItem()
 
 		local itemHeader = nil
 		local abilityNum = specificID
@@ -1040,7 +1008,8 @@ function ZJAttackInfo_Private_ReadActionArea(sprite)
 		end
 
 		if itemHeader ~= nil and abilityNum >= 0 and abilityNum < itemHeader.abilityCount then
-			local ability = EEex_PtrToUD(
+			header = itemHeader
+			ability = EEex_PtrToUD(
 				EEex_UDToPtr(itemHeader) + itemHeader.abilityOffset + Item_ability_st.sizeof * abilityNum, "Item_ability_st")
 			missileType = ability.missileType
 		end
@@ -1056,8 +1025,9 @@ function ZJAttackInfo_Private_ReadActionArea(sprite)
 		if resref ~= "" then
 			local spellHeader = EEex_Resource_Demand(resref, "SPL")
 			if spellHeader ~= nil then
-				local ability = spellHeader:getAbilityForLevel(sprite:getCasterLevelForSpell(resref, true))
+				ability = spellHeader:getAbilityForLevel(sprite:getCasterLevelForSpell(resref, true))
 				if ability ~= nil then
+					header = spellHeader
 					missileType = ability.missileType
 				end
 			end
@@ -1065,12 +1035,7 @@ function ZJAttackInfo_Private_ReadActionArea(sprite)
 	end
 
 	if missileType ~= nil then
-		local area = ZJAttackInfo_Private_ProjectileAreas[missileType]
-		if area == nil then
-			area = ZJAttackInfo_Private_ReadProjectileArea(missileType)
-			ZJAttackInfo_Private_ProjectileAreas[missileType] = area
-		end
-		cache.area = area
+		cache.area = ZJArea_ReadAbilityArea(EEex_UDToPtr(header), EEex_UDToPtr(ability), missileType)
 	end
 
 	return cache.area
@@ -1113,8 +1078,9 @@ function ZJAttackInfo_Private_IsCastingSpellAt(casterSprite, targetSprite)
 
 	-- A cone starts at the caster and points at the destination, everything else is centered on the destination
 	local coneSize = area.coneSize
+	-- A sub-spell cast on the caster, (Chant), is centered on the caster too
 	local isCone = coneSize ~= nil and coneSize > 0 and coneSize < 360 and aimLength > 0
-	local origin = isCone and casterPos or dest
+	local origin = (isCone or area.onCaster) and casterPos or dest
 
 	local offsetX = targetPos.x - origin.x
 	local offsetY = (targetPos.y - origin.y) * 4 / 3

@@ -11,6 +11,38 @@ menu
 	}
 }
 
+-- The area of the spell being aimed / the action bar button under the cursor, on the ground, (always open, area set in
+-- ZJSpellInfo_Private_UpdateArea()). Over an enabled item the engine doesn't pick the creature under the cursor, and a
+-- spell can't be cast on it. So the area is only enabled while this menu is drawn: the labels before and after it mark
+-- that, (opacity is only asked for while drawing), and the engine finds it disabled whenever it checks the mouse.
+menu
+{
+	name "ZJSpellInfo_Menu_Area"
+	ignoreesc
+
+	label
+	{
+		opacity lua "ZJSpellInfo_Private_Menu_AreaDrawBegin()"
+	}
+
+	label
+	{
+		name "ZJSpellInfo_Menu_AreaLabel"
+		area -1 -1 -1 -1
+		enabled "ZJSpellInfo_Private_Menu_Area_Enabled()"
+		bam "ZJSPLARE"
+		scaleToClip
+		sequence lua "ZJSpellInfo_Private_Menu_Area.sequence"
+		opacity lua "ZJSpellInfo_Private_Menu_AreaOpacity"
+		ignoreEvents
+	}
+
+	label
+	{
+		opacity lua "ZJSpellInfo_Private_Menu_AreaDrawEnd()"
+	}
+}
+
 -- The popup, opened on top of everything else while it has something to say (areas set in ZJSpellInfo_Private_Layout())
 menu
 {
