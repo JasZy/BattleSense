@@ -24,7 +24,7 @@ Infinity_DoFile("ZJPopup")
 -------------
 
 -- The module's on / off switch, in the "Battle Sense Modules" tab
-ZJItemInfo_Private_OpenOn = EEex_Options_Register("ZJItemInfo_Enable", ZJPopup_NewSwitch("Item Info", {
+EEex_Options_Register("ZJItemInfo_Enable", ZJPopup_NewSwitch("Item Info", {
 	["onChange"] = function(self, oldValue) ZJItemInfo_SetEnabled(self:get() ~= 0) end,
 }))
 
@@ -160,7 +160,6 @@ EEex_Options_AddTab("ZJBattleSense_Options_TRANSLATION_ItemInfo_TabTitle", funct
 -------------
 
 ZJItemInfo_Private_Enabled = false
-ZJItemInfo_Private_ErrorReported = false
 ZJItemInfo_Private_QuickItemErrorReported = false -- Shown in the message log, the quick item popup is new
 ZJItemInfo_Private_ContainerErrorReported = false -- Shown in the message log, the container popup is new
 ZJItemInfo_Private_InventoryErrorReported = false -- Shown in the message log, the inventory popup is new
@@ -183,9 +182,6 @@ ZJItemInfo_Private_ColorEndStr    = "^-"
 -- To persist this change, instead modify the "ZJItemInfo_Enable" option.
 function ZJItemInfo_SetEnabled(enabled)
 	ZJItemInfo_Private_Enabled = enabled
-	if not enabled then
-		ZJItemInfo_Private_Menu_SetOpen(false)
-	end
 end
 
 function ZJItemInfo_Private_T(key)
@@ -2445,27 +2441,16 @@ function ZJItemInfo_Private_GetSelectedSprite()
 end
 
 -----------
--- Popup --
+-- Panel --
 -----------
 
-ZJItemInfo_Private_Menu_IsOpen  = false
-ZJItemInfo_Private_Menu_Text    = ""
-ZJItemInfo_Private_Menu_TextUD  = nil -- uiItem
-ZJItemInfo_Private_Menu_Key     = nil -- What the popup was last built for
-ZJItemInfo_Private_Menu_BuiltAt = 0
+ZJItemInfo_Private_PanelText    = nil -- The panel's text, built again when what it is for changes, (and every so often)
+ZJItemInfo_Private_PanelKey     = nil -- What the text was last built for
+ZJItemInfo_Private_PanelBuiltAt = 0
 
-function ZJItemInfo_Private_Menu_SetOpen(open)
-	if open then
-		if not ZJItemInfo_Private_Menu_IsOpen then
-			Infinity_PushMenu("ZJItemInfo_Menu")
-			ZJItemInfo_Private_Menu_IsOpen = true
-		end
-	elseif ZJItemInfo_Private_Menu_IsOpen then
-		Infinity_PopMenu("ZJItemInfo_Menu")
-		ZJItemInfo_Private_Menu_IsOpen = false
-		ZJItemInfo_Private_Menu_Key = nil
-		ZJItemInfo_Private_HoveredActionbarIndex = nil
-	end
+-- Whether the popup shows this module's panel
+function ZJItemInfo_Private_IsShowing()
+	return ZJPopup_GetCursorPanel() == "Item Info"
 end
 
 -- The action bar button's own tooltip, (the item's name), would sit under the popup. UI.menu defines
@@ -2476,7 +2461,7 @@ function ZJItemInfo_Private_WrapActionBarTooltip()
 	if type(original) ~= "function" or original == ZJItemInfo_Private_ActionBarTooltipWrapper then return end
 
 	ZJItemInfo_Private_ActionBarTooltipWrapper = function(index, ...)
-		if ZJItemInfo_Private_Menu_IsOpen and ZJItemInfo_Private_HoveredActionbarIndex == index then
+		if ZJItemInfo_Private_HoveredActionbarIndex == index and ZJItemInfo_Private_IsShowing() then
 			return ""
 		end
 		return original(index, ...)
@@ -2600,81 +2585,16 @@ function ZJItemInfo_Private_BuildText(hovered, sprite)
 	return table.concat(parts, "\n\n")
 end
 
-function ZJItemInfo_Private_StripColors(text)
-	return (text:gsub("%^0x%x%x%x%x%x%x%x%x", ""):gsub("%^%-", ""))
-end
+-- The panel's text, (see ZJPopup_AddPanel()): the item under the cursor, and where to put the popup, (above an action
+-- bar button, or beside the cursor at the height of a list's row), or nil
+function ZJItemInfo_Private_GetPanelText()
 
-function ZJItemInfo_Private_Layout(hovered)
+	ZJItemInfo_Private_HoveredActionbarIndex = nil
 
-	local fontPoint = ZJItemInfo_Private_FontPoint:get()
-	local style = styles["normal"]
-
-	local pad = 10
-	local gap = 8 -- Between the popup and what it is beside
-	local wrapWidth = fontPoint * 32
-
-	local text = ZJItemInfo_Private_Menu_Text
-	local textW, textH = EEex_Menu_GetTextWidthHeight(ZJItemInfo_Private_StripColors(text), style.font, fontPoint, style.useFontZoom, wrapWidth)
-	textW = math.min(math.ceil(textW), wrapWidth)
-	textH = math.ceil(textH)
-
-	local width = textW + pad * 2
-	local height = textH + pad * 2
-
-	if ZJItemInfo_Private_Menu_TextUD ~= nil then
-		ZJItemInfo_Private_Menu_TextUD.text.point = fontPoint
-	end
-
-	Infinity_SetArea("ZJItemInfo_Menu_Background", 0, 0, width, height)
-	Infinity_SetArea("ZJItemInfo_Menu_Text", pad, pad, wrapWidth, textH)
-
-	local screenW, screenH = Infinity_GetScreenSize()
-	local area = hovered.area
-	local areaX, areaY, areaW, areaH = area[1], area[2], area[3], area[4]
-	local x, y
-
-	if hovered.placement == "above" then
-
-		x = areaX + areaW / 2 - width / 2
-		y = areaY - gap - height
-
-		if y < 0 then
-			y = areaY + areaH + gap
-		end
-	else
-		-- Beside the cursor, so the rest of the list stays readable
-		local mouseX = EEex_Menu_GetMousePos()
-		local cursorRoom = 32
-
-		x = mouseX + cursorRoom
-		y = areaY
-
-		if x + width > screenW then
-			x = mouseX - gap - width
-		end
-	end
-
-	x = math.max(0, math.min(x, screenW - width))
-	y = math.max(0, math.min(y, screenH - height))
-
-	Infinity_SetOffset("ZJItemInfo_Menu", math.floor(x), math.floor(y))
-end
-
-function ZJItemInfo_Private_DoTick()
-
-	if not ZJItemInfo_Private_Enabled then return end
-
-	if not ZJPopup_IsOpenAllowed(ZJItemInfo_Private_OpenOn) then
-		ZJItemInfo_Private_Menu_SetOpen(false)
-		return
-	end
+	if not ZJItemInfo_Private_Enabled then return nil end
 
 	local hovered = ZJItemInfo_Private_FindHoveredItem()
-
-	if hovered == nil then
-		ZJItemInfo_Private_Menu_SetOpen(false)
-		return
-	end
+	if hovered == nil then return nil end
 
 	local sprite = ZJItemInfo_Private_GetSelectedSprite()
 
@@ -2685,53 +2605,32 @@ function ZJItemInfo_Private_DoTick()
 		sprite and sprite.m_id or -1, hovered.use and hovered.use.abilityNum or "")
 	local curTick = Infinity_GetClockTicks()
 
-	if key ~= ZJItemInfo_Private_Menu_Key or curTick - ZJItemInfo_Private_Menu_BuiltAt >= ZJItemInfo_Private_RefreshInterval then
-		ZJItemInfo_Private_Menu_Text = ZJItemInfo_Private_BuildText(hovered, sprite)
-		ZJItemInfo_Private_Menu_Key = key
-		ZJItemInfo_Private_Menu_BuiltAt = curTick
+	if key ~= ZJItemInfo_Private_PanelKey or curTick - ZJItemInfo_Private_PanelBuiltAt >= ZJItemInfo_Private_RefreshInterval then
+		ZJItemInfo_Private_PanelText = ZJItemInfo_Private_BuildText(hovered, sprite)
+		ZJItemInfo_Private_PanelKey = key
+		ZJItemInfo_Private_PanelBuiltAt = curTick
 	end
 
-	ZJItemInfo_Private_Layout(hovered)
-	ZJItemInfo_Private_Menu_SetOpen(true)
-end
-
-function ZJItemInfo_Private_Tick()
-
-	local ok, err = pcall(ZJItemInfo_Private_DoTick)
-
-	if not ok then
-		pcall(ZJItemInfo_Private_Menu_SetOpen, false)
-		-- This runs every frame, don't flood the log
-		if not ZJItemInfo_Private_ErrorReported then
-			ZJItemInfo_Private_ErrorReported = true
-			print("[Battle Sense] Item Info: "..tostring(err))
-		end
+	local area = hovered.area
+	if hovered.placement == "above" then
+		return ZJItemInfo_Private_PanelText, { ["above"] = area }
 	end
+	return ZJItemInfo_Private_PanelText, area[2]
 end
 
 ---------------
 -- Listeners --
 ---------------
 
-function ZJItemInfo_Private_PushTicker()
-	if not Infinity_IsMenuOnStack("ZJItemInfo_Menu_Ticker") then
-		Infinity_PushMenu("ZJItemInfo_Menu_Ticker")
-	end
-end
-
 EEex_Menu_AddMainFileLoadedListener(function()
 
-	EEex_Menu_LoadFile("ZJItmInf")
-
 	ZJItemInfo_Private_ResetUICaches()
-	ZJItemInfo_Private_Menu_IsOpen = false
-	ZJItemInfo_Private_Menu_Key = nil
-	ZJItemInfo_Private_Menu_TextUD = EEex_Menu_GetItem("ZJItemInfo_Menu_Text")
+	ZJItemInfo_Private_PanelKey = nil
 	ZJItemInfo_Private_HoveredActionbarIndex = nil
 	ZJItemInfo_Private_WrapActionBarTooltip()
 
-	-- The ticker is opened when a game starts. Opening it again with the quick loot bar and with a store's
-	-- lists makes sure it runs where it is needed, should something have closed it.
+	-- The popup's ticker is opened when a game starts. Opening it again with the quick loot bar, the inventory and a
+	-- store's lists makes sure it runs where it is needed, should something have closed it.
 	local seenMenus = {}
 
 	local pushTickerOnOpen = function(menuName)
@@ -2745,7 +2644,7 @@ EEex_Menu_AddMainFileLoadedListener(function()
 		local oldOnOpen = EEex_Menu_GetItemFunction(menu.reference_onOpen) or function() end
 		EEex_Menu_SetItemFunction(menu.reference_onOpen, function()
 			local toReturn = oldOnOpen()
-			ZJItemInfo_Private_PushTicker()
+			ZJPopup_PushTicker()
 			return toReturn
 		end)
 	end
@@ -2760,26 +2659,12 @@ EEex_Menu_AddMainFileLoadedListener(function()
 	end
 end)
 
-EEex_GameState_AddInitializedListener(ZJItemInfo_Private_PushTicker)
-EEex_Menu_AddAfterMainFileReloadedListener(ZJItemInfo_Private_PushTicker)
-
-EEex.RegisterSlicedRect("ZJItemInfo_BackgroundRect", {
-	["topLeft"]     = {  0,  0, 32, 32 },
-	["top"]         = { 16,  0, 32, 32 },
-	["topRight"]    = { 32,  0, 32, 32 },
-	["right"]       = { 32, 16, 32, 32 },
-	["bottomRight"] = { 32, 32, 32, 32 },
-	["bottom"]      = { 16, 32, 32, 32 },
-	["bottomLeft"]  = {  0, 32, 32, 32 },
-	["left"]        = {  0, 16, 32, 32 },
-	["center"]      = { 16, 16, 32, 32 },
-	["dimensions"]  = { 64, 64 },
-	["resref"]      = "X-OPTBOX",
-	["flags"]       = 0,
+-- First: an item is on the screen, on top of whatever in the game world is below the cursor
+ZJPopup_AddPanel({
+	["name"]         = "Item Info",
+	["priority"]     = 5,
+	["getText"]      = ZJItemInfo_Private_GetPanelText,
+	["getFontPoint"] = function() return ZJItemInfo_Private_FontPoint:get() end,
+	["getOpacity"]   = function() return 92 end,
+	["wrap"]         = true,
 })
-
-function ZJItemInfo_Private_Background_Render(item)
-	EEex.DrawSlicedRect("ZJItemInfo_BackgroundRect", { item:getArea() }, 255 * 0.92)
-end
-
-EEex_Menu_AddBeforeUIItemRenderListener("ZJItemInfo_Menu_Background", ZJItemInfo_Private_Background_Render)

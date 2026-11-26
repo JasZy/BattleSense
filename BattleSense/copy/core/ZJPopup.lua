@@ -167,15 +167,18 @@ ZJPopup_Private_Panels = {}
 -- `panel` is a table:
 --
 --   "name"         - The module's name, (for ZJPopup_GetCursorPanel() and error messages).
---   "priority"     - Lower is asked first. Spell Info = 10, (a spell waiting for a target, over a creature), Attack
---                    Info = 20, (a creature), Lock Info = 30, (a container, door or trap), Ability Info = 40 and
---                    Proficiency Info = 50, (a row of their character creation screen).
+--   "priority"     - Lower is asked first. Item Info = 5, (an item on the screen, on top of the game world), Spell
+--                    Info = 10, (a spell waiting for a target, over a creature), Attack Info = 20, (a creature), Lock
+--                    Info = 30, (a container, door or trap), Ability Info = 40 and Proficiency Info = 50, (a row of
+--                    their character creation screen).
 --
 -- A text panel, shown in the popup's box of text:
 --
 --   "getText"      - function() returning the text of the panel for what is under the cursor, or nil if the module
---                    has nothing to say about it. It may return a second value: the height, (in menu coordinates), to
---                    put the top of the popup at, (the hovered row of a list), instead of the top of the cursor.
+--                    has nothing to say about it. The box goes beside the cursor, with its top at the top of the
+--                    cursor. A second value can place it otherwise: a number puts its top at that height, (in menu
+--                    coordinates, the hovered row of a list), { ["above"] = { x, y, w, h } } centers it above that area,
+--                    (or below it if there is no room above, an action bar button).
 --   "getFontPoint" - function() returning the size of the text, (optional).
 --   "getOpacity"   - function() returning the background's opacity in percent, (optional).
 --   "wrap"         - true to wrap the text at a width that follows the size of the text, (optional, otherwise the box
@@ -338,7 +341,7 @@ function ZJPopup_GetCursorRenderData()
 end
 
 -- Lays out the box of `choice`, (a text panel): beside the cursor image, with its top at the top of the cursor, or at
--- the height the panel gave
+-- the height the panel gave, or above the area the panel gave
 function ZJPopup_Private_Layout(choice)
 
 	local panel = choice.panel
@@ -374,12 +377,27 @@ function ZJPopup_Private_Layout(choice)
 	cursorCenterX, cursorCenterY, cursorW = cursorCenterX or 0, cursorCenterY or 0, cursorW or 0
 
 	local cursorRenderX = cursorX - cursorCenterX
-	local backgroundX = cursorRenderX + cursorW + 5
-	local backgroundY = choice.y or (cursorY - cursorCenterY)
-
 	local screenW, screenH = Infinity_GetScreenSize()
-	if backgroundX + backgroundW > screenW then
-		backgroundX = cursorRenderX - backgroundW - 5
+	local where = choice.y
+	local backgroundX, backgroundY
+
+	if type(where) == "table" and type(where.above) == "table" then
+
+		local gap = 8
+		local areaX, areaY, areaW, areaH = where.above[1], where.above[2], where.above[3], where.above[4]
+
+		backgroundX = areaX + areaW / 2 - backgroundW / 2
+		backgroundY = areaY - gap - backgroundH
+		if backgroundY < 0 then
+			backgroundY = areaY + areaH + gap
+		end
+	else
+		backgroundX = cursorRenderX + cursorW + 5
+		backgroundY = type(where) == "number" and where or (cursorY - cursorCenterY)
+
+		if backgroundX + backgroundW > screenW then
+			backgroundX = cursorRenderX - backgroundW - 5
+		end
 	end
 	backgroundX = math.max(0, math.min(backgroundX, screenW - backgroundW))
 	backgroundY = math.max(0, math.min(backgroundY, screenH - backgroundH))
@@ -438,8 +456,9 @@ function ZJPopup_Tick()
 	end
 end
 
--- The ticker is always open while a game is running, (only once a module added a panel)
-function ZJPopup_Private_PushTicker()
+-- Opens the ticker, (if a module added a panel). It is opened when a game starts; a module whose screens may have closed
+-- it, (Item Info: the inventory, stores, the quick loot bar), opens it again when those screens open.
+function ZJPopup_PushTicker()
 	if ZJPopup_Private_Panels[1] == nil then return end
 	if not Infinity_IsMenuOnStack("ZJPopup_Cursor_Ticker") then
 		Infinity_PushMenu("ZJPopup_Cursor_Ticker")
@@ -466,8 +485,8 @@ EEex_Menu_AddMainFileLoadedListener(function()
 	ZJPopup_Private_TextUD = EEex_Menu_GetItem("ZJPopup_Cursor_Text")
 end)
 
-EEex_GameState_AddInitializedListener(ZJPopup_Private_PushTicker)
-EEex_Menu_AddAfterMainFileReloadedListener(ZJPopup_Private_PushTicker)
+EEex_GameState_AddInitializedListener(ZJPopup_PushTicker)
+EEex_Menu_AddAfterMainFileReloadedListener(ZJPopup_PushTicker)
 
 EEex.RegisterSlicedRect("ZJPopup_BackgroundRect", {
 	["topLeft"]     = {  0,  0, 32, 32 },
