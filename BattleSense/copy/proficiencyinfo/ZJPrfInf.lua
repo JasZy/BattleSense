@@ -24,22 +24,17 @@
 +--------------------------------------------------------------------------------------------------+
 --]]
 
--- The "Open On" option and the screen popup, (shared by every popup)
+-- The switch that opens the popup and the screen popup, (shared by every popup)
 Infinity_DoFile("ZJPopup")
 
 -------------
 -- Options --
 -------------
 
-EEex_Options_Register("ZJProficiencyInfo_Enable", EEex_Options_Option.new({
-	["default"]  = 1,
-	["type"]     = EEex_Options_ToggleType.new(),
-	["accessor"] = EEex_Options_ClampedAccessor.new({ ["min"] = 0, ["max"] = 1 }),
-	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Proficiency Info" }),
+-- The module's switch, (Off or the key that opens the popup), in the "Battle Sense Modules" tab
+ZJProficiencyInfo_Private_OpenOn = EEex_Options_Register("ZJProficiencyInfo_Enable", ZJPopup_NewSwitch("Proficiency Info", {
 	["onChange"] = function(self, oldValue) ZJProficiencyInfo_SetEnabled(self:get() ~= 0) end,
 }))
-
-ZJProficiencyInfo_Private_OpenOn = ZJPopup_RegisterOpenOn("ZJProficiencyInfo_OpenOn", "Proficiency Info Module: Open On")
 
 ZJProficiencyInfo_Private_FontPoint = EEex_Options_Register("ZJProficiencyInfo_FontPoint", EEex_Options_Option.new({
 	["default"]  = 11,
@@ -64,7 +59,6 @@ ZJProficiencyInfo_Private_ShowNextPoint = EEex_Options_Register("ZJProficiencyIn
 
 EEex_Options_AddTab("ZJBattleSense_Options_TRANSLATION_ProficiencyInfo_TabTitle", function() return {
 	{
-		ZJPopup_OpenOnDisplayEntry("ZJProficiencyInfo_OpenOn"),
 		EEex_Options_DisplayEntry.new({
 			["optionID"]    = "ZJProficiencyInfo_FontPoint",
 			["label"]       = "ZJBattleSense_Options_TRANSLATION_ProficiencyInfo_FontPoint",

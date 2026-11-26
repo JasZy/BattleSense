@@ -16,22 +16,17 @@
 +--------------------------------------------------------------------------------------------------+
 --]]
 
--- The "Open On" option, (shared by every popup)
+-- The switch that opens the popup, (shared by every popup)
 Infinity_DoFile("ZJPopup")
 
 -------------
 -- Options --
 -------------
 
-EEex_Options_Register("ZJItemInfo_Enable", EEex_Options_Option.new({
-	["default"]  = 1,
-	["type"]     = EEex_Options_ToggleType.new(),
-	["accessor"] = EEex_Options_ClampedAccessor.new({ ["min"] = 0, ["max"] = 1 }),
-	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Item Info" }),
+-- The module's switch, (Off or the key that opens the popup), in the "Battle Sense Modules" tab
+ZJItemInfo_Private_OpenOn = EEex_Options_Register("ZJItemInfo_Enable", ZJPopup_NewSwitch("Item Info", {
 	["onChange"] = function(self, oldValue) ZJItemInfo_SetEnabled(self:get() ~= 0) end,
 }))
-
-ZJItemInfo_Private_OpenOn = ZJPopup_RegisterOpenOn("ZJItemInfo_OpenOn", "Item Info Module: Open On")
 
 ZJItemInfo_Private_FontPoint = EEex_Options_Register("ZJItemInfo_FontPoint", EEex_Options_Option.new({
 	["default"]  = 11,
@@ -98,7 +93,6 @@ ZJItemInfo_Private_ShowOnQuickItems = EEex_Options_Register("ZJItemInfo_ShowOnQu
 
 EEex_Options_AddTab("ZJBattleSense_Options_TRANSLATION_ItemInfo_TabTitle", function() return {
 	{
-		ZJPopup_OpenOnDisplayEntry("ZJItemInfo_OpenOn"),
 		EEex_Options_DisplayEntry.new({
 			["optionID"]    = "ZJItemInfo_FontPoint",
 			["label"]       = "ZJBattleSense_Options_TRANSLATION_ItemInfo_FontPoint",

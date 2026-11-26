@@ -17,7 +17,7 @@
 +--------------------------------------------------------------------------------------------------------------+
 --]]
 
--- The "Open On" option, (shared by every popup)
+-- The switch that opens the popup, (shared by every popup)
 Infinity_DoFile("ZJPopup")
 -- The areas of spells / items, (shared with Attack Info)
 Infinity_DoFile("ZJArea")
@@ -26,15 +26,10 @@ Infinity_DoFile("ZJArea")
 -- Options --
 -------------
 
-EEex_Options_Register("ZJSpellInfo_Enable", EEex_Options_Option.new({
-	["default"]  = 1,
-	["type"]     = EEex_Options_ToggleType.new(),
-	["accessor"] = EEex_Options_ClampedAccessor.new({ ["min"] = 0, ["max"] = 1 }),
-	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Spell Info" }),
+-- The module's switch, (Off or the key that opens the popup), in the "Battle Sense Modules" tab
+ZJSpellInfo_Private_OpenOn = EEex_Options_Register("ZJSpellInfo_Enable", ZJPopup_NewSwitch("Spell Info", {
 	["onChange"] = function(self, oldValue) ZJSpellInfo_SetEnabled(self:get() ~= 0) end,
 }))
-
-ZJSpellInfo_Private_OpenOn = ZJPopup_RegisterOpenOn("ZJSpellInfo_OpenOn", "Spell Info Module: Open On")
 
 ZJSpellInfo_Private_FontPoint = EEex_Options_Register("ZJSpellInfo_FontPoint", EEex_Options_Option.new({
 	["default"]  = 11,
@@ -101,7 +96,6 @@ ZJSpellInfo_Private_ShowAreas = EEex_Options_Register("ZJSpellInfo_ShowAreas", E
 
 EEex_Options_AddTab("ZJBattleSense_Options_TRANSLATION_SpellInfo_TabTitle", function() return {
 	{
-		ZJPopup_OpenOnDisplayEntry("ZJSpellInfo_OpenOn"),
 		EEex_Options_DisplayEntry.new({
 			["optionID"]    = "ZJSpellInfo_FontPoint",
 			["label"]       = "ZJBattleSense_Options_TRANSLATION_SpellInfo_FontPoint",

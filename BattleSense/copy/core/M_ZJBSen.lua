@@ -28,13 +28,14 @@ ZJBattleSense_Modules = {
 	["ZJCmbLog"] = false,
 	["ZJCntCol"] = false,
 	["ZJItmInf"] = false,
+	["ZJLckInf"] = false,
 	["ZJPrfInf"] = false,
 	["ZJSplInf"] = false,
 	["ZJTimer"]  = false,
 }
 
 -- The order the modules are started in
-ZJBattleSense_Private_ModuleOrder = { "ZJAblInf", "ZJAtkInf", "ZJCmbLog", "ZJCntCol", "ZJItmInf", "ZJPrfInf", "ZJSplInf", "ZJTimer" }
+ZJBattleSense_Private_ModuleOrder = { "ZJAblInf", "ZJAtkInf", "ZJCmbLog", "ZJCntCol", "ZJItmInf", "ZJLckInf", "ZJPrfInf", "ZJSplInf", "ZJTimer" }
 
 -- Four of the modules are extended versions of a module that ships with EEex, (the Combat Log one only with the EEex
 -- fork Battle Sense started in). Running both versions at once would draw / print everything twice, so the EEex
@@ -188,18 +189,21 @@ end
 --   "optionID" - The option the module registers for its switch.
 --   "key"      - Where that option is stored, (the "Battle Sense" section of Baldur.lua).
 --   "name"     - The module's part of the strings' names, (ZJBattleSense_Options_TRANSLATION_<name>_Enable).
+--   "openOn"   - Only for the modules with a popup: their switch is also the key that opens the popup, (Off, Left Ctrl,
+--                ...), see ZJPopup_NewSwitch(). This is where its separate "Open On" option used to be stored.
 --
 ZJBattleSense_Private_ToggleSection = "Battle Sense"
 
 ZJBattleSense_Private_ModuleToggles = {
-	["ZJAblInf"] = { ["optionID"] = "ZJAbilityInfo_Enable",     ["key"] = "Ability Info",     ["name"] = "AbilityInfo"     },
-	["ZJAtkInf"] = { ["optionID"] = "ZJAttackInfo_Enable",      ["key"] = "Attack Info",      ["name"] = "AttackInfo"      },
-	["ZJCmbLog"] = { ["optionID"] = "ZJCombatLog_Enable",       ["key"] = "Combat Log",       ["name"] = "CombatLog"       },
-	["ZJCntCol"] = { ["optionID"] = "ZJContainerColors_Enable", ["key"] = "Container Colors", ["name"] = "ContainerColors" },
-	["ZJItmInf"] = { ["optionID"] = "ZJItemInfo_Enable",        ["key"] = "Item Info",        ["name"] = "ItemInfo"        },
-	["ZJPrfInf"] = { ["optionID"] = "ZJProficiencyInfo_Enable", ["key"] = "Proficiency Info", ["name"] = "ProficiencyInfo" },
-	["ZJSplInf"] = { ["optionID"] = "ZJSpellInfo_Enable",       ["key"] = "Spell Info",       ["name"] = "SpellInfo"       },
-	["ZJTimer"]  = { ["optionID"] = "ZJTimer_Enable",           ["key"] = "Timer",            ["name"] = "Timer"           },
+	["ZJAblInf"] = { ["optionID"] = "ZJAbilityInfo_Enable",     ["key"] = "Ability Info",     ["name"] = "AbilityInfo",     ["openOn"] = "Ability Info Module: Open On"     },
+	["ZJAtkInf"] = { ["optionID"] = "ZJAttackInfo_Enable",      ["key"] = "Attack Info",      ["name"] = "AttackInfo",      ["openOn"] = "Attack Info Module: Open On"      },
+	["ZJCmbLog"] = { ["optionID"] = "ZJCombatLog_Enable",       ["key"] = "Combat Log",       ["name"] = "CombatLog"                                                        },
+	["ZJCntCol"] = { ["optionID"] = "ZJContainerColors_Enable", ["key"] = "Container Colors", ["name"] = "ContainerColors"                                                  },
+	["ZJItmInf"] = { ["optionID"] = "ZJItemInfo_Enable",        ["key"] = "Item Info",        ["name"] = "ItemInfo",        ["openOn"] = "Item Info Module: Open On"        },
+	["ZJLckInf"] = { ["optionID"] = "ZJLockInfo_Enable",        ["key"] = "Lock Info",        ["name"] = "LockInfo",        ["openOn"] = "Lock Info Module: Open On"        },
+	["ZJPrfInf"] = { ["optionID"] = "ZJProficiencyInfo_Enable", ["key"] = "Proficiency Info", ["name"] = "ProficiencyInfo", ["openOn"] = "Proficiency Info Module: Open On" },
+	["ZJSplInf"] = { ["optionID"] = "ZJSpellInfo_Enable",       ["key"] = "Spell Info",       ["name"] = "SpellInfo",       ["openOn"] = "Spell Info Module: Open On"       },
+	["ZJTimer"]  = { ["optionID"] = "ZJTimer_Enable",           ["key"] = "Timer",            ["name"] = "Timer"                                                            },
 }
 
 -- Whether the module's switch is on, read from where its option stores it, (the module isn't loaded yet, so its option
@@ -212,6 +216,10 @@ end
 -- Stands in for the switch of a module that wasn't loaded, so that it can still be switched on. It is stored in the
 -- same place as the module's own switch, and applies on the next launch, (EEex shows that next to it).
 function ZJBattleSense_Private_RegisterUnloadedToggle(toggle)
+	if toggle.openOn ~= nil then
+		EEex_Options_Register(toggle.optionID, ZJPopup_NewSwitch(toggle.key, { ["requiresRestart"] = true }))
+		return
+	end
 	EEex_Options_Register(toggle.optionID, EEex_Options_Option.new({
 		["default"]         = 1,
 		["type"]            = EEex_Options_ToggleType.new(),
@@ -222,11 +230,16 @@ function ZJBattleSense_Private_RegisterUnloadedToggle(toggle)
 end
 
 Infinity_DoFile("ZJSprite")
+Infinity_DoFile("ZJPopup") -- The switch of the modules with a popup, (also for a module that isn't loaded)
 
 for _, moduleFile in ipairs(ZJBattleSense_Private_ModuleOrder) do
 	if ZJBattleSense_Modules[moduleFile] then
 
 		local toggle = ZJBattleSense_Private_ModuleToggles[moduleFile]
+
+		if toggle.openOn ~= nil then
+			EEex_Utility_TryIgnore(ZJPopup_MoveOldOpenOn, toggle.key, toggle.openOn)
+		end
 
 		if ZJBattleSense_Private_IsModuleSwitchedOn(toggle) then
 
@@ -247,7 +260,8 @@ end
 --------------------------
 
 -- Every module's on / off switch is in one "Battle Sense Modules" tab, like EEex's "Modules" tab, instead of in the
--- module's own tab. Only the modules that are installed are listed.
+-- module's own tab. Only the modules that are installed are listed. A module with a popup shows a button that steps
+-- through Off and the keys that can open the popup, the others a toggle.
 function ZJBattleSense_Private_InstalledModuleToggles()
 	local toggles = {}
 	for _, moduleFile in ipairs(ZJBattleSense_Private_ModuleOrder) do
@@ -267,7 +281,7 @@ if #ZJBattleSense_Private_InstalledModuleToggles() > 0 then
 				["optionID"]    = toggle.optionID,
 				["label"]       = "ZJBattleSense_Options_TRANSLATION_"..toggle.name.."_Enable",
 				["description"] = "ZJBattleSense_Options_TRANSLATION_"..toggle.name.."_Enable_Description",
-				["widget"]      = EEex_Options_ToggleWidget.new(),
+				["widget"]      = toggle.openOn ~= nil and ZJPopup_OpenOnWidget.new() or EEex_Options_ToggleWidget.new(),
 			}))
 		end
 		return { entries }

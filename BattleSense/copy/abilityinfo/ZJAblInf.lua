@@ -22,22 +22,17 @@
 +--------------------------------------------------------------------------------------------------+
 --]]
 
--- The "Open On" option and the screen popup, (shared by every popup)
+-- The switch that opens the popup and the screen popup, (shared by every popup)
 Infinity_DoFile("ZJPopup")
 
 -------------
 -- Options --
 -------------
 
-EEex_Options_Register("ZJAbilityInfo_Enable", EEex_Options_Option.new({
-	["default"]  = 1,
-	["type"]     = EEex_Options_ToggleType.new(),
-	["accessor"] = EEex_Options_ClampedAccessor.new({ ["min"] = 0, ["max"] = 1 }),
-	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Ability Info" }),
+-- The module's switch, (Off or the key that opens the popup), in the "Battle Sense Modules" tab
+ZJAbilityInfo_Private_OpenOn = EEex_Options_Register("ZJAbilityInfo_Enable", ZJPopup_NewSwitch("Ability Info", {
 	["onChange"] = function(self, oldValue) ZJAbilityInfo_SetEnabled(self:get() ~= 0) end,
 }))
-
-ZJAbilityInfo_Private_OpenOn = ZJPopup_RegisterOpenOn("ZJAbilityInfo_OpenOn", "Ability Info Module: Open On")
 
 ZJAbilityInfo_Private_FontPoint = EEex_Options_Register("ZJAbilityInfo_FontPoint", EEex_Options_Option.new({
 	["default"]  = 11,
@@ -62,7 +57,6 @@ ZJAbilityInfo_Private_ShowNextScore = EEex_Options_Register("ZJAbilityInfo_ShowN
 
 EEex_Options_AddTab("ZJBattleSense_Options_TRANSLATION_AbilityInfo_TabTitle", function() return {
 	{
-		ZJPopup_OpenOnDisplayEntry("ZJAbilityInfo_OpenOn"),
 		EEex_Options_DisplayEntry.new({
 			["optionID"]    = "ZJAbilityInfo_FontPoint",
 			["label"]       = "ZJBattleSense_Options_TRANSLATION_AbilityInfo_FontPoint",

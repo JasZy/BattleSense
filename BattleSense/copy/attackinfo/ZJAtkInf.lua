@@ -1,7 +1,7 @@
 
 -- The bar colors, (shared with Timer)
 Infinity_DoFile("ZJBarCol")
--- The "Open On" option, (shared by every popup)
+-- The switch that opens the popup, (shared by every popup)
 Infinity_DoFile("ZJPopup")
 -- The areas of spells / items, (shared with Spell Info)
 Infinity_DoFile("ZJArea")
@@ -10,15 +10,10 @@ Infinity_DoFile("ZJArea")
 -- Options --
 -------------
 
-EEex_Options_Register("ZJAttackInfo_Enable", EEex_Options_Option.new({
-	["default"]  = 1,
-	["type"]     = EEex_Options_ToggleType.new(),
-	["accessor"] = EEex_Options_ClampedAccessor.new({ ["min"] = 0, ["max"] = 1 }),
-	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Attack Info" }),
+-- The module's switch, (Off or the key that opens the popup), in the "Battle Sense Modules" tab
+ZJAttackInfo_Private_OpenOn = EEex_Options_Register("ZJAttackInfo_Enable", ZJPopup_NewSwitch("Attack Info", {
 	["onChange"] = function(self, oldValue) ZJAttackInfo_SetEnabled(self:get() ~= 0) end,
 }))
-
-ZJAttackInfo_Private_OpenOn = ZJPopup_RegisterOpenOn("ZJAttackInfo_OpenOn", "Attack Info Module: Open On")
 
 -- "Enabled For Friendly": the compact popup, over party members and allies that are in a fight
 ZJAttackInfo_Private_CompactForAllies = EEex_Options_Register("ZJAttackInfo_CompactForAllies", EEex_Options_Option.new({
@@ -120,7 +115,6 @@ end
 
 EEex_Options_AddTab("ZJBattleSense_Options_TRANSLATION_AttackInfo_TabTitle", function() return {
 	{
-		ZJPopup_OpenOnDisplayEntry("ZJAttackInfo_OpenOn"),
 		EEex_Options_DisplayEntry.new({
 			["optionID"]    = "ZJAttackInfo_CompactForAllies",
 			["label"]       = "ZJBattleSense_Options_TRANSLATION_AttackInfo_CompactForAllies",

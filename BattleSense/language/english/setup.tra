@@ -12,6 +12,7 @@
 @60 = ~Ability Info: Show what an ability score gives, (to-hit, armor class, hit points, spells, ...), when hovering it on the abilities screen of character creation~
 @70 = ~Proficiency Info: Show what the points of a weapon proficiency or fighting style give, (to-hit, damage, speed, attacks per round, style bonuses), when hovering it on the proficiencies screen at character creation and level up~
 @80 = ~Container Colors: Outline locked containers red and empty containers gray (replaces EEex's empty container module)~
+@90 = ~Lock Info: Show how hard a lock or found trap is, and each selected character's chance to pick, force or disarm it, when hovering a container, door or trap~
 
 // Error messages
 @1000 = ~Game not supported. Battle Sense requires BG:EE, BG2:EE, EET or IWD:EE.~

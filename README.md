@@ -14,7 +14,7 @@ Battle Sense is built on [EEex](https://github.com/Bubb13/EEex) and requires it.
 
 Each component can be installed on its own.
 
-The popups open while you hold a key and hover what they describe. The key is Left Ctrl by default, each popup's `Open On` setting picks another one: left or right Ctrl, Alt or Shift.
+The popups open while you hold a key and hover what they describe. The key is Left Ctrl by default. Each popup's switch in the "Battle Sense Modules" tab picks another one, (left or right Ctrl, Alt or Shift), or Off.
 
 ### Attack Info
 
@@ -102,13 +102,24 @@ Changes the color of a container's outline, (normally cyan), so you can see at a
 
 A container that is both is outlined red. The green outline the game shows when a thieving, spell or item cursor can target a container is left alone. Both colors can be changed, and "None" leaves those containers the game's own cyan.
 
+### Lock Info
+
+Hover a locked container or door to open a popup with its lock difficulty, and each selected character's chance to:
+
+- Pick the lock, (characters with Open Locks)
+- Force it, (from their strength's Bend Bars / Lift Gates)
+
+A trap that has been found, on a container, door or the floor, adds its difficulty and the chance to disarm it, (characters with Remove Traps). Traps that haven't been found are never mentioned.
+
+For example `Lock difficulty 50 (pick and force)` with `Imoen: pick 40% (45 + d10), force 0% (15 + d10)`. Each chance is followed by the character's skill, so you can see how far off they are. The chances follow the game's own rule: a try succeeds if the skill plus a d10 roll, (0 to 9, raised by Luck), is above the difficulty, and a difficulty of 100 never gives way. Picking and forcing use the same lock difficulty.
+
 ## Installation
 
 1. Install EEex.
 2. Extract this mod so that the `BattleSense` folder and `setup-BattleSense.exe` sit in your game folder.
 3. Run `setup-BattleSense.exe` and pick the components you want.
 
-The settings of each component are in the game under Options > EEex Options. The "Battle Sense Modules" tab switches each installed component on or off, and the tabs named "Battle Sense: ..." hold each component's other settings. A component that is switched off isn't loaded the next time the game starts; switching it back on then takes a restart.
+The settings of each component are in the game under Options > EEex Options. The "Battle Sense Modules" tab switches each installed component on or off, (for a component with a popup: Off, or the key that opens it), and the tabs named "Battle Sense: ..." hold each component's other settings. A component that is switched off isn't loaded the next time the game starts; switching it back on then takes a restart.
 
 ## Good to know
 
@@ -139,5 +150,5 @@ BattleSense/
 
 - `M_ZJBSen.lua` is run by the engine during startup and starts the installed modules.
 - `ZJ-en_US.lua` holds the English strings. A translation goes in a file named after the game's language code, for example `ZJ-de_DE.lua`, and only needs the strings it translates.
-- `ZJPopup.lua` holds what the popups share: the `Open On` option, and the popup of the abilities and proficiencies screens, (`ZJPopup.menu`).
+- `ZJPopup.lua` holds what the popups share: the switch that is both the module's on / off and the key that opens its popup, and the popup of the abilities and proficiencies screens, (`ZJPopup.menu`).
 - `ZJSprite.lua` holds the functions that read the engine's casting and attack round state. They are also available as methods on `CGameSprite`, prefixed with `zj`.

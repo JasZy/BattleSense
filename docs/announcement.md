@@ -22,7 +22,7 @@ It has five components, and you can install any combination of them:
 
 Under Options > EEex Options, the "Battle Sense Modules" tab switches each component on or off, and every component has its own tab ("Battle Sense: ..."), where each part of it can be switched on or off.
 
-The three popups, (Attack Info, Item Info and Spell Info), only open while you hold a key, so they stay out of the way until you want them. The key is Left Ctrl by default; each popup's tab can change it to Right Ctrl, or the left or right Alt or Shift.
+The three popups, (Attack Info, Item Info and Spell Info), only open while you hold a key, so they stay out of the way until you want them. The key is Left Ctrl by default; the "Battle Sense Modules" tab can change it to Right Ctrl, or the left or right Alt or Shift.
 
 ---
 

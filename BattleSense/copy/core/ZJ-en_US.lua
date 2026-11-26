@@ -12,15 +12,8 @@ uiStrings["ZJBattleSense_Options_TRANSLATION_Modules_TabTitle"] = "Battle Sense 
 -- Popups --
 ------------
 
--- The "Open On" option every popup has, (ZJPopup.lua)
-uiStrings["ZJBattleSense_Options_TRANSLATION_OpenOn"] = "Open On"
-
-uiStrings["ZJBattleSense_Options_TRANSLATION_OpenOn_Description"] = [[
-The key that opens the popup: left / right Ctrl, Alt or Shift. Click to pick the next one.
-
-The popup only opens while that key is held down, with the cursor over what the popup describes. Letting go of the key closes the popup.
-]]
-
+-- The switch of a module with a popup, in the "Battle Sense Modules" tab: Off, or the key that opens the popup, (ZJPopup.lua)
+uiStrings["ZJBattleSense_TRANSLATION_OpenOn_Off"]           = "Off"
 uiStrings["ZJBattleSense_TRANSLATION_OpenOn_LeftCtrl"]      = "Left Ctrl"
 uiStrings["ZJBattleSense_TRANSLATION_OpenOn_LeftAlt"]       = "Left Alt"
 uiStrings["ZJBattleSense_TRANSLATION_OpenOn_LeftShift"]     = "Left Shift"
@@ -34,12 +27,12 @@ uiStrings["ZJBattleSense_TRANSLATION_OpenOn_RightShift"]    = "Right Shift"
 
 uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_TabTitle"] = "Battle Sense: Attack Info"
 
-uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_Enable"] = "Enable Attack Info Module"
+uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_Enable"] = "Attack Info Module"
 
 uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_Enable_Description"] = [[
-Enables the attack information popup.
+The key that opens the attack information popup: left / right Ctrl, Alt or Shift, or Off to switch the module off. Click to pick the next one.
 
-The popup opens when hovering any creature while its "Open On" key is held: a hostile or neutral creature, or a party member or ally, (see "Enabled For Friendly").
+The popup opens when hovering any creature while that key is held: a hostile or neutral creature, or a party member or ally, (see "Enabled For Friendly"). Letting go of the key closes it.
 
 It has two panels, with a row for each selected party member:
 
@@ -206,10 +199,12 @@ These are the spells EEex's Effect Menu module shows: spells from items, permane
 
 uiStrings["ZJBattleSense_Options_TRANSLATION_SpellInfo_TabTitle"] = "Battle Sense: Spell Info"
 
-uiStrings["ZJBattleSense_Options_TRANSLATION_SpellInfo_Enable"] = "Enable Spell Info Module"
+uiStrings["ZJBattleSense_Options_TRANSLATION_SpellInfo_Enable"] = "Spell Info Module"
 
 uiStrings["ZJBattleSense_Options_TRANSLATION_SpellInfo_Enable_Description"] = [[
-While a spell, wand, scroll or other item ability is waiting for a target, hovering a creature shows what it will do to that creature: its magic resistance, the saving throws it gets and the roll it needs, the damage with its resistance to each element, and why it would be unaffected, (immunities, the spell's own exclusions and level limits).
+The key that opens the spell popup: left / right Ctrl, Alt or Shift, or Off to switch the module off. Click to pick the next one.
+
+While a spell, wand, scroll or other item ability is waiting for a target, hovering a creature with that key held shows what it will do to that creature: its magic resistance, the saving throws it gets and the roll it needs, the damage with its resistance to each element, and why it would be unaffected, (immunities, the spell's own exclusions and level limits).
 ]]
 
 uiStrings["ZJBattleSense_Options_TRANSLATION_SpellInfo_FontPoint"] = "Font Point"
@@ -281,7 +276,7 @@ Turn this off to keep the popup out of the way while healing or buffing the part
 uiStrings["ZJBattleSense_Options_TRANSLATION_SpellInfo_ShowAreas"] = "Show Areas"
 
 uiStrings["ZJBattleSense_Options_TRANSLATION_SpellInfo_ShowAreas_Description"] = [[
-Marks the ground a spell / item will affect, while the "Open On" key is held.
+Marks the ground a spell / item will affect, while the Spell Info key is held, (the "Battle Sense Modules" tab).
 
 While a spell / item with an area waits for a target, its area is marked in blue around the creature under the cursor, or around the cursor. A spell that affects the area around the caster, like Chant, is marked around the caster.
 
@@ -480,12 +475,12 @@ The lowest value is 1.
 
 uiStrings["ZJBattleSense_Options_TRANSLATION_ItemInfo_TabTitle"] = "Battle Sense: Item Info"
 
-uiStrings["ZJBattleSense_Options_TRANSLATION_ItemInfo_Enable"] = "Enable Item Info Module"
+uiStrings["ZJBattleSense_Options_TRANSLATION_ItemInfo_Enable"] = "Item Info Module"
 
 uiStrings["ZJBattleSense_Options_TRANSLATION_ItemInfo_Enable_Description"] = [[
-Enables the item popup.
+The key that opens the item popup: left / right Ctrl, Alt or Shift, or Off to switch the module off. Click to pick the next one.
 
-The item popup opens when hovering the cursor over an item in a store, a container, the quick loot bar, or the inventory screen, and displays the properties of that item.
+The item popup opens while that key is held, when hovering the cursor over an item in a store, a container, the quick loot bar, or the inventory screen, and displays the properties of that item.
 ]]
 
 uiStrings["ZJBattleSense_Options_TRANSLATION_ItemInfo_FontPoint"] = "Font Point"
@@ -641,12 +636,12 @@ uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Weapon_SpeedFactor"] = "Speed fact
 
 uiStrings["ZJBattleSense_Options_TRANSLATION_AbilityInfo_TabTitle"] = "Battle Sense: Ability Info"
 
-uiStrings["ZJBattleSense_Options_TRANSLATION_AbilityInfo_Enable"] = "Enable Ability Info Module"
+uiStrings["ZJBattleSense_Options_TRANSLATION_AbilityInfo_Enable"] = "Ability Info Module"
 
 uiStrings["ZJBattleSense_Options_TRANSLATION_AbilityInfo_Enable_Description"] = [[
-Enables the ability popup.
+The key that opens the ability popup: left / right Ctrl, Alt or Shift, or Off to switch the module off. Click to pick the next one.
 
-The popup opens when hovering an ability on the abilities screen of character creation, (see "Open On"). It lists what the character's current score in that ability gives: to-hit and damage bonus, armor class, hit points per level, chance to learn spells, bonus priest spells, lore, store prices, ...
+The popup opens while that key is held, when hovering an ability on the abilities screen of character creation. It lists what the character's current score in that ability gives: to-hit and damage bonus, armor class, hit points per level, chance to learn spells, bonus priest spells, lore, store prices, ...
 
 Values that only matter to some classes, (spells, thieving skills), are only listed for those classes. The popup follows the score as it is rerolled or changed.
 ]]
@@ -703,12 +698,12 @@ uiStrings["ZJBattleSense_TRANSLATION_AbilityInfo_Stat_StorePrices"]       = "Sto
 
 uiStrings["ZJBattleSense_Options_TRANSLATION_ProficiencyInfo_TabTitle"] = "Battle Sense: Proficiency Info"
 
-uiStrings["ZJBattleSense_Options_TRANSLATION_ProficiencyInfo_Enable"] = "Enable Proficiency Info Module"
+uiStrings["ZJBattleSense_Options_TRANSLATION_ProficiencyInfo_Enable"] = "Proficiency Info Module"
 
 uiStrings["ZJBattleSense_Options_TRANSLATION_ProficiencyInfo_Enable_Description"] = [[
-Enables the proficiency popup.
+The key that opens the proficiency popup: left / right Ctrl, Alt or Shift, or Off to switch the module off. Click to pick the next one.
 
-The popup opens when hovering a weapon proficiency or fighting style on the proficiencies screen, at character creation and level up, (see "Open On"). It shows what its points give now, (values of 0 are left out), and follows the points as they are changed.
+The popup opens while that key is held, when hovering a weapon proficiency or fighting style on the proficiencies screen, at character creation and level up. It shows what its points give now, (values of 0 are left out), and follows the points as they are changed.
 
 For a weapon: the to-hit and damage bonus, the speed factor, and the extra attacks per round the points add at the character's level, (with no points: the class's penalty for using it). For a fighting style: its damage, to-hit, armor class, speed factor and critical hit bonuses.
 ]]
@@ -784,3 +779,36 @@ The outline color of containers with nothing in them. Click to pick the next col
 
 uiStrings["ZJBattleSense_TRANSLATION_ContainerColors_None"] = "None"
 uiStrings["ZJBattleSense_TRANSLATION_ContainerColors_Gray"] = "Gray"
+
+---------------
+-- Lock Info --
+---------------
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_LockInfo_TabTitle"] = "Battle Sense: Lock Info"
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_LockInfo_Enable"] = "Lock Info Module"
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_LockInfo_Enable_Description"] = [[
+The key that opens the lock popup: left / right Ctrl, Alt or Shift, or Off to switch the module off. Click to pick the next one.
+
+Hovering a locked container or door with that key held shows its lock difficulty, and each selected character's chance to pick the lock, (characters with Open Locks), and to force it, (from their strength's Bend Bars / Lift Gates). A trap that has been found, on a container, door or the floor, adds its difficulty and the chance to disarm it, (characters with Remove Traps). Traps that haven't been found are never mentioned.
+
+Each try succeeds if the skill plus a d10 roll, (0 to 9, raised by Luck), is above the difficulty. A difficulty of 100 can never be picked, forced or disarmed.
+]]
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_LockInfo_FontPoint"] = "Font Point"
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_LockInfo_FontPoint_Description"] = [[
+The size of the text in the lock popup.
+]]
+
+uiStrings["ZJBattleSense_TRANSLATION_LockInfo_Lock"]           = "Lock difficulty %d (pick and force)"
+uiStrings["ZJBattleSense_TRANSLATION_LockInfo_LockImpossible"] = "Lock difficulty 100: can't be picked or forced"
+uiStrings["ZJBattleSense_TRANSLATION_LockInfo_Trap"]           = "Trap difficulty %d"
+uiStrings["ZJBattleSense_TRANSLATION_LockInfo_TrapImpossible"] = "Trap difficulty 100: can't be disarmed"
+uiStrings["ZJBattleSense_TRANSLATION_LockInfo_Pick"]           = "pick %d%%"
+uiStrings["ZJBattleSense_TRANSLATION_LockInfo_Force"]          = "force %d%%"
+uiStrings["ZJBattleSense_TRANSLATION_LockInfo_Disarm"]         = "disarm %d%%"
+-- The roll after a chance: the character's skill, plus a d10, (0 to 9), and Luck if it isn't 0
+uiStrings["ZJBattleSense_TRANSLATION_LockInfo_Roll"]           = "(%d + d10)"
+uiStrings["ZJBattleSense_TRANSLATION_LockInfo_RollLuck"]       = "(%d + d10 %+d Luck)"

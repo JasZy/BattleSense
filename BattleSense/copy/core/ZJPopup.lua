@@ -2,9 +2,9 @@
 +--------------------------------------------------------------------------------------------------+
 | ZJPopup - What the popups of the modules share                                                   |
 +--------------------------------------------------------------------------------------------------+
-|   * The "Open On" option: a popup only opens while its key is held, (left / right Ctrl, Alt or   |
-|     Shift), with the cursor over what it describes. Every popup module registers its own, the    |
-|     options menu shows it as a button with the key's name, clicking it steps to the next.        |
+|   * The switch: a popup only opens while its key is held, (left / right Ctrl, Alt or Shift),     |
+|     with the cursor over what it describes. The key is also the module's on / off switch, the    |
+|     "Battle Sense Modules" tab shows it as a button with "Off" or the key's name.                |
 |                                                                                                  |
 |   * The screen popup, (ZJPopup.menu): a box of text beside the cursor, for the modules that      |
 |     describe a row of a list on a full screen menu, (the abilities and proficiencies screens).   |
@@ -22,7 +22,7 @@ Infinity_DoFile("ZJBarCol")
 -- Open On --
 -------------
 
--- [option value] = The key that has to be held. Value 0 was "Automatically", which was removed: a stored 0 is raised to 1.
+-- [option value] = The key that has to be held, (0 = Off, see ZJPopup_NewSwitch())
 ZJPopup_OpenOnKeys = {
 	{ ["name"] = "ZJBattleSense_TRANSLATION_OpenOn_LeftCtrl",   ["key"] = 0x400000E0 }, -- SDLK_LCTRL
 	{ ["name"] = "ZJBattleSense_TRANSLATION_OpenOn_LeftAlt",    ["key"] = 0x400000E2 }, -- SDLK_LALT
@@ -34,22 +34,47 @@ ZJPopup_OpenOnKeys = {
 
 ZJPopup_OpenOnDefault = 1 -- Left Ctrl
 
--- Registers the "Open On" option of a popup, `id` is the option's ID, `storageKey` its key in the options file
-function ZJPopup_RegisterOpenOn(id, storageKey)
-	return EEex_Options_Register(id, EEex_Options_Option.new({
+ZJPopup_OpenOnSection = "Battle Sense"
+
+-- A popup module's switch is also its "Open On" key: 0 = Off, (the module is switched off), otherwise the key that has
+-- to be held, ([option value] of ZJPopup_OpenOnKeys). It is shown in the "Battle Sense Modules" tab, (M_ZJBSen.lua).
+-- `storageKey` is its key in the options file, `fields` any more fields of the option, (onChange, requiresRestart).
+function ZJPopup_NewSwitch(storageKey, fields)
+	local option = {
 		["default"]  = ZJPopup_OpenOnDefault,
-		["accessor"] = EEex_Options_ClampedAccessor.new({ ["min"] = 1, ["max"] = #ZJPopup_OpenOnKeys }),
-		["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = storageKey }),
-	}))
+		["accessor"] = EEex_Options_ClampedAccessor.new({ ["min"] = 0, ["max"] = #ZJPopup_OpenOnKeys }),
+		["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = ZJPopup_OpenOnSection, ["key"] = storageKey }),
+	}
+	for field, value in pairs(fields or {}) do
+		option[field] = value
+	end
+	return EEex_Options_Option.new(option)
 end
 
--- Whether a popup with the "Open On" option `option` may be open now: only while its key is held
+-- The switch used to be an on / off toggle, (1 = on), with the key in a separate "Open On" option stored under
+-- `oldOpenOnKey`. A switch that is on takes over that key once, after which the old option is set to 0, (it was never
+-- 0 otherwise: that was "Automatically", which was removed). Called before the switch is registered or read.
+function ZJPopup_MoveOldOpenOn(storageKey, oldOpenOnKey)
+
+	local section = ZJPopup_OpenOnSection
+	local openOn = tonumber(Infinity_GetINIString(section, oldOpenOnKey, "X-DEFAULT"))
+	if openOn == nil or openOn < 1 then return end
+
+	local switch = tonumber(Infinity_GetINIString(section, storageKey, "X-DEFAULT"))
+	if switch == nil or switch == 1 then
+		Infinity_SetINIValue(section, storageKey, math.min(math.floor(openOn), #ZJPopup_OpenOnKeys))
+	end
+
+	Infinity_SetINIValue(section, oldOpenOnKey, 0)
+end
+
+-- Whether a popup with the switch `option` may be open now: only while its key is held, (never while it is Off)
 function ZJPopup_IsOpenAllowed(option)
-	local entry = ZJPopup_OpenOnKeys[option:get()] or ZJPopup_OpenOnKeys[ZJPopup_OpenOnDefault]
-	return EEex_Key_IsDown(entry.key) == true
+	local entry = ZJPopup_OpenOnKeys[option:get()]
+	return entry ~= nil and EEex_Key_IsDown(entry.key) == true
 end
 
--- A button that shows the name of the key, clicking it steps to the next one
+-- A button that shows "Off" or the name of the key, clicking it steps to the next one
 ZJPopup_OpenOnWidget = {}
 ZJPopup_OpenOnWidget.__index = ZJPopup_OpenOnWidget
 setmetatable(ZJPopup_OpenOnWidget, ZJBarColors_CycleWidget)
@@ -66,26 +91,16 @@ function ZJPopup_OpenOnWidget:_getCount()
 end
 
 function ZJPopup_OpenOnWidget:_getMin()
-	return 1
+	return 0
 end
 
 function ZJPopup_OpenOnWidget:_getText(value)
-	local entry = ZJPopup_OpenOnKeys[value] or ZJPopup_OpenOnKeys[ZJPopup_OpenOnDefault]
-	return getUiString(entry.name)
+	local entry = ZJPopup_OpenOnKeys[value]
+	return getUiString(entry and entry.name or "ZJBattleSense_TRANSLATION_OpenOn_Off")
 end
 
 function ZJPopup_OpenOnWidget:_getColor(value)
 	return EEex_Options_Private_GetFontStyleColor(styles["EEex_Options_Normal"])
-end
-
--- The options menu entry of the "Open On" option `optionID`
-function ZJPopup_OpenOnDisplayEntry(optionID)
-	return EEex_Options_DisplayEntry.new({
-		["optionID"]    = optionID,
-		["label"]       = "ZJBattleSense_Options_TRANSLATION_OpenOn",
-		["description"] = "ZJBattleSense_Options_TRANSLATION_OpenOn_Description",
-		["widget"]      = ZJPopup_OpenOnWidget.new(),
-	})
 end
 
 ------------------
