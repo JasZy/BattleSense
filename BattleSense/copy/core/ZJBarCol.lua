@@ -1,9 +1,9 @@
 --[[
 +--------------------------------------------------------------------------------------------------+
-| ZJBarCol - The colors of the timer bars, shared by the Timer and Attack Info modules             |
+| ZJBarCol - The colors of the timer bars, shared by the Timer and Creature Info modules           |
 +--------------------------------------------------------------------------------------------------+
 |   Every bar type, (cast, contingency, modal, attack), has one option: Off, or one of the colors  |
-|   below. It applies to the bars beside the portraits and to the ones in the attack info popup.   |
+|   below. It applies to the bars beside the portraits and to the ones in the creature info popup. |
 |   The options menu shows it as a button with the color's name, clicking it steps to the next.    |
 +--------------------------------------------------------------------------------------------------+
 --]]

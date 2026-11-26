@@ -1,5 +1,5 @@
 
--- The bar colors, (shared with Attack Info)
+-- The bar colors, (shared with Creature Info)
 Infinity_DoFile("ZJBarCol")
 
 -------------

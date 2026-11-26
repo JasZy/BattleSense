@@ -1,0 +1,1377 @@
+
+-- The popup, opened and laid out by the panel, (ZJCreatureInfo_Private_Panel_Show()), which the Battle Sense popup asks
+-- every frame while its key is held, (ZJPopup.lua)
+menu
+{
+	name "ZJCreatureInfo_Menu"
+	ignoreesc
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_BackgroundRect"
+		area 0 0 -1 -1
+	}
+
+	-- The target's name, the first thing in the left panel's header (area set in ZJCreatureInfo_Private_Layout())
+	label
+	{
+		name "ZJCreatureInfo_Menu_TargetName"
+		area -1 -1 -1 -1
+		text style "normal"
+		text lua "ZJCreatureInfo_Private_Menu_TargetName"
+		text color 255 255 255 255
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_Label"
+		area -1 -1 -1 -1
+		text style "normal"
+		text lua "ZJCreatureInfo_Private_Menu_Label"
+		text color 255 255 255 255
+	}
+
+	-- Right panel's header: what the target attacks with, per hand: its damage, the icons of the damage type(s)
+	-- the extra damage and the icons of its elements, (areas set in ZJCreatureInfo_Private_Layout())
+	label
+	{
+		name "ZJCreatureInfo_Menu_TargetAttack1Text"
+		area -1 -1 -1 -1
+		text style "normal"
+		text lua "ZJCreatureInfo_Private_Menu_TargetAttack[1].text"
+		text color 255 255 255 255
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_TargetAttack1Icon1"
+		enabled "ZJCreatureInfo_Private_Menu_TargetAttack[1].icons[1] ~= nil"
+		area 0 0 -1 -1
+		bam "ZJCREDMG"
+		frame lua "(ZJCreatureInfo_Private_Menu_TargetAttack[1].icons[1] or 0) * 4"
+		scaleToClip
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_TargetAttack1Icon2"
+		enabled "ZJCreatureInfo_Private_Menu_TargetAttack[1].icons[2] ~= nil"
+		area 0 0 -1 -1
+		bam "ZJCREDMG"
+		frame lua "(ZJCreatureInfo_Private_Menu_TargetAttack[1].icons[2] or 0) * 4"
+		scaleToClip
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_TargetAttack1Extra"
+		area -1 -1 -1 -1
+		text style "normal"
+		text lua "ZJCreatureInfo_Private_Menu_TargetAttack[1].extra"
+		text color 255 255 255 255
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_TargetAttack1ExtraIcon1"
+		enabled "ZJCreatureInfo_Private_Menu_TargetAttack[1].extraIcons[1] ~= nil"
+		area 0 0 -1 -1
+		bam "ZJCREELM"
+		frame lua "ZJCreatureInfo_Private_Menu_TargetAttack[1].extraIcons[1] or 0"
+		scaleToClip
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_TargetAttack1ExtraIcon2"
+		enabled "ZJCreatureInfo_Private_Menu_TargetAttack[1].extraIcons[2] ~= nil"
+		area 0 0 -1 -1
+		bam "ZJCREELM"
+		frame lua "ZJCreatureInfo_Private_Menu_TargetAttack[1].extraIcons[2] or 0"
+		scaleToClip
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_TargetAttack2Text"
+		area -1 -1 -1 -1
+		text style "normal"
+		text lua "ZJCreatureInfo_Private_Menu_TargetAttack[2].text"
+		text color 255 255 255 255
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_TargetAttack2Icon1"
+		enabled "ZJCreatureInfo_Private_Menu_TargetAttack[2].icons[1] ~= nil"
+		area 0 0 -1 -1
+		bam "ZJCREDMG"
+		frame lua "(ZJCreatureInfo_Private_Menu_TargetAttack[2].icons[1] or 0) * 4"
+		scaleToClip
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_TargetAttack2Icon2"
+		enabled "ZJCreatureInfo_Private_Menu_TargetAttack[2].icons[2] ~= nil"
+		area 0 0 -1 -1
+		bam "ZJCREDMG"
+		frame lua "(ZJCreatureInfo_Private_Menu_TargetAttack[2].icons[2] or 0) * 4"
+		scaleToClip
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_TargetAttack2Extra"
+		area -1 -1 -1 -1
+		text style "normal"
+		text lua "ZJCreatureInfo_Private_Menu_TargetAttack[2].extra"
+		text color 255 255 255 255
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_TargetAttack2ExtraIcon1"
+		enabled "ZJCreatureInfo_Private_Menu_TargetAttack[2].extraIcons[1] ~= nil"
+		area 0 0 -1 -1
+		bam "ZJCREELM"
+		frame lua "ZJCreatureInfo_Private_Menu_TargetAttack[2].extraIcons[1] or 0"
+		scaleToClip
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_TargetAttack2ExtraIcon2"
+		enabled "ZJCreatureInfo_Private_Menu_TargetAttack[2].extraIcons[2] ~= nil"
+		area 0 0 -1 -1
+		bam "ZJCREELM"
+		frame lua "ZJCreatureInfo_Private_Menu_TargetAttack[2].extraIcons[2] or 0"
+		scaleToClip
+	}
+
+	-- Between the two hands
+	label
+	{
+		name "ZJCreatureInfo_Menu_TargetAttackSeparator"
+		area -1 -1 -1 -1
+		text style "normal"
+		text lua "ZJCreatureInfo_Private_Menu_TargetAttackSeparator"
+		text color 255 255 255 255
+	}
+
+	-- Right panel's header: the target's defenses
+	label
+	{
+		name "ZJCreatureInfo_Menu_Label2"
+		area -1 -1 -1 -1
+		text style "normal"
+		text lua "ZJCreatureInfo_Private_Menu_Label2"
+		text color 255 255 255 255
+	}
+
+	-- Right panel's header: the spells affecting the target, on lines below the header's first line
+	label
+	{
+		name "ZJCreatureInfo_Menu_SpellEffects"
+		area -1 -1 -1 -1
+		text style "normal"
+		text lua "ZJCreatureInfo_Private_Menu_SpellEffects"
+		text color 255 255 255 255
+		text align left center
+	}
+
+	-- Separator between the panels
+	label
+	{
+		name "ZJCreatureInfo_Menu_PanelSeparator"
+		area -1 -1 -1 -1
+		fill 112 111 111 64
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_LabelSeparator"
+		area -1 -1 -1 -1
+		fill 112 111 111 64
+	}
+
+	-- Left panel: the target's attacks on the listed sprites
+	list
+	{
+		-- Name column
+		column
+		{
+			width -1
+
+			label
+			{
+				area -1 0 -1 -1
+				text style "normal"
+				text lua "ZJCreatureInfo_Private_Menu_InfoList_Table[rowNumber][1]"
+				text color 255 255 255 255
+				text align right center
+			}
+
+			-- What the target is doing to the creature on this row: the icon of its weapon's damage type, of a spell or of an item
+			-- (area set in ZJCreatureInfo_Private_Layout())
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_RowIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber) ~= nil"
+				area 0 0 -1 -1
+				bam "ZJCREDMG"
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_RowIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber) or 0"
+				scaleToClip
+			}
+		}
+
+		-- Main hand column
+		column
+		{
+			width -1
+
+			label
+			{
+				area -1 0 -1 -1
+				fill 112 111 111 64
+			}
+
+			-- Roll needed to hit
+			label
+			{
+				area -1 0 -1 -1
+				text style "normal"
+				text lua "ZJCreatureInfo_Private_Menu_InfoList_Table[rowNumber][2]"
+				text color 255 255 255 255
+				text align left center
+			}
+
+			-- Weapon damage (area set in ZJCreatureInfo_Private_Layout())
+			label
+			{
+				area -1 0 -1 -1
+				text style "normal"
+				text lua "ZJCreatureInfo_Private_Menu_InfoList_Table[rowNumber][5]"
+				text color 255 255 255 255
+				text align left center
+			}
+
+			-- The icons in front of the roll, (damage type / spell / item), the extra damage and its icons
+			-- (areas set in ZJCreatureInfo_Private_Layout())
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 8, 1) ~= nil"
+				area 0 0 -1 -1
+				bam "ZJCREDMG"
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 8, 1) or 0"
+				scaleToClip
+			}
+
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 8, 2) ~= nil"
+				area 0 0 -1 -1
+				bam "ZJCREDMG"
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 8, 2) or 0"
+				scaleToClip
+			}
+
+			label
+			{
+				area -1 0 -1 -1
+				text style "normal"
+				text lua "ZJCreatureInfo_Private_Menu_InfoList_ExtraText(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 8)"
+				text color 255 255 255 255
+				text align left center
+			}
+
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_ExtraIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 8, 1) ~= nil"
+				area 0 0 -1 -1
+				bam "ZJCREELM"
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_ExtraIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 8, 1) or 0"
+				scaleToClip
+			}
+
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_ExtraIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 8, 2) ~= nil"
+				area 0 0 -1 -1
+				bam "ZJCREELM"
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_ExtraIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 8, 2) or 0"
+				scaleToClip
+			}
+		}
+
+		-- Offhand column
+		column
+		{
+			width -1
+
+			label
+			{
+				area -1 0 -1 -1
+				fill 112 111 111 64
+			}
+
+			-- Roll needed to hit
+			label
+			{
+				area -1 0 -1 -1
+				text style "normal"
+				text lua "ZJCreatureInfo_Private_Menu_InfoList_Table[rowNumber][3]"
+				text color 255 255 255 255
+				text align left center
+			}
+
+			-- Weapon damage (area set in ZJCreatureInfo_Private_Layout())
+			label
+			{
+				area -1 0 -1 -1
+				text style "normal"
+				text lua "ZJCreatureInfo_Private_Menu_InfoList_Table[rowNumber][6]"
+				text color 255 255 255 255
+				text align left center
+			}
+
+			-- The icons in front of the roll, (damage type / spell / item), the extra damage and its icons
+			-- (areas set in ZJCreatureInfo_Private_Layout())
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 9, 1) ~= nil"
+				area 0 0 -1 -1
+				bam "ZJCREDMG"
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 9, 1) or 0"
+				scaleToClip
+			}
+
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 9, 2) ~= nil"
+				area 0 0 -1 -1
+				bam "ZJCREDMG"
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 9, 2) or 0"
+				scaleToClip
+			}
+
+			label
+			{
+				area -1 0 -1 -1
+				text style "normal"
+				text lua "ZJCreatureInfo_Private_Menu_InfoList_ExtraText(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 9)"
+				text color 255 255 255 255
+				text align left center
+			}
+
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_ExtraIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 9, 1) ~= nil"
+				area 0 0 -1 -1
+				bam "ZJCREELM"
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_ExtraIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 9, 1) or 0"
+				scaleToClip
+			}
+
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_ExtraIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 9, 2) ~= nil"
+				area 0 0 -1 -1
+				bam "ZJCREELM"
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_ExtraIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 9, 2) or 0"
+				scaleToClip
+			}
+		}
+
+		-- End
+		column
+		{
+			width -1
+
+			label
+			{
+				area 0 -1 -1 -1
+				fill 112 111 111 64
+			}
+		}
+
+		area -1 -1 -1 -1
+		name "ZJCreatureInfo_Menu_InfoList"
+		table "ZJCreatureInfo_Private_Menu_InfoList_Table"
+		var "ZJCreatureInfo_Private_Menu_InfoList_SelectedRow"
+		rowheight -1
+		hidehighlight
+	}
+
+	-- Right panel: the attacks of the listed sprites on the target
+	list
+	{
+		-- Name column
+		column
+		{
+			width -1
+
+			label
+			{
+				area -1 0 -1 -1
+				text style "normal"
+				text lua "ZJCreatureInfo_Private_Menu_InfoList2_Table[rowNumber][1]"
+				text color 255 255 255 255
+				text align right center
+			}
+		}
+
+		-- Main hand column
+		column
+		{
+			width -1
+
+			label
+			{
+				area -1 0 -1 -1
+				fill 112 111 111 64
+			}
+
+			-- Roll needed to hit
+			label
+			{
+				area -1 0 -1 -1
+				text style "normal"
+				text lua "ZJCreatureInfo_Private_Menu_InfoList2_Table[rowNumber][2]"
+				text color 255 255 255 255
+				text align left center
+			}
+
+			-- Weapon damage (area set in ZJCreatureInfo_Private_Layout())
+			label
+			{
+				area -1 0 -1 -1
+				text style "normal"
+				text lua "ZJCreatureInfo_Private_Menu_InfoList2_Table[rowNumber][5]"
+				text color 255 255 255 255
+				text align left center
+			}
+
+			-- The icons in front of the roll, (damage type / spell / item), the extra damage and its icons
+			-- (areas set in ZJCreatureInfo_Private_Layout())
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 8, 1) ~= nil"
+				area 0 0 -1 -1
+				bam "ZJCREDMG"
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 8, 1) or 0"
+				scaleToClip
+			}
+
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 8, 2) ~= nil"
+				area 0 0 -1 -1
+				bam "ZJCREDMG"
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 8, 2) or 0"
+				scaleToClip
+			}
+
+			label
+			{
+				area -1 0 -1 -1
+				text style "normal"
+				text lua "ZJCreatureInfo_Private_Menu_InfoList_ExtraText(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 8)"
+				text color 255 255 255 255
+				text align left center
+			}
+
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_ExtraIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 8, 1) ~= nil"
+				area 0 0 -1 -1
+				bam "ZJCREELM"
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_ExtraIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 8, 1) or 0"
+				scaleToClip
+			}
+
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_ExtraIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 8, 2) ~= nil"
+				area 0 0 -1 -1
+				bam "ZJCREELM"
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_ExtraIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 8, 2) or 0"
+				scaleToClip
+			}
+		}
+
+		-- Offhand column
+		column
+		{
+			width -1
+
+			label
+			{
+				area -1 0 -1 -1
+				fill 112 111 111 64
+			}
+
+			-- Roll needed to hit
+			label
+			{
+				area -1 0 -1 -1
+				text style "normal"
+				text lua "ZJCreatureInfo_Private_Menu_InfoList2_Table[rowNumber][3]"
+				text color 255 255 255 255
+				text align left center
+			}
+
+			-- Weapon damage (area set in ZJCreatureInfo_Private_Layout())
+			label
+			{
+				area -1 0 -1 -1
+				text style "normal"
+				text lua "ZJCreatureInfo_Private_Menu_InfoList2_Table[rowNumber][6]"
+				text color 255 255 255 255
+				text align left center
+			}
+
+			-- The icons in front of the roll, (damage type / spell / item), the extra damage and its icons
+			-- (areas set in ZJCreatureInfo_Private_Layout())
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 9, 1) ~= nil"
+				area 0 0 -1 -1
+				bam "ZJCREDMG"
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 9, 1) or 0"
+				scaleToClip
+			}
+
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 9, 2) ~= nil"
+				area 0 0 -1 -1
+				bam "ZJCREDMG"
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 9, 2) or 0"
+				scaleToClip
+			}
+
+			label
+			{
+				area -1 0 -1 -1
+				text style "normal"
+				text lua "ZJCreatureInfo_Private_Menu_InfoList_ExtraText(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 9)"
+				text color 255 255 255 255
+				text align left center
+			}
+
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_ExtraIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 9, 1) ~= nil"
+				area 0 0 -1 -1
+				bam "ZJCREELM"
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_ExtraIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 9, 1) or 0"
+				scaleToClip
+			}
+
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_ExtraIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 9, 2) ~= nil"
+				area 0 0 -1 -1
+				bam "ZJCREELM"
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_ExtraIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 9, 2) or 0"
+				scaleToClip
+			}
+		}
+
+		-- End
+		column
+		{
+			width -1
+
+			label
+			{
+				area 0 -1 -1 -1
+				fill 112 111 111 64
+			}
+		}
+
+		area -1 -1 -1 -1
+		name "ZJCreatureInfo_Menu_InfoList2"
+		table "ZJCreatureInfo_Private_Menu_InfoList2_Table"
+		var "ZJCreatureInfo_Private_Menu_InfoList2_SelectedRow"
+		rowheight -1
+		hidehighlight
+	}
+
+	-- Target's timer bars (areas set in ZJCreatureInfo_Private_Layout())
+
+	-- Cast timer
+	label
+	{
+		name "ZJCreatureInfo_Menu_TargetCastBarTrack"
+		enabled "ZJCreatureInfo_Private_Menu_TargetBars.Cast.track"
+		area 0 0 -1 -1
+		fill 112 111 111 64
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_TargetCastBarFill"
+		enabled "ZJCreatureInfo_Private_Menu_TargetBars.Cast.fill"
+		area 0 0 -1 -1
+		fill lua "ZJBarColors_Fill('Cast')"
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_TargetCastBarMarker1"
+		enabled "ZJCreatureInfo_Private_Menu_TargetBars.Cast.markers[1]"
+		area 0 0 -1 -1
+		fill 255 255 255 255
+	}
+
+	-- Contingency timer
+	label
+	{
+		name "ZJCreatureInfo_Menu_TargetContingencyBarTrack"
+		enabled "ZJCreatureInfo_Private_Menu_TargetBars.Contingency.track"
+		area 0 0 -1 -1
+		fill 112 111 111 64
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_TargetContingencyBarFill"
+		enabled "ZJCreatureInfo_Private_Menu_TargetBars.Contingency.fill"
+		area 0 0 -1 -1
+		fill lua "ZJBarColors_Fill('Contingency')"
+	}
+
+	-- Modal timer
+	label
+	{
+		name "ZJCreatureInfo_Menu_TargetModalBarTrack"
+		enabled "ZJCreatureInfo_Private_Menu_TargetBars.Modal.track"
+		area 0 0 -1 -1
+		fill 112 111 111 64
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_TargetModalBarFill"
+		enabled "ZJCreatureInfo_Private_Menu_TargetBars.Modal.fill"
+		area 0 0 -1 -1
+		fill lua "ZJBarColors_Fill('Modal')"
+	}
+
+	-- Attack timer
+	label
+	{
+		name "ZJCreatureInfo_Menu_TargetAttackBarTrack"
+		enabled "ZJCreatureInfo_Private_Menu_TargetBars.Attack.track"
+		area 0 0 -1 -1
+		fill 112 111 111 64
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_TargetAttackBarFill"
+		enabled "ZJCreatureInfo_Private_Menu_TargetBars.Attack.fill"
+		area 0 0 -1 -1
+		fill lua "ZJBarColors_Fill('Attack')"
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_TargetAttackBarMarker1"
+		enabled "ZJCreatureInfo_Private_Menu_TargetBars.Attack.markers[1]"
+		area 0 0 -1 -1
+		fill 255 255 255 255
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_TargetAttackBarMarker2"
+		enabled "ZJCreatureInfo_Private_Menu_TargetBars.Attack.markers[2]"
+		area 0 0 -1 -1
+		fill 255 255 255 255
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_TargetAttackBarMarker3"
+		enabled "ZJCreatureInfo_Private_Menu_TargetBars.Attack.markers[3]"
+		area 0 0 -1 -1
+		fill 255 255 255 255
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_TargetAttackBarMarker4"
+		enabled "ZJCreatureInfo_Private_Menu_TargetBars.Attack.markers[4]"
+		area 0 0 -1 -1
+		fill 255 255 255 255
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_TargetAttackBarMarker5"
+		enabled "ZJCreatureInfo_Private_Menu_TargetBars.Attack.markers[5]"
+		area 0 0 -1 -1
+		fill 255 255 255 255
+	}
+
+	-- Timer bars below the names in the right panel (areas set in ZJCreatureInfo_Private_Layout())
+	-- A set of bars for every row that can have them, see ZJCreatureInfo_Private_MaxRowBars
+
+	-- Row bars 1: cast timer
+	label
+	{
+		name "ZJCreatureInfo_Menu_Row1CastBarTrack"
+		enabled "ZJCreatureInfo_Private_Menu_RowBars[1].Cast.track"
+		area 0 0 -1 -1
+		fill 112 111 111 64
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_Row1CastBarFill"
+		enabled "ZJCreatureInfo_Private_Menu_RowBars[1].Cast.fill"
+		area 0 0 -1 -1
+		fill lua "ZJBarColors_Fill('Cast')"
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_Row1CastBarMarker1"
+		enabled "ZJCreatureInfo_Private_Menu_RowBars[1].Cast.markers[1]"
+		area 0 0 -1 -1
+		fill 255 255 255 255
+	}
+
+	-- Row bars 1: attack timer
+	label
+	{
+		name "ZJCreatureInfo_Menu_Row1AttackBarTrack"
+		enabled "ZJCreatureInfo_Private_Menu_RowBars[1].Attack.track"
+		area 0 0 -1 -1
+		fill 112 111 111 64
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_Row1AttackBarFill"
+		enabled "ZJCreatureInfo_Private_Menu_RowBars[1].Attack.fill"
+		area 0 0 -1 -1
+		fill lua "ZJBarColors_Fill('Attack')"
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_Row1AttackBarMarker1"
+		enabled "ZJCreatureInfo_Private_Menu_RowBars[1].Attack.markers[1]"
+		area 0 0 -1 -1
+		fill 255 255 255 255
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_Row1AttackBarMarker2"
+		enabled "ZJCreatureInfo_Private_Menu_RowBars[1].Attack.markers[2]"
+		area 0 0 -1 -1
+		fill 255 255 255 255
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_Row1AttackBarMarker3"
+		enabled "ZJCreatureInfo_Private_Menu_RowBars[1].Attack.markers[3]"
+		area 0 0 -1 -1
+		fill 255 255 255 255
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_Row1AttackBarMarker4"
+		enabled "ZJCreatureInfo_Private_Menu_RowBars[1].Attack.markers[4]"
+		area 0 0 -1 -1
+		fill 255 255 255 255
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_Row1AttackBarMarker5"
+		enabled "ZJCreatureInfo_Private_Menu_RowBars[1].Attack.markers[5]"
+		area 0 0 -1 -1
+		fill 255 255 255 255
+	}
+
+	-- Row bars 2: cast timer
+	label
+	{
+		name "ZJCreatureInfo_Menu_Row2CastBarTrack"
+		enabled "ZJCreatureInfo_Private_Menu_RowBars[2].Cast.track"
+		area 0 0 -1 -1
+		fill 112 111 111 64
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_Row2CastBarFill"
+		enabled "ZJCreatureInfo_Private_Menu_RowBars[2].Cast.fill"
+		area 0 0 -1 -1
+		fill lua "ZJBarColors_Fill('Cast')"
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_Row2CastBarMarker1"
+		enabled "ZJCreatureInfo_Private_Menu_RowBars[2].Cast.markers[1]"
+		area 0 0 -1 -1
+		fill 255 255 255 255
+	}
+
+	-- Row bars 2: attack timer
+	label
+	{
+		name "ZJCreatureInfo_Menu_Row2AttackBarTrack"
+		enabled "ZJCreatureInfo_Private_Menu_RowBars[2].Attack.track"
+		area 0 0 -1 -1
+		fill 112 111 111 64
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_Row2AttackBarFill"
+		enabled "ZJCreatureInfo_Private_Menu_RowBars[2].Attack.fill"
+		area 0 0 -1 -1
+		fill lua "ZJBarColors_Fill('Attack')"
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_Row2AttackBarMarker1"
+		enabled "ZJCreatureInfo_Private_Menu_RowBars[2].Attack.markers[1]"
+		area 0 0 -1 -1
+		fill 255 255 255 255
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_Row2AttackBarMarker2"
+		enabled "ZJCreatureInfo_Private_Menu_RowBars[2].Attack.markers[2]"
+		area 0 0 -1 -1
+		fill 255 255 255 255
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_Row2AttackBarMarker3"
+		enabled "ZJCreatureInfo_Private_Menu_RowBars[2].Attack.markers[3]"
+		area 0 0 -1 -1
+		fill 255 255 255 255
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_Row2AttackBarMarker4"
+		enabled "ZJCreatureInfo_Private_Menu_RowBars[2].Attack.markers[4]"
+		area 0 0 -1 -1
+		fill 255 255 255 255
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_Row2AttackBarMarker5"
+		enabled "ZJCreatureInfo_Private_Menu_RowBars[2].Attack.markers[5]"
+		area 0 0 -1 -1
+		fill 255 255 255 255
+	}
+
+	-- Row bars 3: cast timer
+	label
+	{
+		name "ZJCreatureInfo_Menu_Row3CastBarTrack"
+		enabled "ZJCreatureInfo_Private_Menu_RowBars[3].Cast.track"
+		area 0 0 -1 -1
+		fill 112 111 111 64
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_Row3CastBarFill"
+		enabled "ZJCreatureInfo_Private_Menu_RowBars[3].Cast.fill"
+		area 0 0 -1 -1
+		fill lua "ZJBarColors_Fill('Cast')"
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_Row3CastBarMarker1"
+		enabled "ZJCreatureInfo_Private_Menu_RowBars[3].Cast.markers[1]"
+		area 0 0 -1 -1
+		fill 255 255 255 255
+	}
+
+	-- Row bars 3: attack timer
+	label
+	{
+		name "ZJCreatureInfo_Menu_Row3AttackBarTrack"
+		enabled "ZJCreatureInfo_Private_Menu_RowBars[3].Attack.track"
+		area 0 0 -1 -1
+		fill 112 111 111 64
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_Row3AttackBarFill"
+		enabled "ZJCreatureInfo_Private_Menu_RowBars[3].Attack.fill"
+		area 0 0 -1 -1
+		fill lua "ZJBarColors_Fill('Attack')"
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_Row3AttackBarMarker1"
+		enabled "ZJCreatureInfo_Private_Menu_RowBars[3].Attack.markers[1]"
+		area 0 0 -1 -1
+		fill 255 255 255 255
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_Row3AttackBarMarker2"
+		enabled "ZJCreatureInfo_Private_Menu_RowBars[3].Attack.markers[2]"
+		area 0 0 -1 -1
+		fill 255 255 255 255
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_Row3AttackBarMarker3"
+		enabled "ZJCreatureInfo_Private_Menu_RowBars[3].Attack.markers[3]"
+		area 0 0 -1 -1
+		fill 255 255 255 255
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_Row3AttackBarMarker4"
+		enabled "ZJCreatureInfo_Private_Menu_RowBars[3].Attack.markers[4]"
+		area 0 0 -1 -1
+		fill 255 255 255 255
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_Row3AttackBarMarker5"
+		enabled "ZJCreatureInfo_Private_Menu_RowBars[3].Attack.markers[5]"
+		area 0 0 -1 -1
+		fill 255 255 255 255
+	}
+
+	-- Row bars 4: cast timer
+	label
+	{
+		name "ZJCreatureInfo_Menu_Row4CastBarTrack"
+		enabled "ZJCreatureInfo_Private_Menu_RowBars[4].Cast.track"
+		area 0 0 -1 -1
+		fill 112 111 111 64
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_Row4CastBarFill"
+		enabled "ZJCreatureInfo_Private_Menu_RowBars[4].Cast.fill"
+		area 0 0 -1 -1
+		fill lua "ZJBarColors_Fill('Cast')"
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_Row4CastBarMarker1"
+		enabled "ZJCreatureInfo_Private_Menu_RowBars[4].Cast.markers[1]"
+		area 0 0 -1 -1
+		fill 255 255 255 255
+	}
+
+	-- Row bars 4: attack timer
+	label
+	{
+		name "ZJCreatureInfo_Menu_Row4AttackBarTrack"
+		enabled "ZJCreatureInfo_Private_Menu_RowBars[4].Attack.track"
+		area 0 0 -1 -1
+		fill 112 111 111 64
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_Row4AttackBarFill"
+		enabled "ZJCreatureInfo_Private_Menu_RowBars[4].Attack.fill"
+		area 0 0 -1 -1
+		fill lua "ZJBarColors_Fill('Attack')"
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_Row4AttackBarMarker1"
+		enabled "ZJCreatureInfo_Private_Menu_RowBars[4].Attack.markers[1]"
+		area 0 0 -1 -1
+		fill 255 255 255 255
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_Row4AttackBarMarker2"
+		enabled "ZJCreatureInfo_Private_Menu_RowBars[4].Attack.markers[2]"
+		area 0 0 -1 -1
+		fill 255 255 255 255
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_Row4AttackBarMarker3"
+		enabled "ZJCreatureInfo_Private_Menu_RowBars[4].Attack.markers[3]"
+		area 0 0 -1 -1
+		fill 255 255 255 255
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_Row4AttackBarMarker4"
+		enabled "ZJCreatureInfo_Private_Menu_RowBars[4].Attack.markers[4]"
+		area 0 0 -1 -1
+		fill 255 255 255 255
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_Row4AttackBarMarker5"
+		enabled "ZJCreatureInfo_Private_Menu_RowBars[4].Attack.markers[5]"
+		area 0 0 -1 -1
+		fill 255 255 255 255
+	}
+
+	-- Row bars 5: cast timer
+	label
+	{
+		name "ZJCreatureInfo_Menu_Row5CastBarTrack"
+		enabled "ZJCreatureInfo_Private_Menu_RowBars[5].Cast.track"
+		area 0 0 -1 -1
+		fill 112 111 111 64
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_Row5CastBarFill"
+		enabled "ZJCreatureInfo_Private_Menu_RowBars[5].Cast.fill"
+		area 0 0 -1 -1
+		fill lua "ZJBarColors_Fill('Cast')"
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_Row5CastBarMarker1"
+		enabled "ZJCreatureInfo_Private_Menu_RowBars[5].Cast.markers[1]"
+		area 0 0 -1 -1
+		fill 255 255 255 255
+	}
+
+	-- Row bars 5: attack timer
+	label
+	{
+		name "ZJCreatureInfo_Menu_Row5AttackBarTrack"
+		enabled "ZJCreatureInfo_Private_Menu_RowBars[5].Attack.track"
+		area 0 0 -1 -1
+		fill 112 111 111 64
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_Row5AttackBarFill"
+		enabled "ZJCreatureInfo_Private_Menu_RowBars[5].Attack.fill"
+		area 0 0 -1 -1
+		fill lua "ZJBarColors_Fill('Attack')"
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_Row5AttackBarMarker1"
+		enabled "ZJCreatureInfo_Private_Menu_RowBars[5].Attack.markers[1]"
+		area 0 0 -1 -1
+		fill 255 255 255 255
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_Row5AttackBarMarker2"
+		enabled "ZJCreatureInfo_Private_Menu_RowBars[5].Attack.markers[2]"
+		area 0 0 -1 -1
+		fill 255 255 255 255
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_Row5AttackBarMarker3"
+		enabled "ZJCreatureInfo_Private_Menu_RowBars[5].Attack.markers[3]"
+		area 0 0 -1 -1
+		fill 255 255 255 255
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_Row5AttackBarMarker4"
+		enabled "ZJCreatureInfo_Private_Menu_RowBars[5].Attack.markers[4]"
+		area 0 0 -1 -1
+		fill 255 255 255 255
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_Row5AttackBarMarker5"
+		enabled "ZJCreatureInfo_Private_Menu_RowBars[5].Attack.markers[5]"
+		area 0 0 -1 -1
+		fill 255 255 255 255
+	}
+
+	-- Row bars 6: cast timer
+	label
+	{
+		name "ZJCreatureInfo_Menu_Row6CastBarTrack"
+		enabled "ZJCreatureInfo_Private_Menu_RowBars[6].Cast.track"
+		area 0 0 -1 -1
+		fill 112 111 111 64
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_Row6CastBarFill"
+		enabled "ZJCreatureInfo_Private_Menu_RowBars[6].Cast.fill"
+		area 0 0 -1 -1
+		fill lua "ZJBarColors_Fill('Cast')"
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_Row6CastBarMarker1"
+		enabled "ZJCreatureInfo_Private_Menu_RowBars[6].Cast.markers[1]"
+		area 0 0 -1 -1
+		fill 255 255 255 255
+	}
+
+	-- Row bars 6: attack timer
+	label
+	{
+		name "ZJCreatureInfo_Menu_Row6AttackBarTrack"
+		enabled "ZJCreatureInfo_Private_Menu_RowBars[6].Attack.track"
+		area 0 0 -1 -1
+		fill 112 111 111 64
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_Row6AttackBarFill"
+		enabled "ZJCreatureInfo_Private_Menu_RowBars[6].Attack.fill"
+		area 0 0 -1 -1
+		fill lua "ZJBarColors_Fill('Attack')"
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_Row6AttackBarMarker1"
+		enabled "ZJCreatureInfo_Private_Menu_RowBars[6].Attack.markers[1]"
+		area 0 0 -1 -1
+		fill 255 255 255 255
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_Row6AttackBarMarker2"
+		enabled "ZJCreatureInfo_Private_Menu_RowBars[6].Attack.markers[2]"
+		area 0 0 -1 -1
+		fill 255 255 255 255
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_Row6AttackBarMarker3"
+		enabled "ZJCreatureInfo_Private_Menu_RowBars[6].Attack.markers[3]"
+		area 0 0 -1 -1
+		fill 255 255 255 255
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_Row6AttackBarMarker4"
+		enabled "ZJCreatureInfo_Private_Menu_RowBars[6].Attack.markers[4]"
+		area 0 0 -1 -1
+		fill 255 255 255 255
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_Row6AttackBarMarker5"
+		enabled "ZJCreatureInfo_Private_Menu_RowBars[6].Attack.markers[5]"
+		area 0 0 -1 -1
+		fill 255 255 255 255
+	}
+
+	-- Row bars 7: cast timer
+	label
+	{
+		name "ZJCreatureInfo_Menu_Row7CastBarTrack"
+		enabled "ZJCreatureInfo_Private_Menu_RowBars[7].Cast.track"
+		area 0 0 -1 -1
+		fill 112 111 111 64
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_Row7CastBarFill"
+		enabled "ZJCreatureInfo_Private_Menu_RowBars[7].Cast.fill"
+		area 0 0 -1 -1
+		fill lua "ZJBarColors_Fill('Cast')"
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_Row7CastBarMarker1"
+		enabled "ZJCreatureInfo_Private_Menu_RowBars[7].Cast.markers[1]"
+		area 0 0 -1 -1
+		fill 255 255 255 255
+	}
+
+	-- Row bars 7: attack timer
+	label
+	{
+		name "ZJCreatureInfo_Menu_Row7AttackBarTrack"
+		enabled "ZJCreatureInfo_Private_Menu_RowBars[7].Attack.track"
+		area 0 0 -1 -1
+		fill 112 111 111 64
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_Row7AttackBarFill"
+		enabled "ZJCreatureInfo_Private_Menu_RowBars[7].Attack.fill"
+		area 0 0 -1 -1
+		fill lua "ZJBarColors_Fill('Attack')"
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_Row7AttackBarMarker1"
+		enabled "ZJCreatureInfo_Private_Menu_RowBars[7].Attack.markers[1]"
+		area 0 0 -1 -1
+		fill 255 255 255 255
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_Row7AttackBarMarker2"
+		enabled "ZJCreatureInfo_Private_Menu_RowBars[7].Attack.markers[2]"
+		area 0 0 -1 -1
+		fill 255 255 255 255
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_Row7AttackBarMarker3"
+		enabled "ZJCreatureInfo_Private_Menu_RowBars[7].Attack.markers[3]"
+		area 0 0 -1 -1
+		fill 255 255 255 255
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_Row7AttackBarMarker4"
+		enabled "ZJCreatureInfo_Private_Menu_RowBars[7].Attack.markers[4]"
+		area 0 0 -1 -1
+		fill 255 255 255 255
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_Row7AttackBarMarker5"
+		enabled "ZJCreatureInfo_Private_Menu_RowBars[7].Attack.markers[5]"
+		area 0 0 -1 -1
+		fill 255 255 255 255
+	}
+
+	-- Row bars 8: cast timer
+	label
+	{
+		name "ZJCreatureInfo_Menu_Row8CastBarTrack"
+		enabled "ZJCreatureInfo_Private_Menu_RowBars[8].Cast.track"
+		area 0 0 -1 -1
+		fill 112 111 111 64
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_Row8CastBarFill"
+		enabled "ZJCreatureInfo_Private_Menu_RowBars[8].Cast.fill"
+		area 0 0 -1 -1
+		fill lua "ZJBarColors_Fill('Cast')"
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_Row8CastBarMarker1"
+		enabled "ZJCreatureInfo_Private_Menu_RowBars[8].Cast.markers[1]"
+		area 0 0 -1 -1
+		fill 255 255 255 255
+	}
+
+	-- Row bars 8: attack timer
+	label
+	{
+		name "ZJCreatureInfo_Menu_Row8AttackBarTrack"
+		enabled "ZJCreatureInfo_Private_Menu_RowBars[8].Attack.track"
+		area 0 0 -1 -1
+		fill 112 111 111 64
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_Row8AttackBarFill"
+		enabled "ZJCreatureInfo_Private_Menu_RowBars[8].Attack.fill"
+		area 0 0 -1 -1
+		fill lua "ZJBarColors_Fill('Attack')"
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_Row8AttackBarMarker1"
+		enabled "ZJCreatureInfo_Private_Menu_RowBars[8].Attack.markers[1]"
+		area 0 0 -1 -1
+		fill 255 255 255 255
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_Row8AttackBarMarker2"
+		enabled "ZJCreatureInfo_Private_Menu_RowBars[8].Attack.markers[2]"
+		area 0 0 -1 -1
+		fill 255 255 255 255
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_Row8AttackBarMarker3"
+		enabled "ZJCreatureInfo_Private_Menu_RowBars[8].Attack.markers[3]"
+		area 0 0 -1 -1
+		fill 255 255 255 255
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_Row8AttackBarMarker4"
+		enabled "ZJCreatureInfo_Private_Menu_RowBars[8].Attack.markers[4]"
+		area 0 0 -1 -1
+		fill 255 255 255 255
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_Row8AttackBarMarker5"
+		enabled "ZJCreatureInfo_Private_Menu_RowBars[8].Attack.markers[5]"
+		area 0 0 -1 -1
+		fill 255 255 255 255
+	}
+}

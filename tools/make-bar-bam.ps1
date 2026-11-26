@@ -2,7 +2,7 @@
 #
 # One sequence per bar color, in the order of ZJBarColors_Colors in ZJBarCol.lua, (sequence = option value - 1).
 # Every sequence has 91 frames of 2x90 pixels: frame N has its bottom N rows filled.
-# The RGB values below must match the ones in ZJBarCol.lua, which colors the Attack Info popup's bars.
+# The RGB values below must match the ones in ZJBarCol.lua, which colors the Creature Info popup's bars.
 #
 # Run from anywhere: powershell -ExecutionPolicy Bypass -File tools\make-bar-bam.ps1
 

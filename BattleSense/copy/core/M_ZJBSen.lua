@@ -24,9 +24,9 @@ if not EEex_Active then return end
 -- uninstalling the component restores this file.
 ZJBattleSense_Modules = {
 	["ZJAblInf"] = false,
-	["ZJAtkInf"] = false,
 	["ZJCmbLog"] = false,
 	["ZJCntCol"] = false,
+	["ZJCreInf"] = false,
 	["ZJItmInf"] = false,
 	["ZJLckInf"] = false,
 	["ZJPrfInf"] = false,
@@ -35,7 +35,7 @@ ZJBattleSense_Modules = {
 }
 
 -- The order the modules are started in
-ZJBattleSense_Private_ModuleOrder = { "ZJAblInf", "ZJAtkInf", "ZJCmbLog", "ZJCntCol", "ZJItmInf", "ZJLckInf", "ZJPrfInf", "ZJSplInf", "ZJTimer" }
+ZJBattleSense_Private_ModuleOrder = { "ZJAblInf", "ZJCmbLog", "ZJCntCol", "ZJCreInf","ZJItmInf", "ZJLckInf", "ZJPrfInf", "ZJSplInf", "ZJTimer" }
 
 -- Four of the modules are extended versions of a module that ships with EEex, (the Combat Log one only with the EEex
 -- fork Battle Sense started in). Running both versions at once would draw / print everything twice, so the EEex
@@ -47,9 +47,9 @@ ZJBattleSense_Private_ModuleOrder = { "ZJAblInf", "ZJAtkInf", "ZJCmbLog", "ZJCnt
 --              EEex's version itself, (see ZJCntCol.lua).
 --
 ZJBattleSense_Private_Replaces = {
-	["ZJAtkInf"] = { ["option"] = "EEex_Module_AttackInfo",     ["tick"] = "B3AttackInfo_Private_Menu_Ticker_Tick" },
 	["ZJCmbLog"] = { ["option"] = "EEex_Module_CombatLog",      ["tick"] = "B3CombatLog_Private_Say"               },
 	["ZJCntCol"] = { ["option"] = "EEex_Module_EmptyContainer"                                                     },
+	["ZJCreInf"] = { ["option"] = "EEex_Module_AttackInfo",     ["tick"] = "B3AttackInfo_Private_Menu_Ticker_Tick" },
 	["ZJTimer"]  = { ["option"] = "EEex_Module_Timer",          ["tick"] = "B3Timer_Private_Menu_Tick"             },
 }
 
@@ -196,9 +196,9 @@ ZJBattleSense_Private_ToggleSection = "Battle Sense"
 
 ZJBattleSense_Private_ModuleToggles = {
 	["ZJAblInf"] = { ["optionID"] = "ZJAbilityInfo_Enable",     ["key"] = "Ability Info",     ["name"] = "AbilityInfo",     ["openOn"] = "Ability Info Module: Open On"     },
-	["ZJAtkInf"] = { ["optionID"] = "ZJAttackInfo_Enable",      ["key"] = "Attack Info",      ["name"] = "AttackInfo",      ["openOn"] = "Attack Info Module: Open On"      },
 	["ZJCmbLog"] = { ["optionID"] = "ZJCombatLog_Enable",       ["key"] = "Combat Log",       ["name"] = "CombatLog"                                                        },
 	["ZJCntCol"] = { ["optionID"] = "ZJContainerColors_Enable", ["key"] = "Container Colors", ["name"] = "ContainerColors"                                                  },
+	["ZJCreInf"] = { ["optionID"] = "ZJCreatureInfo_Enable",    ["key"] = "Creature Info",    ["name"] = "CreatureInfo",    ["openOn"] = "Creature Info Module: Open On"    },
 	["ZJItmInf"] = { ["optionID"] = "ZJItemInfo_Enable",        ["key"] = "Item Info",        ["name"] = "ItemInfo",        ["openOn"] = "Item Info Module: Open On"        },
 	["ZJLckInf"] = { ["optionID"] = "ZJLockInfo_Enable",        ["key"] = "Lock Info",        ["name"] = "LockInfo",        ["openOn"] = "Lock Info Module: Open On"        },
 	["ZJPrfInf"] = { ["optionID"] = "ZJProficiencyInfo_Enable", ["key"] = "Proficiency Info", ["name"] = "ProficiencyInfo", ["openOn"] = "Proficiency Info Module: Open On" },

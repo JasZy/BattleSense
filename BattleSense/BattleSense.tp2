@@ -47,16 +47,16 @@ END
 LANGUAGE ~English~ ~english~ ~BattleSense/language/english/setup.tra~
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Attack Info: To-hit chances, damage and timers when hovering a creature in a fight                  //
+// Creature Info: To-hit chances, damage and timers when hovering a creature in a fight                //
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-BEGIN @10 LABEL ~ZJ-BattleSense-Attack-Info~ DESIGNATED 10
+BEGIN @10 LABEL ~ZJ-BattleSense-Creature-Info~ DESIGNATED 10
 REQUIRE_PREDICATE GAME_IS ~bgee bg2ee eet iwdee~ @1000 // Game not supported.
 REQUIRE_PREDICATE MOD_IS_INSTALLED ~EEex.tp2~ 1 @1001 // Battle Sense requires EEex to be installed first.
 
 	LAF ZJ_BATTLESENSE_INSTALL_CORE END
-	COPY ~BattleSense/copy/attackinfo~ ~override~
-	LAF ZJ_BATTLESENSE_ENABLE_MODULE STR_VAR module = ~ZJAtkInf~ END
+	COPY ~BattleSense/copy/creatureinfo~ ~override~
+	LAF ZJ_BATTLESENSE_ENABLE_MODULE STR_VAR module = ~ZJCreInf~ END
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Timer: Casting, attack round, modal and contingency bars, and resistance rings, beside portraits    //

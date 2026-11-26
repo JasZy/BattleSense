@@ -14,7 +14,7 @@ If you are interested, or willing to help test it, please let me know and I will
 
 It has five components, and you can install any combination of them:
 
-1. **Attack Info** – who can hit whom, and for how much, when you hover a creature
+1. **Creature Info** – who can hit whom, and for how much, when you hover a creature
 2. **Timer** – casting, attack round and other timers beside the party portraits
 3. **Combat Log** – extra log lines that explain failed saves, immunities and effects ending
 4. **Item Info** – what an item would change for your character, in stores, containers, the quick loot bar and the inventory
@@ -22,11 +22,11 @@ It has five components, and you can install any combination of them:
 
 Under Options > EEex Options, the "Battle Sense Modules" tab switches each component on or off, and every component has its own tab ("Battle Sense: ..."), where each part of it can be switched on or off.
 
-The three popups, (Attack Info, Item Info and Spell Info), only open while you hold a key, so they stay out of the way until you want them. The key is Left Ctrl by default; the "Battle Sense Modules" tab can change it to Right Ctrl, or the left or right Alt or Shift.
+The three popups, (Creature Info, Item Info and Spell Info), only open while you hold a key, so they stay out of the way until you want them. The key is Left Ctrl by default; the "Battle Sense Modules" tab can change it to Right Ctrl, or the left or right Alt or Shift.
 
 ---
 
-## 1. Attack Info
+## 1. Creature Info
 
 Hold Left Ctrl and hover over an enemy, and a popup opens with two panels.
 
@@ -67,7 +67,7 @@ Bars beside the party portraits that show what each character is in the middle o
 - **Modal action** (red) and **contingency** (green)
 - **Resistance rings**: a ring for every element the character resists, and for magic resistance; the green part is the percentage
 
-Each bar's color can be changed in the options, or set to Off to hide the bar. The Attack Info popup's bars use the same colors.
+Each bar's color can be changed in the options, or set to Off to hide the bar. The Creature Info popup's bars use the same colors.
 
 `[image: Timer bars while Fighting 1x.jpg]`
 
@@ -124,7 +124,7 @@ Pick a spell, wand, scroll or throwable potion, then hold Left Ctrl and hover th
 
 Good to know before you install:
 
-- **Attack Info and Timer replace EEex's own modules of the same name.** They started from Bubb's modules, and Battle Sense switches the EEex ones off so nothing is drawn twice.
+- **Creature Info and Timer replace EEex's own Attack Info and Timer modules.** They started from Bubb's modules, and Battle Sense switches the EEex ones off so nothing is drawn twice.
 - **The Combat Log component adds a hidden effect to every creature,** which is how it sees spells being blocked. That effect is stored in your saves, so keep the component installed for saves made with it.
 - **Everything is read-only.** Battle Sense never changes a roll, a spell or an item. It only adds files with the `ZJ` prefix to the override folder.
 - **English only.**
@@ -137,4 +137,4 @@ If you are interested or willing to test, let me know here or send me a message,
 
 ## Credits
 
-Battle Sense is built on [EEex](https://github.com/Bubb13/EEex) by Bubb, and the Attack Info and Timer components started from his modules of the same name. Thank you, Bubb, for making all of this possible.
+Battle Sense is built on [EEex](https://github.com/Bubb13/EEex) by Bubb, and the Creature Info and Timer components started from his Attack Info and Timer modules. Thank you, Bubb, for making all of this possible.

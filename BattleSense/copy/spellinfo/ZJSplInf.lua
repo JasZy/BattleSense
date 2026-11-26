@@ -19,7 +19,7 @@
 
 -- The popup this module adds its panel to, (shared by every module with a popup)
 Infinity_DoFile("ZJPopup")
--- The areas of spells / items, (shared with Attack Info)
+-- The areas of spells / items, (shared with Creature Info)
 Infinity_DoFile("ZJArea")
 
 -------------
@@ -785,7 +785,7 @@ end
 
 -- Returns the line with how far `target` is from `caster`, and how far it is out of reach, in the units of an ability's
 -- range field, (search map squares of 16 pixels). The engine measures distances in pixels, with the vertical axis
--- stretched by 4/3, (see Attack Info's ZJAttackInfo_Private_IsInArea).
+-- stretched by 4/3, (see Creature Info's ZJCreatureInfo_Private_IsInArea).
 --
 -- A caster also has to see the target: its visual range, (14 by default, in units of 32 pixels), caps the range.
 -- Tested in game: Command, (range 35), and Magic Missile, (range 60), both walk until about 416 pixels away, straight
@@ -861,7 +861,7 @@ function ZJSpellInfo_Private_GetText()
 	return ZJSpellInfo_Private_BuildText(caster, target)
 end
 
--- First: while a spell waits for a target, it describes the creature under the cursor instead of Attack Info
+-- First: while a spell waits for a target, it describes the creature under the cursor instead of Creature Info
 ZJPopup_AddPanel({
 	["name"]         = "Spell Info",
 	["priority"]     = 10,
@@ -1146,7 +1146,7 @@ function ZJSpellInfo_Private_UpdateArea()
 		local aimY = (area.aimUIY - centerY) * 4 / 3
 
 		-- Aimed at the caster's own spot the engine has no direction, and treats the cone as a circle, (see
-		-- Attack Info's ZJAttackInfo_Private_IsCastingSpellAt())
+		-- Creature Info's ZJCreatureInfo_Private_IsCastingSpellAt())
 		if aimX ~= 0 or aimY ~= 0 then
 
 			local angle = (math.atan2 or math.atan)(aimY, aimX)

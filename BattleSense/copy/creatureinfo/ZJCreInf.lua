@@ -11,190 +11,190 @@ Infinity_DoFile("ZJArea")
 -------------
 
 -- The module's on / off switch, in the "Battle Sense Modules" tab
-EEex_Options_Register("ZJAttackInfo_Enable", ZJPopup_NewSwitch("Attack Info", {
-	["onChange"] = function(self, oldValue) ZJAttackInfo_SetEnabled(self:get() ~= 0) end,
+EEex_Options_Register("ZJCreatureInfo_Enable", ZJPopup_NewSwitch("Creature Info", {
+	["onChange"] = function(self, oldValue) ZJCreatureInfo_SetEnabled(self:get() ~= 0) end,
 }))
 
 -- "Enabled For Friendly": the compact popup, over party members and allies that are in a fight
-ZJAttackInfo_Private_CompactForAllies = EEex_Options_Register("ZJAttackInfo_CompactForAllies", EEex_Options_Option.new({
+ZJCreatureInfo_Private_CompactForAllies = EEex_Options_Register("ZJCreatureInfo_CompactForAllies", EEex_Options_Option.new({
 	["default"]  = 1,
 	["type"]     = EEex_Options_ToggleType.new(),
 	["accessor"] = EEex_Options_ClampedAccessor.new({ ["min"] = 0, ["max"] = 1 }),
-	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Attack Info Module: Compact For Allies" }),
+	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Creature Info Module: Compact For Allies" }),
 }))
 
-ZJAttackInfo_Private_FontPoint = EEex_Options_Register("ZJAttackInfo_FontPoint", EEex_Options_Option.new({
+ZJCreatureInfo_Private_FontPoint = EEex_Options_Register("ZJCreatureInfo_FontPoint", EEex_Options_Option.new({
 	["default"]  = 11,
 	["type"]     = EEex_Options_EditType.new(),
 	["accessor"] = EEex_Options_ClampedAccessor.new({ ["min"] = 1, ["max"] = 99 }),
-	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Attack Info Module: Font Point" }),
+	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Creature Info Module: Font Point" }),
 }))
 
 -- 0 = Minimum d20 roll needed to hit, 1 = Hit chance percentage
-ZJAttackInfo_Private_HitDisplayType = EEex_Options_Register("ZJAttackInfo_HitDisplayType", EEex_Options_Option.new({
+ZJCreatureInfo_Private_HitDisplayType = EEex_Options_Register("ZJCreatureInfo_HitDisplayType", EEex_Options_Option.new({
 	["default"]  = 0,
 	["accessor"] = EEex_Options_ClampedAccessor.new({ ["min"] = 0, ["max"] = 1 }),
-	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Attack Info Module: Hit Display Type" }),
+	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Creature Info Module: Hit Display Type" }),
 }))
 
 -- The colors of the resistance and immunity labels, one of the bar colors, (ZJBarCol.lua), option value 0 is Off: the
 -- damage is shown as if the target had no resistance / immunity
 local registerLabelColorOption = function(name, default)
-	return EEex_Options_Register("ZJAttackInfo_"..name.."Color", EEex_Options_Option.new({
+	return EEex_Options_Register("ZJCreatureInfo_"..name.."Color", EEex_Options_Option.new({
 		["default"]  = default,
 		["accessor"] = EEex_Options_ClampedAccessor.new({ ["min"] = 0, ["max"] = #ZJBarColors_Colors }),
-		["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Attack Info Module: "..name.." Color" }),
+		["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Creature Info Module: "..name.." Color" }),
 	}))
 end
 
-ZJAttackInfo_Private_ResistanceColor = registerLabelColorOption("Resistance", 1) -- Red
-ZJAttackInfo_Private_ImmunityColor   = registerLabelColorOption("Immunity",   7) -- Purple
+ZJCreatureInfo_Private_ResistanceColor = registerLabelColorOption("Resistance", 1) -- Red
+ZJCreatureInfo_Private_ImmunityColor   = registerLabelColorOption("Immunity",   7) -- Purple
 
 -- The text color code of a label color option's value, (half as bright if `dim`), "" if it is Off
-function ZJAttackInfo_Private_LabelColorStr(value, dim)
+function ZJCreatureInfo_Private_LabelColorStr(value, dim)
 	local color = ZJBarColors_Colors[value]
 	if color == nil then return "" end
 	local scale = dim and 0.5 or 1
 	return string.format("^0xFF%02X%02X%02X", math.floor(color.b * scale), math.floor(color.g * scale), math.floor(color.r * scale))
 end
 
-ZJAttackInfo_Private_ShowSpellEffects = EEex_Options_Register("ZJAttackInfo_ShowSpellEffects", EEex_Options_Option.new({
+ZJCreatureInfo_Private_ShowSpellEffects = EEex_Options_Register("ZJCreatureInfo_ShowSpellEffects", EEex_Options_Option.new({
 	["default"]  = 1,
 	["type"]     = EEex_Options_ToggleType.new(),
 	["accessor"] = EEex_Options_ClampedAccessor.new({ ["min"] = 0, ["max"] = 1 }),
-	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Attack Info Module: Show Spell Effects" }),
+	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Creature Info Module: Show Spell Effects" }),
 }))
 
-ZJAttackInfo_Private_ShowRowTimers = EEex_Options_Register("ZJAttackInfo_ShowRowTimers", EEex_Options_Option.new({
+ZJCreatureInfo_Private_ShowRowTimers = EEex_Options_Register("ZJCreatureInfo_ShowRowTimers", EEex_Options_Option.new({
 	["default"]  = 1,
 	["type"]     = EEex_Options_ToggleType.new(),
 	["accessor"] = EEex_Options_ClampedAccessor.new({ ["min"] = 0, ["max"] = 1 }),
-	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Attack Info Module: Show Row Timers" }),
+	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Creature Info Module: Show Row Timers" }),
 }))
 
 -- 1 = Include the party's summons and other allies, 0 = Only the party members, (companions)
-ZJAttackInfo_Private_ShowAllies = EEex_Options_Register("ZJAttackInfo_ShowAllies", EEex_Options_Option.new({
+ZJCreatureInfo_Private_ShowAllies = EEex_Options_Register("ZJCreatureInfo_ShowAllies", EEex_Options_Option.new({
 	["default"]  = 1,
 	["type"]     = EEex_Options_ToggleType.new(),
 	["accessor"] = EEex_Options_ClampedAccessor.new({ ["min"] = 0, ["max"] = 1 }),
-	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Attack Info Module: Show Allies" }),
+	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Creature Info Module: Show Allies" }),
 }))
 
 -- The most creatures listed in the popup: [option value] = the limit, option value 0 is Off, (no limit)
-ZJAttackInfo_Private_MaxRowsChoices = { 6, 10, 15, 20 } -- 6 = a full party
-ZJAttackInfo_Private_MaxRows = EEex_Options_Register("ZJAttackInfo_MaxRows", EEex_Options_Option.new({
+ZJCreatureInfo_Private_MaxRowsChoices = { 6, 10, 15, 20 } -- 6 = a full party
+ZJCreatureInfo_Private_MaxRows = EEex_Options_Register("ZJCreatureInfo_MaxRows", EEex_Options_Option.new({
 	["default"]  = 0,
-	["accessor"] = EEex_Options_ClampedAccessor.new({ ["min"] = 0, ["max"] = #ZJAttackInfo_Private_MaxRowsChoices }),
-	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Attack Info Module: Max Creatures" }),
+	["accessor"] = EEex_Options_ClampedAccessor.new({ ["min"] = 0, ["max"] = #ZJCreatureInfo_Private_MaxRowsChoices }),
+	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Creature Info Module: Max Creatures" }),
 }))
 
 -- A button showing "Off" or the limit, clicking it steps Off, 6, 10, 15, 20, and back to Off
-ZJAttackInfo_MaxRowsWidget = {}
-ZJAttackInfo_MaxRowsWidget.__index = ZJAttackInfo_MaxRowsWidget
-setmetatable(ZJAttackInfo_MaxRowsWidget, ZJBarColors_CycleWidget)
+ZJCreatureInfo_MaxRowsWidget = {}
+ZJCreatureInfo_MaxRowsWidget.__index = ZJCreatureInfo_MaxRowsWidget
+setmetatable(ZJCreatureInfo_MaxRowsWidget, ZJBarColors_CycleWidget)
 
-ZJAttackInfo_MaxRowsWidget.new = function(o)
+ZJCreatureInfo_MaxRowsWidget.new = function(o)
 	if o == nil then o = {} end
-	setmetatable(o, ZJAttackInfo_MaxRowsWidget)
+	setmetatable(o, ZJCreatureInfo_MaxRowsWidget)
 	o:_init()
 	return o
 end
 
-function ZJAttackInfo_MaxRowsWidget:_getCount()
-	return #ZJAttackInfo_Private_MaxRowsChoices
+function ZJCreatureInfo_MaxRowsWidget:_getCount()
+	return #ZJCreatureInfo_Private_MaxRowsChoices
 end
 
-function ZJAttackInfo_MaxRowsWidget:_getText(value)
-	local maxRows = ZJAttackInfo_Private_MaxRowsChoices[value]
+function ZJCreatureInfo_MaxRowsWidget:_getText(value)
+	local maxRows = ZJCreatureInfo_Private_MaxRowsChoices[value]
 	return maxRows and tostring(maxRows) or getUiString(ZJBarColors_OffName)
 end
 
-function ZJAttackInfo_MaxRowsWidget:_getColor(value)
+function ZJCreatureInfo_MaxRowsWidget:_getColor(value)
 	return EEex_Options_Private_GetFontStyleColor(styles["EEex_Options_Normal"])
 end
 
-EEex_Options_AddTab("ZJBattleSense_Options_TRANSLATION_AttackInfo_TabTitle", function() return {
+EEex_Options_AddTab("ZJBattleSense_Options_TRANSLATION_CreatureInfo_TabTitle", function() return {
 	{
 		EEex_Options_DisplayEntry.new({
-			["optionID"]    = "ZJAttackInfo_CompactForAllies",
-			["label"]       = "ZJBattleSense_Options_TRANSLATION_AttackInfo_CompactForAllies",
-			["description"] = "ZJBattleSense_Options_TRANSLATION_AttackInfo_CompactForAllies_Description",
+			["optionID"]    = "ZJCreatureInfo_CompactForAllies",
+			["label"]       = "ZJBattleSense_Options_TRANSLATION_CreatureInfo_CompactForAllies",
+			["description"] = "ZJBattleSense_Options_TRANSLATION_CreatureInfo_CompactForAllies_Description",
 			["widget"]      = EEex_Options_ToggleWidget.new(),
 		}),
 		EEex_Options_DisplayEntry.new({
-			["optionID"]    = "ZJAttackInfo_ShowAllies",
-			["label"]       = "ZJBattleSense_Options_TRANSLATION_AttackInfo_ShowAllies",
-			["description"] = "ZJBattleSense_Options_TRANSLATION_AttackInfo_ShowAllies_Description",
+			["optionID"]    = "ZJCreatureInfo_ShowAllies",
+			["label"]       = "ZJBattleSense_Options_TRANSLATION_CreatureInfo_ShowAllies",
+			["description"] = "ZJBattleSense_Options_TRANSLATION_CreatureInfo_ShowAllies_Description",
 			["widget"]      = EEex_Options_ToggleWidget.new(),
 		}),
 		EEex_Options_DisplayEntry.new({
-			["optionID"]    = "ZJAttackInfo_MaxRows",
-			["label"]       = "ZJBattleSense_Options_TRANSLATION_AttackInfo_MaxRows",
-			["description"] = "ZJBattleSense_Options_TRANSLATION_AttackInfo_MaxRows_Description",
-			["widget"]      = ZJAttackInfo_MaxRowsWidget.new(),
+			["optionID"]    = "ZJCreatureInfo_MaxRows",
+			["label"]       = "ZJBattleSense_Options_TRANSLATION_CreatureInfo_MaxRows",
+			["description"] = "ZJBattleSense_Options_TRANSLATION_CreatureInfo_MaxRows_Description",
+			["widget"]      = ZJCreatureInfo_MaxRowsWidget.new(),
 		}),
 		EEex_Options_DisplayEntry.new({
-			["optionID"]    = "ZJAttackInfo_FontPoint",
-			["label"]       = "ZJBattleSense_Options_TRANSLATION_AttackInfo_FontPoint",
-			["description"] = "ZJBattleSense_Options_TRANSLATION_AttackInfo_FontPoint_Description",
+			["optionID"]    = "ZJCreatureInfo_FontPoint",
+			["label"]       = "ZJBattleSense_Options_TRANSLATION_CreatureInfo_FontPoint",
+			["description"] = "ZJBattleSense_Options_TRANSLATION_CreatureInfo_FontPoint_Description",
 			["widget"]      = EEex_Options_EditWidget.new({
 				["maxCharacters"] = 2,
 				["number"]        = true,
 			}),
 		}),
 		EEex_Options_DisplayEntry.new({
-			["optionID"]    = "ZJAttackInfo_HitDisplayType",
-			["label"]       = "ZJBattleSense_Options_TRANSLATION_AttackInfo_HitDisplayType",
-			["description"] = "ZJBattleSense_Options_TRANSLATION_AttackInfo_HitDisplayType_Description",
+			["optionID"]    = "ZJCreatureInfo_HitDisplayType",
+			["label"]       = "ZJBattleSense_Options_TRANSLATION_CreatureInfo_HitDisplayType",
+			["description"] = "ZJBattleSense_Options_TRANSLATION_CreatureInfo_HitDisplayType_Description",
 			["widget"]      = EEex_Options_HorizontalMultiToggleWidget.new({
 				["toggles"] = {
 					{
-						["label"] = "ZJBattleSense_Options_TRANSLATION_AttackInfo_HitDisplayType_Roll",
+						["label"] = "ZJBattleSense_Options_TRANSLATION_CreatureInfo_HitDisplayType_Roll",
 						["data"] = { ["toggleValue"] = 0 },
 					},
 					{
-						["label"] = "ZJBattleSense_Options_TRANSLATION_AttackInfo_HitDisplayType_Percentage",
+						["label"] = "ZJBattleSense_Options_TRANSLATION_CreatureInfo_HitDisplayType_Percentage",
 						["data"] = { ["toggleValue"] = 1 },
 					},
 				},
 			}),
 		}),
 		EEex_Options_DisplayEntry.new({
-			["optionID"]    = "ZJAttackInfo_ResistanceColor",
-			["label"]       = "ZJBattleSense_Options_TRANSLATION_AttackInfo_ResistanceColor",
-			["description"] = "ZJBattleSense_Options_TRANSLATION_AttackInfo_ResistanceColor_Description",
+			["optionID"]    = "ZJCreatureInfo_ResistanceColor",
+			["label"]       = "ZJBattleSense_Options_TRANSLATION_CreatureInfo_ResistanceColor",
+			["description"] = "ZJBattleSense_Options_TRANSLATION_CreatureInfo_ResistanceColor_Description",
 			["widget"]      = ZJBarColors_CycleWidget.new(),
 		}),
 		EEex_Options_DisplayEntry.new({
-			["optionID"]    = "ZJAttackInfo_ImmunityColor",
-			["label"]       = "ZJBattleSense_Options_TRANSLATION_AttackInfo_ImmunityColor",
-			["description"] = "ZJBattleSense_Options_TRANSLATION_AttackInfo_ImmunityColor_Description",
+			["optionID"]    = "ZJCreatureInfo_ImmunityColor",
+			["label"]       = "ZJBattleSense_Options_TRANSLATION_CreatureInfo_ImmunityColor",
+			["description"] = "ZJBattleSense_Options_TRANSLATION_CreatureInfo_ImmunityColor_Description",
 			["widget"]      = ZJBarColors_CycleWidget.new(),
 		}),
 		EEex_Options_DisplayEntry.new({
-			["optionID"]    = "ZJAttackInfo_ShowSpellEffects",
-			["label"]       = "ZJBattleSense_Options_TRANSLATION_AttackInfo_ShowSpellEffects",
-			["description"] = "ZJBattleSense_Options_TRANSLATION_AttackInfo_ShowSpellEffects_Description",
+			["optionID"]    = "ZJCreatureInfo_ShowSpellEffects",
+			["label"]       = "ZJBattleSense_Options_TRANSLATION_CreatureInfo_ShowSpellEffects",
+			["description"] = "ZJBattleSense_Options_TRANSLATION_CreatureInfo_ShowSpellEffects_Description",
 			["widget"]      = EEex_Options_ToggleWidget.new(),
 		}),
 		EEex_Options_DisplayEntry.new({
-			["optionID"]    = "ZJAttackInfo_ShowRowTimers",
-			["label"]       = "ZJBattleSense_Options_TRANSLATION_AttackInfo_ShowRowTimers",
-			["description"] = "ZJBattleSense_Options_TRANSLATION_AttackInfo_ShowRowTimers_Description",
+			["optionID"]    = "ZJCreatureInfo_ShowRowTimers",
+			["label"]       = "ZJBattleSense_Options_TRANSLATION_CreatureInfo_ShowRowTimers",
+			["description"] = "ZJBattleSense_Options_TRANSLATION_CreatureInfo_ShowRowTimers_Description",
 			["widget"]      = EEex_Options_ToggleWidget.new(),
 		}),
 		ZJBarColors_DisplayEntry("Attack",
-			"ZJBattleSense_Options_TRANSLATION_AttackInfo_AttackBar",
-			"ZJBattleSense_Options_TRANSLATION_AttackInfo_AttackBar_Description"),
+			"ZJBattleSense_Options_TRANSLATION_CreatureInfo_AttackBar",
+			"ZJBattleSense_Options_TRANSLATION_CreatureInfo_AttackBar_Description"),
 		ZJBarColors_DisplayEntry("Cast",
-			"ZJBattleSense_Options_TRANSLATION_AttackInfo_CastBar",
-			"ZJBattleSense_Options_TRANSLATION_AttackInfo_CastBar_Description"),
+			"ZJBattleSense_Options_TRANSLATION_CreatureInfo_CastBar",
+			"ZJBattleSense_Options_TRANSLATION_CreatureInfo_CastBar_Description"),
 		ZJBarColors_DisplayEntry("Contingency",
-			"ZJBattleSense_Options_TRANSLATION_AttackInfo_ContingencyBar",
-			"ZJBattleSense_Options_TRANSLATION_AttackInfo_ContingencyBar_Description"),
+			"ZJBattleSense_Options_TRANSLATION_CreatureInfo_ContingencyBar",
+			"ZJBattleSense_Options_TRANSLATION_CreatureInfo_ContingencyBar_Description"),
 		ZJBarColors_DisplayEntry("Modal",
-			"ZJBattleSense_Options_TRANSLATION_AttackInfo_ModalBar",
-			"ZJBattleSense_Options_TRANSLATION_AttackInfo_ModalBar_Description"),
+			"ZJBattleSense_Options_TRANSLATION_CreatureInfo_ModalBar",
+			"ZJBattleSense_Options_TRANSLATION_CreatureInfo_ModalBar_Description"),
 	},
 } end)
 
@@ -202,48 +202,48 @@ EEex_Options_AddTab("ZJBattleSense_Options_TRANSLATION_AttackInfo_TabTitle", fun
 -- Globals --
 -------------
 
-ZJAttackInfo_Private_CombatantSearchRange = 896 -- Twice a sprite's default visual range
-ZJAttackInfo_Private_GoodCutoff = 30 -- EA.IDS, everything up to this value is on the party's side
-ZJAttackInfo_Private_ObjectTypes = {} -- [script object string] = CAIObjectType
-ZJAttackInfo_Private_CurrentTargetID = -1
-ZJAttackInfo_Private_Enabled = false
-ZJAttackInfo_Private_LastTargetID = -1
-ZJAttackInfo_Private_OpenDelayTarget = -1
+ZJCreatureInfo_Private_CombatantSearchRange = 896 -- Twice a sprite's default visual range
+ZJCreatureInfo_Private_GoodCutoff = 30 -- EA.IDS, everything up to this value is on the party's side
+ZJCreatureInfo_Private_ObjectTypes = {} -- [script object string] = CAIObjectType
+ZJCreatureInfo_Private_CurrentTargetID = -1
+ZJCreatureInfo_Private_Enabled = false
+ZJCreatureInfo_Private_LastTargetID = -1
+ZJCreatureInfo_Private_OpenDelayTarget = -1
 
 -------------
 -- General --
 -------------
 
--- @bubb_doc { ZJAttackInfo_SetEnabled }
+-- @bubb_doc { ZJCreatureInfo_SetEnabled }
 --
--- @summary: Temporarily changes the enable state of the attack information popup.
+-- @summary: Temporarily changes the enable state of the creature info popup.
 --
--- @note: To persist this change, instead modify the ``ZJAttackInfo_Enable`` option.
+-- @note: To persist this change, instead modify the ``ZJCreatureInfo_Enable`` option.
 --
 -- @param { enabled / type=boolean }: The enable / disable state to set.
 
-function ZJAttackInfo_SetEnabled(enabled)
-	ZJAttackInfo_Private_Enabled = enabled
-	if not enabled then ZJAttackInfo_Private_Menu_SetOpen(false) end
+function ZJCreatureInfo_SetEnabled(enabled)
+	ZJCreatureInfo_Private_Enabled = enabled
+	if not enabled then ZJCreatureInfo_Private_Menu_SetOpen(false) end
 end
 
 -- Whether `sprite` is a party member, (has a portrait), as opposed to a summon or other ally
-function ZJAttackInfo_Private_IsPartyMember(sprite)
+function ZJCreatureInfo_Private_IsPartyMember(sprite)
 	return EEex_Sprite_GetPortraitIndex(sprite) ~= -1
 end
 
 -- Whether the popup may open over `targetSprite`, (`compact` = the target is on the party's side)
-function ZJAttackInfo_Private_IsPopupAllowed(compact, targetSprite)
+function ZJCreatureInfo_Private_IsPopupAllowed(compact, targetSprite)
 	if not compact then return true end
-	return ZJAttackInfo_Private_CompactForAllies:get() ~= 0
-		and (ZJAttackInfo_Private_ShowAllies:get() ~= 0 or ZJAttackInfo_Private_IsPartyMember(targetSprite))
+	return ZJCreatureInfo_Private_CompactForAllies:get() ~= 0
+		and (ZJCreatureInfo_Private_ShowAllies:get() ~= 0 or ZJCreatureInfo_Private_IsPartyMember(targetSprite))
 end
 
 ----------
 -- Misc --
 ----------
 
-function ZJAttackInfo_Private_GetCursorRenderData()
+function ZJCreatureInfo_Private_GetCursorRenderData()
 
 	local vidMode = EngineGlobals.g_pBaldurChitin.cVideo.pCurrentMode
 	local cursorCell = vidMode.pPointerVidCell
@@ -254,16 +254,16 @@ function ZJAttackInfo_Private_GetCursorRenderData()
 	return EEex_Menu_ScaleX(centerX), EEex_Menu_ScaleY(centerY), EEex_Menu_ScaleX(w), EEex_Menu_ScaleY(h)
 end
 
-function ZJAttackInfo_Private_GetSelectedSprites(targetSprite)
+function ZJCreatureInfo_Private_GetSelectedSprites(targetSprite)
 
 	local selectedSprites = {}
 	local addedIDs = {}
-	local showAllies = ZJAttackInfo_Private_ShowAllies:get() ~= 0
+	local showAllies = ZJCreatureInfo_Private_ShowAllies:get() ~= 0
 
 	local add = function(sprite)
 		if sprite == nil or EEex_UDEqual(sprite, targetSprite) then return end
 		-- With "Show Allies" off, selected summons are left out too
-		if not showAllies and not ZJAttackInfo_Private_IsPartyMember(sprite) then return end
+		if not showAllies and not ZJCreatureInfo_Private_IsPartyMember(sprite) then return end
 		local id = sprite.m_id
 		if addedIDs[id] then return end
 		addedIDs[id] = true
@@ -278,7 +278,7 @@ function ZJAttackInfo_Private_GetSelectedSprites(targetSprite)
 	for portraitIndex = 0, 5 do
 		local sprite = EEex_Sprite_GetInPortrait(portraitIndex)
 		if EEex_GameObject_IsSprite(sprite)
-			and (ZJAttackInfo_Private_IsEngaging(sprite, targetSprite) or ZJAttackInfo_Private_IsEngaging(targetSprite, sprite))
+			and (ZJCreatureInfo_Private_IsEngaging(sprite, targetSprite) or ZJCreatureInfo_Private_IsEngaging(targetSprite, sprite))
 		then
 			add(sprite)
 		end
@@ -286,7 +286,7 @@ function ZJAttackInfo_Private_GetSelectedSprites(targetSprite)
 
 	-- The same goes for the party's summons and other allies near the target
 	if showAllies then
-		ZJAttackInfo_Private_IterateCombatants(targetSprite, "[GOODCUTOFF]", add)
+		ZJCreatureInfo_Private_IterateCombatants(targetSprite, "[GOODCUTOFF]", add)
 	end
 
 	EEex_Utility_AlphanumericSortTable(selectedSprites, function(sprite)
@@ -298,19 +298,19 @@ end
 
 -- Calls `func` for every creature near `targetSprite` that matches `objectTypeString`, (as per a script object),
 -- and is attacking `targetSprite` or is being attacked by it
-function ZJAttackInfo_Private_IterateCombatants(targetSprite, objectTypeString, func)
+function ZJCreatureInfo_Private_IterateCombatants(targetSprite, objectTypeString, func)
 
-	local objectType = ZJAttackInfo_Private_ObjectTypes[objectTypeString]
+	local objectType = ZJCreatureInfo_Private_ObjectTypes[objectTypeString]
 	if objectType == nil then
 		-- Kept for the lifetime of the Lua state so the string isn't parsed every tick
 		objectType = EEex_Object_ParseString(objectTypeString)
-		ZJAttackInfo_Private_ObjectTypes[objectTypeString] = objectType
+		ZJCreatureInfo_Private_ObjectTypes[objectTypeString] = objectType
 	end
 
-	targetSprite:forAllOfTypeInRange(objectType, ZJAttackInfo_Private_CombatantSearchRange, function(sprite)
+	targetSprite:forAllOfTypeInRange(objectType, ZJCreatureInfo_Private_CombatantSearchRange, function(sprite)
 		if EEex_GameObject_IsSprite(sprite)
 			and not EEex_UDEqual(sprite, targetSprite)
-			and (ZJAttackInfo_Private_IsEngaging(sprite, targetSprite) or ZJAttackInfo_Private_IsEngaging(targetSprite, sprite))
+			and (ZJCreatureInfo_Private_IsEngaging(sprite, targetSprite) or ZJCreatureInfo_Private_IsEngaging(targetSprite, sprite))
 		then
 			func(sprite)
 		end
@@ -318,11 +318,11 @@ function ZJAttackInfo_Private_IterateCombatants(targetSprite, objectTypeString, 
 end
 
 -- Returns every creature that `targetSprite` is attacking or is being attacked by
-function ZJAttackInfo_Private_GetCombatants(targetSprite)
+function ZJCreatureInfo_Private_GetCombatants(targetSprite)
 
 	local combatants = {}
 
-	ZJAttackInfo_Private_IterateCombatants(targetSprite, "[ANYONE]", function(sprite)
+	ZJCreatureInfo_Private_IterateCombatants(targetSprite, "[ANYONE]", function(sprite)
 		table.insert(combatants, sprite)
 	end)
 
@@ -335,15 +335,15 @@ end
 
 -- The compact popup is used for the party and its summons / allies. Instead of the selected party members,
 -- it lists the creatures the target is fighting.
-function ZJAttackInfo_Private_IsCompactTarget(targetSprite)
-	return targetSprite.m_typeAI.m_EnemyAlly <= ZJAttackInfo_Private_GoodCutoff
+function ZJCreatureInfo_Private_IsCompactTarget(targetSprite)
+	return targetSprite.m_typeAI.m_EnemyAlly <= ZJCreatureInfo_Private_GoodCutoff
 end
 
 -- With the "Max Creatures" option set, keeps that many of `sprites`: the ones closest to `targetSprite`,
 -- still in alphabetical order
-function ZJAttackInfo_Private_LimitRowSprites(sprites, targetSprite)
+function ZJCreatureInfo_Private_LimitRowSprites(sprites, targetSprite)
 
-	local maxRows = ZJAttackInfo_Private_MaxRowsChoices[ZJAttackInfo_Private_MaxRows:get()]
+	local maxRows = ZJCreatureInfo_Private_MaxRowsChoices[ZJCreatureInfo_Private_MaxRows:get()]
 	if maxRows == nil or #sprites <= maxRows then return sprites end
 
 	local targetPos = targetSprite.m_pos
@@ -371,14 +371,14 @@ end
 
 -- Returns the sprites to list for `targetSprite`, and whether the compact popup should be used
 -- `attackCursor`: the cursor is an attack cursor, the full popup is used then, (the selected creatures attacking an ally)
-function ZJAttackInfo_Private_GetRowSprites(targetSprite, attackCursor)
-	if not attackCursor and ZJAttackInfo_Private_IsCompactTarget(targetSprite) then
-		return ZJAttackInfo_Private_LimitRowSprites(ZJAttackInfo_Private_GetCombatants(targetSprite), targetSprite), true
+function ZJCreatureInfo_Private_GetRowSprites(targetSprite, attackCursor)
+	if not attackCursor and ZJCreatureInfo_Private_IsCompactTarget(targetSprite) then
+		return ZJCreatureInfo_Private_LimitRowSprites(ZJCreatureInfo_Private_GetCombatants(targetSprite), targetSprite), true
 	end
-	return ZJAttackInfo_Private_LimitRowSprites(ZJAttackInfo_Private_GetSelectedSprites(targetSprite), targetSprite), false
+	return ZJCreatureInfo_Private_LimitRowSprites(ZJCreatureInfo_Private_GetSelectedSprites(targetSprite), targetSprite), false
 end
 
-function ZJAttackInfo_Private_GetWeaponHitChance(sourceSprite, targetSprite, leftHand)
+function ZJCreatureInfo_Private_GetWeaponHitChance(sourceSprite, targetSprite, leftHand)
 
 	local sourceSpriteEquipment = sourceSprite.m_equipment
 
@@ -397,12 +397,12 @@ function ZJAttackInfo_Private_GetWeaponHitChance(sourceSprite, targetSprite, lef
 	end
 
 	-- With the "Immunity Color" option Off, an immune target is shown as if it weren't immune
-	local isImmune = ZJAttackInfo_Private_ImmunityColor:get() ~= 0
+	local isImmune = ZJCreatureInfo_Private_ImmunityColor:get() ~= 0
 		and EEex.IsImmuneToWeapon(sourceSprite, targetSprite, nSourceSpriteSelectedWeapon, sourceSpriteSelectedWeapon, nSourceSpriteSelectedWeaponAbility)
 	local hitChance, reasoning = EEex.GetWeaponHitChance(sourceSprite, targetSprite, sourceSpriteSelectedWeapon, nSourceSpriteSelectedWeaponAbility, leftHand)
 
 	-- Reading the weapon's damage is cosmetic, never let it take the popup down
-	local ok, damageStr, extras, damageType, iconDamageType = pcall(ZJAttackInfo_Private_GetWeaponDamageString,
+	local ok, damageStr, extras, damageType, iconDamageType = pcall(ZJCreatureInfo_Private_GetWeaponDamageString,
 		sourceSprite, sourceSpriteSelectedWeapon, nSourceSpriteSelectedWeaponAbility, leftHand)
 
 	if not ok or damageStr == nil then
@@ -412,24 +412,24 @@ function ZJAttackInfo_Private_GetWeaponHitChance(sourceSprite, targetSprite, lef
 	-- The target's resistance to the weapon's damage type reduces what a hit does, (or increases it, if it is negative).
 	-- If the target is immune to the weapon, a hit does nothing at all, the resistance makes no difference then and
 	-- "Immune" is shown in its place. With the "Resistance Color" option Off, the resistance isn't shown.
-	local okResistance, resistance = pcall(ZJAttackInfo_Private_GetDamageResistance, targetSprite, damageType)
+	local okResistance, resistance = pcall(ZJCreatureInfo_Private_GetDamageResistance, targetSprite, damageType)
 	if isImmune then
-		damageStr = string.format("%s %s", damageStr, uiStrings["ZJBattleSense_TRANSLATION_AttackInfo_Immune"])
-	elseif okResistance and resistance ~= 0 and ZJAttackInfo_Private_ResistanceColor:get() ~= 0 then
-		damageStr = string.format("%s %s", damageStr, ZJAttackInfo_Private_FormatResistance(resistance))
+		damageStr = string.format("%s %s", damageStr, uiStrings["ZJBattleSense_TRANSLATION_CreatureInfo_Immune"])
+	elseif okResistance and resistance ~= 0 and ZJCreatureInfo_Private_ResistanceColor:get() ~= 0 then
+		damageStr = string.format("%s %s", damageStr, ZJCreatureInfo_Private_FormatResistance(resistance))
 	end
 
 	-- The icons and the extra damage that go behind the damage
-	local okDisplay, handDisplay = pcall(ZJAttackInfo_Private_GetHandDisplay, iconDamageType, extras, targetSprite)
+	local okDisplay, handDisplay = pcall(ZJCreatureInfo_Private_GetHandDisplay, iconDamageType, extras, targetSprite)
 
 	return hitChance, isImmune, reasoning, damageStr, okDisplay and handDisplay or nil
 end
 
--- ITM ability damage type => the icon(s) that show it, (ZJATKDMG.BAM: frame = icon * 4 + variant, the variants are
+-- ITM ability damage type => the icon(s) that show it, (ZJCREDMG.BAM: frame = icon * 4 + variant, the variants are
 -- 0 = green, 1 = red, 2 = dimmed red, 3 = dimmed green; the green ones face the other way).
 --   0 = sword (slashing), 1 = mace (crushing), 2 = spear (piercing), 3 = bow (missile), 4 = slingshot (sling ammunition), 5 = fist
 -- The file also has: 6 = spell, 7 = item
-ZJAttackInfo_Private_DamageTypeIcons = {
+ZJCreatureInfo_Private_DamageTypeIcons = {
 	[1] = { 2 },
 	[2] = { 1 },
 	[3] = { 0 },
@@ -442,8 +442,8 @@ ZJAttackInfo_Private_DamageTypeIcons = {
 }
 
 -- op12 damage type => { the icon of its element, the resistance stat of the target that applies to it }
--- The icon is the frame in ZJATKELM.BAM: 0 = fire, 1 = cold, 2 = electricity, 3 = acid, 4 = magic
-ZJAttackInfo_Private_EffectDamageTypeIcons = {
+-- The icon is the frame in ZJCREELM.BAM: 0 = fire, 1 = cold, 2 = electricity, 3 = acid, 4 = magic
+ZJCreatureInfo_Private_EffectDamageTypeIcons = {
 	[0x8]   = { 0, "m_nResistFire" },
 	[0x200] = { 0, "m_nResistMagicFire" },
 	[0x2]   = { 1, "m_nResistCold" },
@@ -453,34 +453,34 @@ ZJAttackInfo_Private_EffectDamageTypeIcons = {
 	[0x40]  = { 4, "m_nResistMagic" },
 }
 
-ZJAttackInfo_Private_MaxHandIcons = 2 -- The menu has this many damage type icons, and this many extra damage icons, per hand
+ZJCreatureInfo_Private_MaxHandIcons = 2 -- The menu has this many damage type icons, and this many extra damage icons, per hand
 
 -- Returns what is shown behind a weapon's damage:
 --
---   typeIcons  => Array of the icons of its damage type(s), (see ZJAttackInfo_Private_DamageTypeIcons)
+--   typeIcons  => Array of the icons of its damage type(s), (see ZJCreatureInfo_Private_DamageTypeIcons)
 --   extraText  => The extra damage it applies on a hit, e.g. "+1D6 -50% +poison", ("" if there is none)
---   extraIcons => Array of the icons of the elements of that extra damage, (see ZJAttackInfo_Private_EffectDamageTypeIcons)
+--   extraIcons => Array of the icons of the elements of that extra damage, (see ZJCreatureInfo_Private_EffectDamageTypeIcons)
 --
 -- If `targetSprite` is given, its resistance to an element is shown behind the amount of that element, as its
 -- resistance to the weapon's damage type is behind the weapon's damage: "-50%" does half, "+25%" does a quarter more.
-function ZJAttackInfo_Private_GetHandDisplay(damageType, extras, targetSprite)
+function ZJCreatureInfo_Private_GetHandDisplay(damageType, extras, targetSprite)
 
 	local display = {
-		["typeIcons"]  = ZJAttackInfo_Private_DamageTypeIcons[damageType] or {},
+		["typeIcons"]  = ZJCreatureInfo_Private_DamageTypeIcons[damageType] or {},
 		["extraText"]  = "",
 		["extraIcons"] = {},
 	}
 
 	-- With the "Resistance Color" option Off, the resistances aren't shown
-	local targetStats = targetSprite and ZJAttackInfo_Private_ResistanceColor:get() ~= 0 and targetSprite:getActiveStats() or nil
+	local targetStats = targetSprite and ZJCreatureInfo_Private_ResistanceColor:get() ~= 0 and targetSprite:getActiveStats() or nil
 	local textParts = {}
 
 	-- The extra damage that has an icon comes first, so the amounts are in the order of the icons
 	for pass = 1, 2 do
 		for _, extra in ipairs(extras) do
 
-			local iconInfo = ZJAttackInfo_Private_EffectDamageTypeIcons[extra.typeID]
-			local useIcon = iconInfo ~= nil and #display.extraIcons < ZJAttackInfo_Private_MaxHandIcons
+			local iconInfo = ZJCreatureInfo_Private_EffectDamageTypeIcons[extra.typeID]
+			local useIcon = iconInfo ~= nil and #display.extraIcons < ZJCreatureInfo_Private_MaxHandIcons
 
 			if pass == 1 and useIcon then
 
@@ -488,7 +488,7 @@ function ZJAttackInfo_Private_GetHandDisplay(damageType, extras, targetSprite)
 
 				local resistance = targetStats and math.min(targetStats[iconInfo[2]], 100) or 0
 				if resistance ~= 0 then
-					text = string.format("%s %s", text, ZJAttackInfo_Private_FormatResistance(resistance))
+					text = string.format("%s %s", text, ZJCreatureInfo_Private_FormatResistance(resistance))
 				end
 
 				table.insert(display.extraIcons, iconInfo[1])
@@ -511,35 +511,35 @@ end
 
 -- A resistance that takes damage away is shown in red, one that adds damage, (a negative resistance), in green.
 -- The colors depend on the row the text ends up in, (a greyed out row has darker colors), so the text is marked
--- here and colored by ZJAttackInfo_Private_ColorResistance().
-ZJAttackInfo_Private_ResistanceLessStart = "\1"
-ZJAttackInfo_Private_ResistanceMoreStart = "\3"
-ZJAttackInfo_Private_ResistanceColorEnd  = "\2"
+-- here and colored by ZJCreatureInfo_Private_ColorResistance().
+ZJCreatureInfo_Private_ResistanceLessStart = "\1"
+ZJCreatureInfo_Private_ResistanceMoreStart = "\3"
+ZJCreatureInfo_Private_ResistanceColorEnd  = "\2"
 
 -- Formats what a resistance of `resistance` percent does to damage, e.g. "-50%", or "+25%" for a negative resistance
-function ZJAttackInfo_Private_FormatResistance(resistance)
+function ZJCreatureInfo_Private_FormatResistance(resistance)
 	local text = string.format("%+d%%", -resistance)
 	if resistance > 0 then
-		text = ZJAttackInfo_Private_ResistanceLessStart..text..ZJAttackInfo_Private_ResistanceColorEnd
+		text = ZJCreatureInfo_Private_ResistanceLessStart..text..ZJCreatureInfo_Private_ResistanceColorEnd
 	elseif resistance < 0 then
-		text = ZJAttackInfo_Private_ResistanceMoreStart..text..ZJAttackInfo_Private_ResistanceColorEnd
+		text = ZJCreatureInfo_Private_ResistanceMoreStart..text..ZJCreatureInfo_Private_ResistanceColorEnd
 	end
 	return text
 end
 
--- Colors the resistances that ZJAttackInfo_Private_FormatResistance() marked in `text`:
+-- Colors the resistances that ZJCreatureInfo_Private_FormatResistance() marked in `text`:
 --   lessColorStr => The color code for the ones that take damage away
 --   moreColorStr => The color code for the ones that add damage
 --   baseColorStr => The color code of the text around them, ("" if it has the item's own color)
-function ZJAttackInfo_Private_ColorResistance(text, lessColorStr, moreColorStr, baseColorStr)
-	text = text:gsub(ZJAttackInfo_Private_ResistanceLessStart, lessColorStr)
-	text = text:gsub(ZJAttackInfo_Private_ResistanceMoreStart, moreColorStr)
-	text = text:gsub(ZJAttackInfo_Private_ResistanceColorEnd, baseColorStr ~= "" and baseColorStr or "^-")
+function ZJCreatureInfo_Private_ColorResistance(text, lessColorStr, moreColorStr, baseColorStr)
+	text = text:gsub(ZJCreatureInfo_Private_ResistanceLessStart, lessColorStr)
+	text = text:gsub(ZJCreatureInfo_Private_ResistanceMoreStart, moreColorStr)
+	text = text:gsub(ZJCreatureInfo_Private_ResistanceColorEnd, baseColorStr ~= "" and baseColorStr or "^-")
 	return text
 end
 
 -- op12 damage types, (the high word of the effect's second parameter)
-ZJAttackInfo_Private_EffectDamageTypeNames = {
+ZJCreatureInfo_Private_EffectDamageTypeNames = {
 	[0x0]   = "crushing",
 	[0x1]   = "acid",
 	[0x2]   = "cold",
@@ -562,7 +562,7 @@ ZJAttackInfo_Private_EffectDamageTypeNames = {
 --   typeName => e.g. "fire"
 --
 -- These are effects of the item: saving throws and their chance to apply aren't looked at.
-function ZJAttackInfo_Private_GetOnHitDamage(weaponHeader, ability)
+function ZJCreatureInfo_Private_GetOnHitDamage(weaponHeader, ability)
 
 	local extras = {}
 	local seen = {}
@@ -585,7 +585,7 @@ function ZJAttackInfo_Private_GetOnHitDamage(weaponHeader, ability)
 		if opcode == 12 then -- Damage
 
 			local typeID = EEex_RShift(effect.dwFlags, 16)
-			local typeName = ZJAttackInfo_Private_EffectDamageTypeNames[typeID] or "damage"
+			local typeName = ZJCreatureInfo_Private_EffectDamageTypeNames[typeID] or "damage"
 			local numDice = effect.numDice
 			local diceSize = effect.diceSize
 			local amount = effect.effectAmount
@@ -603,7 +603,7 @@ function ZJAttackInfo_Private_GetOnHitDamage(weaponHeader, ability)
 			add(amountStr, typeID, typeName)
 
 		elseif opcode == 25 then -- Poison
-			add("", nil, uiStrings["ZJBattleSense_TRANSLATION_AttackInfo_Poison"])
+			add("", nil, uiStrings["ZJBattleSense_TRANSLATION_CreatureInfo_Poison"])
 		end
 	end
 
@@ -612,7 +612,7 @@ end
 
 -- ITM ability damage type => the resistance stat(s) of the target that apply to it. An attack with two damage types
 -- uses the one the target resists least.
-ZJAttackInfo_Private_DamageTypeResistances = {
+ZJCreatureInfo_Private_DamageTypeResistances = {
 	[1] = { "m_nResistPiercing" },
 	[2] = { "m_nResistCrushing" },
 	[3] = { "m_nResistSlashing" },
@@ -625,9 +625,9 @@ ZJAttackInfo_Private_DamageTypeResistances = {
 }
 
 -- Returns the percentage of a weapon's damage of `damageType` that `targetSprite` resists, (at most 100, can be negative)
-function ZJAttackInfo_Private_GetDamageResistance(targetSprite, damageType)
+function ZJCreatureInfo_Private_GetDamageResistance(targetSprite, damageType)
 
-	local statNames = ZJAttackInfo_Private_DamageTypeResistances[damageType]
+	local statNames = ZJCreatureInfo_Private_DamageTypeResistances[damageType]
 	if statNames == nil then return 0 end
 
 	local stats = targetSprite:getActiveStats()
@@ -645,27 +645,27 @@ end
 
 -- Returns the lowest d20 roll that lands the attack, derived from the hit chance, (every face of the die is worth 5%).
 -- Returns 21 if no roll can hit, and 1 if every roll hits.
-function ZJAttackInfo_Private_GetMinimumHitRoll(hitChance)
+function ZJCreatureInfo_Private_GetMinimumHitRoll(hitChance)
 	local hittingFaces = math.floor(hitChance / 5 + 0.5)
 	return math.max(1, math.min(21 - hittingFaces, 21))
 end
 
-ZJAttackInfo_Private_StrengthDamageBonusCache = {} -- [STR * 1000 + exceptional STR] = bonus
+ZJCreatureInfo_Private_StrengthDamageBonusCache = {} -- [STR * 1000 + exceptional STR] = bonus
 
 -- The STRMOD.2DA + STRMODEX.2DA damage bonus of `stats`
-function ZJAttackInfo_Private_GetStrengthDamageBonus(stats)
+function ZJCreatureInfo_Private_GetStrengthDamageBonus(stats)
 
 	local strength = stats.m_nSTR
 	local strengthExtra = stats.m_nSTRExtra
 
 	local cacheKey = strength * 1000 + strengthExtra
-	local bonus = ZJAttackInfo_Private_StrengthDamageBonusCache[cacheKey]
+	local bonus = ZJCreatureInfo_Private_StrengthDamageBonusCache[cacheKey]
 
 	if bonus == nil then
 		local ruleTables = EngineGlobals.g_pBaldurChitin.m_pObjectGame.m_ruleTables
 		bonus = (tonumber(ruleTables.m_tStrengthMod:getAtLabels("DAMAGE", tostring(strength))) or 0)
 		      + (tonumber(ruleTables.m_tStrengthModExtra:getAtLabels("DAMAGE", tostring(strengthExtra))) or 0)
-		ZJAttackInfo_Private_StrengthDamageBonusCache[cacheKey] = bonus
+		ZJCreatureInfo_Private_StrengthDamageBonusCache[cacheKey] = bonus
 	end
 
 	return bonus
@@ -674,7 +674,7 @@ end
 -- Returns, for the weapon `sprite` attacks with, (nil if the ability doesn't deal damage):
 --
 --   * The damage it rolls on a hit, e.g. "1D8+4"
---   * The extra damage it applies on a hit, see ZJAttackInfo_Private_GetOnHitDamage()
+--   * The extra damage it applies on a hit, see ZJCreatureInfo_Private_GetOnHitDamage()
 --   * The ITM damage type
 --   * The ITM damage type to show the icon(s) of, (see below)
 --
@@ -691,7 +691,7 @@ end
 --
 -- Not included: Everything that depends on the roll or the target, (critical hits, backstabs, damage bonuses against specific
 -- creatures, the target's resistances), and the effects the weapon applies on hit, (e.g. extra elemental damage).
-function ZJAttackInfo_Private_GetWeaponDamageString(sprite, weapon, abilityNum, leftHand)
+function ZJCreatureInfo_Private_GetWeaponDamageString(sprite, weapon, abilityNum, leftHand)
 
 	if weapon == nil then return nil end
 
@@ -750,7 +750,7 @@ function ZJAttackInfo_Private_GetWeaponDamageString(sprite, weapon, abilityNum, 
 	bonus = bonus + stats.m_nDamageBonus + (leftHand and stats.m_DamageBonusLeft or stats.m_DamageBonusRight)
 
 	if addStrength then
-		bonus = bonus + ZJAttackInfo_Private_GetStrengthDamageBonus(stats)
+		bonus = bonus + ZJCreatureInfo_Private_GetStrengthDamageBonus(stats)
 	end
 
 	if EEex_BAnd(stats.m_generalState, 0x2) ~= 0 then -- STATE_BERSERK
@@ -770,7 +770,7 @@ function ZJAttackInfo_Private_GetWeaponDamageString(sprite, weapon, abilityNum, 
 	local damageType = ability.damageType
 
 	-- Elemental damage, poison, etc. that the weapon applies on a hit. This is an extra, it may not take the damage down with it.
-	local okOnHit, extras = pcall(ZJAttackInfo_Private_GetOnHitDamage, weaponHeader, ability)
+	local okOnHit, extras = pcall(ZJCreatureInfo_Private_GetOnHitDamage, weaponHeader, ability)
 	if not okOnHit then
 		extras = {}
 	end
@@ -786,7 +786,7 @@ function ZJAttackInfo_Private_GetWeaponDamageString(sprite, weapon, abilityNum, 
 end
 
 -- Attack(), GroupAttack(), AttackNoSound(), AttackOneRound(), AttackReevaluate()
-ZJAttackInfo_Private_AttackActions = {
+ZJCreatureInfo_Private_AttackActions = {
 	[  3] = true,
 	[ 94] = true,
 	[ 98] = true,
@@ -795,10 +795,10 @@ ZJAttackInfo_Private_AttackActions = {
 }
 
 -- Returns true if `attackerSprite` is currently executing an attack action against `targetSprite`
-function ZJAttackInfo_Private_IsAttacking(attackerSprite, targetSprite)
+function ZJCreatureInfo_Private_IsAttacking(attackerSprite, targetSprite)
 
 	local curAction = attackerSprite.m_curAction
-	if not ZJAttackInfo_Private_AttackActions[curAction.m_actionID] then return false end
+	if not ZJCreatureInfo_Private_AttackActions[curAction.m_actionID] then return false end
 
 	local acteeId = curAction.m_acteeID.m_Instance
 	if acteeId == nil or acteeId <= 0 then
@@ -810,7 +810,7 @@ function ZJAttackInfo_Private_IsAttacking(attackerSprite, targetSprite)
 end
 
 -- Spell(), UseItem(), ForceSpell(), SpellNoDec(), ForceSpellRange(), (and their RES / slot variants)
-ZJAttackInfo_Private_TargetedCastActions = {
+ZJCreatureInfo_Private_TargetedCastActions = {
 	[ 31] = true,
 	[ 34] = true,
 	[113] = true,
@@ -819,7 +819,7 @@ ZJAttackInfo_Private_TargetedCastActions = {
 }
 
 -- SpellPoint(), ForceSpellPoint(), SpellPointNoDec(), ForceSpellPointRange(), (and their RES variants)
-ZJAttackInfo_Private_PointCastActions = {
+ZJCreatureInfo_Private_PointCastActions = {
 	[ 95] = true,
 	[114] = true,
 	[192] = true,
@@ -828,11 +828,11 @@ ZJAttackInfo_Private_PointCastActions = {
 
 -- The spell action ends before the caster's spell cooldown does, so the creature a sprite cast at is remembered for
 -- as long as that cooldown runs.
-ZJAttackInfo_Private_CastTargets = {} -- [caster id] = target id, emptied when the popup closes
+ZJCreatureInfo_Private_CastTargets = {} -- [caster id] = target id, emptied when the popup closes
 
 -- Returns true if `casterSprite` is casting a spell / using an item on `targetSprite`, or is still in the
 -- cooldown of having done so
-function ZJAttackInfo_Private_IsCastingAt(casterSprite, targetSprite)
+function ZJCreatureInfo_Private_IsCastingAt(casterSprite, targetSprite)
 
 	local casterId = casterSprite.m_id
 	local curAction = casterSprite.m_curAction
@@ -841,40 +841,40 @@ function ZJAttackInfo_Private_IsCastingAt(casterSprite, targetSprite)
 	-- the earlier spell's target
 	local begun = casterSprite:zjHasCastBegun()
 
-	if begun and ZJAttackInfo_Private_TargetedCastActions[actionID] then
-		ZJAttackInfo_Private_CastTargets[casterId] = curAction.m_acteeID.m_Instance
-	elseif (begun and ZJAttackInfo_Private_PointCastActions[actionID]) or casterSprite:getCastTimerPercentage() <= 0 then
-		ZJAttackInfo_Private_CastTargets[casterId] = nil
+	if begun and ZJCreatureInfo_Private_TargetedCastActions[actionID] then
+		ZJCreatureInfo_Private_CastTargets[casterId] = curAction.m_acteeID.m_Instance
+	elseif (begun and ZJCreatureInfo_Private_PointCastActions[actionID]) or casterSprite:getCastTimerPercentage() <= 0 then
+		ZJCreatureInfo_Private_CastTargets[casterId] = nil
 	end
 
-	return ZJAttackInfo_Private_CastTargets[casterId] == targetSprite.m_id
+	return ZJCreatureInfo_Private_CastTargets[casterId] == targetSprite.m_id
 end
 
 -- UseItem(), UseItemPoint()
-ZJAttackInfo_Private_ItemActions = {
+ZJCreatureInfo_Private_ItemActions = {
 	[ 34] = true,
 	[ 97] = true,
 }
 
 -- Returns what `sprite` is doing: 1 = attacking, 2 = casting a spell, 3 = using an item, false = something else
-function ZJAttackInfo_Private_GetActionIcon(sprite)
+function ZJCreatureInfo_Private_GetActionIcon(sprite)
 	local actionID = sprite.m_curAction.m_actionID
-	if ZJAttackInfo_Private_AttackActions[actionID] then return 1 end
+	if ZJCreatureInfo_Private_AttackActions[actionID] then return 1 end
 	-- Don't give away the spell / item a creature queued until the round it is used in begins
 	if not sprite:zjHasCastBegun() then return false end
-	if ZJAttackInfo_Private_ItemActions[actionID] then return 3 end
-	if ZJAttackInfo_Private_TargetedCastActions[actionID] or ZJAttackInfo_Private_PointCastActions[actionID] then return 2 end
+	if ZJCreatureInfo_Private_ItemActions[actionID] then return 3 end
+	if ZJCreatureInfo_Private_TargetedCastActions[actionID] or ZJCreatureInfo_Private_PointCastActions[actionID] then return 2 end
 	return false
 end
 
 -- SPELL.IDS prefixes, [spell id / 1000]
-ZJAttackInfo_Private_SpellIDPrefixes = { [1] = "SPPR", [2] = "SPWI", [3] = "SPIN", [4] = "SPCL" }
+ZJCreatureInfo_Private_SpellIDPrefixes = { [1] = "SPPR", [2] = "SPWI", [3] = "SPIN", [4] = "SPCL" }
 
 -- Reading a name demands the spell / item, so it is kept for as long as the sprite executes the same action
-ZJAttackInfo_Private_ActionNameCaches = {} -- [sprite id] = { key, name }, emptied when the popup closes
+ZJCreatureInfo_Private_ActionNameCaches = {} -- [sprite id] = { key, name }, emptied when the popup closes
 
 -- Returns the first of the given strrefs that has text
-function ZJAttackInfo_Private_FetchName(...)
+function ZJCreatureInfo_Private_FetchName(...)
 	for _, strref in ipairs({...}) do
 		if strref >= 0 and strref < 0x7FFFFFFF then
 			local name = Infinity_FetchString(strref)
@@ -884,7 +884,7 @@ function ZJAttackInfo_Private_FetchName(...)
 	return nil
 end
 
-function ZJAttackInfo_Private_ReadActionName(sprite)
+function ZJCreatureInfo_Private_ReadActionName(sprite)
 
 	local curAction = sprite.m_curAction
 	local actionID = curAction.m_actionID
@@ -893,16 +893,16 @@ function ZJAttackInfo_Private_ReadActionName(sprite)
 
 	local cacheKey = string.format("%d:%s:%d", actionID, resref, specificID)
 	local id = sprite.m_id
-	local cache = ZJAttackInfo_Private_ActionNameCaches[id]
+	local cache = ZJCreatureInfo_Private_ActionNameCaches[id]
 
 	if cache ~= nil and cache.key == cacheKey then
 		return cache.name
 	end
 
 	cache = { ["key"] = cacheKey }
-	ZJAttackInfo_Private_ActionNameCaches[id] = cache
+	ZJCreatureInfo_Private_ActionNameCaches[id] = cache
 
-	if ZJAttackInfo_Private_ItemActions[actionID] then
+	if ZJCreatureInfo_Private_ItemActions[actionID] then
 
 		local itemHeader = nil
 		local identified = true
@@ -920,15 +920,15 @@ function ZJAttackInfo_Private_ReadActionName(sprite)
 
 		if itemHeader ~= nil then
 			if identified then
-				cache.name = ZJAttackInfo_Private_FetchName(itemHeader.identifiedName, itemHeader.genericName)
+				cache.name = ZJCreatureInfo_Private_FetchName(itemHeader.identifiedName, itemHeader.genericName)
 			else
-				cache.name = ZJAttackInfo_Private_FetchName(itemHeader.genericName)
+				cache.name = ZJCreatureInfo_Private_FetchName(itemHeader.genericName)
 			end
 		end
 	else
 		if resref == "" then
 			-- The spell is given by its SPELL.IDS value
-			local prefix = ZJAttackInfo_Private_SpellIDPrefixes[math.floor(specificID / 1000)]
+			local prefix = ZJCreatureInfo_Private_SpellIDPrefixes[math.floor(specificID / 1000)]
 			if prefix ~= nil then
 				resref = string.format("%s%03d", prefix, specificID % 1000)
 			end
@@ -937,7 +937,7 @@ function ZJAttackInfo_Private_ReadActionName(sprite)
 		if resref ~= "" then
 			local spellHeader = EEex_Resource_Demand(resref, "SPL")
 			if spellHeader ~= nil then
-				cache.name = ZJAttackInfo_Private_FetchName(spellHeader.genericName)
+				cache.name = ZJCreatureInfo_Private_FetchName(spellHeader.genericName)
 			end
 		end
 	end
@@ -951,19 +951,19 @@ function ZJAttackInfo_Private_ReadActionName(sprite)
 end
 
 -- Returns the name of the spell `sprite` is casting / the item it is using, or nil if that can't be determined.
--- Only meaningful while ZJAttackInfo_Private_GetActionIcon() returns 2 or 3 for `sprite`.
-function ZJAttackInfo_Private_GetActionName(sprite)
+-- Only meaningful while ZJCreatureInfo_Private_GetActionIcon() returns 2 or 3 for `sprite`.
+function ZJCreatureInfo_Private_GetActionName(sprite)
 	-- The name is cosmetic, never let it take the popup down
-	local ok, name = pcall(ZJAttackInfo_Private_ReadActionName, sprite)
+	local ok, name = pcall(ZJCreatureInfo_Private_ReadActionName, sprite)
 	return ok and name or nil
 end
 
 -- Reading an area demands the spell / item, so it is kept for as long as the sprite executes the same action
-ZJAttackInfo_Private_ActionAreaCaches = {} -- [sprite id] = { key, area }, emptied when the popup closes
+ZJCreatureInfo_Private_ActionAreaCaches = {} -- [sprite id] = { key, area }, emptied when the popup closes
 
 -- Returns the area, (see ZJArea.lua), of the spell `sprite` is casting / the item it is using, false if it has none,
 -- or nil if that can't be determined.
-function ZJAttackInfo_Private_ReadActionArea(sprite)
+function ZJCreatureInfo_Private_ReadActionArea(sprite)
 
 	local curAction = sprite.m_curAction
 	local actionID = curAction.m_actionID
@@ -973,14 +973,14 @@ function ZJAttackInfo_Private_ReadActionArea(sprite)
 
 	local cacheKey = string.format("%d:%s:%d:%d", actionID, resref, specificID, specificID2)
 	local id = sprite.m_id
-	local cache = ZJAttackInfo_Private_ActionAreaCaches[id]
+	local cache = ZJCreatureInfo_Private_ActionAreaCaches[id]
 
 	if cache ~= nil and cache.key == cacheKey then
 		return cache.area
 	end
 
 	cache = { ["key"] = cacheKey }
-	ZJAttackInfo_Private_ActionAreaCaches[id] = cache
+	ZJCreatureInfo_Private_ActionAreaCaches[id] = cache
 
 	local missileType = nil
 	local header, ability = nil, nil
@@ -1010,7 +1010,7 @@ function ZJAttackInfo_Private_ReadActionArea(sprite)
 	else
 		if resref == "" then
 			-- The spell is given by its SPELL.IDS value
-			local prefix = ZJAttackInfo_Private_SpellIDPrefixes[math.floor(specificID / 1000)]
+			local prefix = ZJCreatureInfo_Private_SpellIDPrefixes[math.floor(specificID / 1000)]
 			if prefix ~= nil then
 				resref = string.format("%s%03d", prefix, specificID % 1000)
 			end
@@ -1038,7 +1038,7 @@ end
 -- Returns true if `casterSprite` is currently executing a spell / item action that is aimed at `targetSprite`, or at a
 -- point with `targetSprite` standing in the area the spell / item affects. That is where the creature stands now: it
 -- can still walk in or out before the spell lands.
-function ZJAttackInfo_Private_IsCastingSpellAt(casterSprite, targetSprite)
+function ZJCreatureInfo_Private_IsCastingSpellAt(casterSprite, targetSprite)
 
 	local curAction = casterSprite.m_curAction
 	local actionID = curAction.m_actionID
@@ -1046,16 +1046,16 @@ function ZJAttackInfo_Private_IsCastingSpellAt(casterSprite, targetSprite)
 	-- A queued spell that waits for the cooldown of the earlier one isn't aimed at anything yet
 	if not casterSprite:zjHasCastBegun() then return false end
 
-	if ZJAttackInfo_Private_TargetedCastActions[actionID] then
+	if ZJCreatureInfo_Private_TargetedCastActions[actionID] then
 		return curAction.m_acteeID.m_Instance == targetSprite.m_id
 	end
 
-	if not ZJAttackInfo_Private_PointCastActions[actionID] and actionID ~= 97 then -- UseItemPoint()
+	if not ZJCreatureInfo_Private_PointCastActions[actionID] and actionID ~= 97 then -- UseItemPoint()
 		return false
 	end
 
 	-- An area that can't be determined counts for everyone, never let it take the popup down
-	local ok, area = pcall(ZJAttackInfo_Private_ReadActionArea, casterSprite)
+	local ok, area = pcall(ZJCreatureInfo_Private_ReadActionArea, casterSprite)
 	if not ok or area == nil then return true end
 
 	-- Nothing lands on a creature, (a summon, a teleport)
@@ -1089,18 +1089,18 @@ function ZJAttackInfo_Private_IsCastingSpellAt(casterSprite, targetSprite)
 end
 
 -- Returns true if `sprite` is attacking or casting at `targetSprite`
-function ZJAttackInfo_Private_IsEngaging(sprite, targetSprite)
-	return ZJAttackInfo_Private_IsAttacking(sprite, targetSprite) or ZJAttackInfo_Private_IsCastingAt(sprite, targetSprite)
+function ZJCreatureInfo_Private_IsEngaging(sprite, targetSprite)
+	return ZJCreatureInfo_Private_IsAttacking(sprite, targetSprite) or ZJCreatureInfo_Private_IsCastingAt(sprite, targetSprite)
 end
 
 -- The attack roll frames only change when the sprite's attacks per round / weapon speed / animation changes.
 -- Reading them takes a hundred engine calls, so the result is kept per sprite and refreshed periodically.
-ZJAttackInfo_Private_AttackRollFramesCaches = {} -- [sprite id] = cache, emptied when the popup closes
-ZJAttackInfo_Private_TargetAttackRollFramesLifetime = 2000 -- Milliseconds
-ZJAttackInfo_Private_MaxTargetAttackMarkers = 5
+ZJCreatureInfo_Private_AttackRollFramesCaches = {} -- [sprite id] = cache, emptied when the popup closes
+ZJCreatureInfo_Private_TargetAttackRollFramesLifetime = 2000 -- Milliseconds
+ZJCreatureInfo_Private_MaxTargetAttackMarkers = 5
 
 -- Returns the attack frames [0-99] on which `sprite` makes an attack roll in its current round
-function ZJAttackInfo_Private_GetAttackRollFrames(sprite)
+function ZJCreatureInfo_Private_GetAttackRollFrames(sprite)
 
 	local curTick = Infinity_GetClockTicks()
 
@@ -1108,10 +1108,10 @@ function ZJAttackInfo_Private_GetAttackRollFrames(sprite)
 	local tableIndex = sprite:zjGetCombatRoundTableIndex()
 	local speedFactor = sprite:zjGetAttackSpeedFactor()
 
-	local cache = ZJAttackInfo_Private_AttackRollFramesCaches[id]
+	local cache = ZJCreatureInfo_Private_AttackRollFramesCaches[id]
 	if cache == nil then
 		cache = {}
-		ZJAttackInfo_Private_AttackRollFramesCaches[id] = cache
+		ZJCreatureInfo_Private_AttackRollFramesCaches[id] = cache
 	end
 
 	if cache.frames == nil
@@ -1121,7 +1121,7 @@ function ZJAttackInfo_Private_GetAttackRollFrames(sprite)
 	then
 		cache.tableIndex = tableIndex
 		cache.speedFactor = speedFactor
-		cache.expireTick = curTick + ZJAttackInfo_Private_TargetAttackRollFramesLifetime
+		cache.expireTick = curTick + ZJCreatureInfo_Private_TargetAttackRollFramesLifetime
 		cache.frames = sprite:zjGetAttackRollFrames(tableIndex, speedFactor)
 
 		-- With a half attack, (1/2, 3/2, etc.), the last attack roll in the table is only made every other round
@@ -1148,32 +1148,32 @@ function ZJAttackInfo_Private_GetAttackRollFrames(sprite)
 end
 
 -- The bars that can be shown for the target, in the order they are stacked, and how many markers each one has in the menu
-ZJAttackInfo_Private_TargetBarNames = { "Attack", "Cast", "Modal", "Contingency" }
-ZJAttackInfo_Private_TargetBarMaxMarkers = {
-	["Attack"]      = ZJAttackInfo_Private_MaxTargetAttackMarkers,
+ZJCreatureInfo_Private_TargetBarNames = { "Attack", "Cast", "Modal", "Contingency" }
+ZJCreatureInfo_Private_TargetBarMaxMarkers = {
+	["Attack"]      = ZJCreatureInfo_Private_MaxTargetAttackMarkers,
 	["Cast"]        = 1,
 	["Modal"]       = 0,
 	["Contingency"] = 0,
 }
 
 -- The rows of the right panel that can have timer bars at the same time, (the menu has this many sets of bar items)
-ZJAttackInfo_Private_MaxRowBars = 8
-ZJAttackInfo_Private_RowBarNames = { "Attack", "Cast" }
+ZJCreatureInfo_Private_MaxRowBars = 8
+ZJCreatureInfo_Private_RowBarNames = { "Attack", "Cast" }
 
 -- Where `sprite` is in its attack round, the ticks are its attack rolls. Returns nil if the sprite isn't attacking,
 -- or the attack bar's color is Off.
-function ZJAttackInfo_Private_GetAttackBar(sprite)
+function ZJCreatureInfo_Private_GetAttackBar(sprite)
 	if not ZJBarColors_IsShown("Attack") or not sprite:zjIsAttacking() then return nil end
 	return {
 		["name"]       = "Attack",
 		["percentage"] = sprite:zjGetAttackTimerPercentage(),
-		["markers"]    = ZJAttackInfo_Private_GetAttackRollFrames(sprite),
+		["markers"]    = ZJCreatureInfo_Private_GetAttackRollFrames(sprite),
 	}
 end
 
 -- The spell / item cooldown of `sprite`, the tick is where the spell being cast is released.
 -- Returns nil if the cooldown isn't running, or the cast bar's color is Off.
-function ZJAttackInfo_Private_GetCastBar(sprite)
+function ZJCreatureInfo_Private_GetCastBar(sprite)
 	if not ZJBarColors_IsShown("Cast") then return nil end
 	local percentage = sprite:getCastTimerPercentage()
 	if percentage <= 0 then return nil end
@@ -1188,25 +1188,25 @@ end
 
 -- Returns the attack and cast bars that currently apply to a sprite listed in the right panel, (same format as below)
 -- The attack bar is only included if `includeAttack`, (the sprite is attacking the target)
-function ZJAttackInfo_Private_GetRowBars(sprite, includeAttack)
+function ZJCreatureInfo_Private_GetRowBars(sprite, includeAttack)
 	local bars = {}
 	if includeAttack then
-		bars[#bars + 1] = ZJAttackInfo_Private_GetAttackBar(sprite)
+		bars[#bars + 1] = ZJCreatureInfo_Private_GetAttackBar(sprite)
 	end
-	bars[#bars + 1] = ZJAttackInfo_Private_GetCastBar(sprite)
+	bars[#bars + 1] = ZJCreatureInfo_Private_GetCastBar(sprite)
 	return bars
 end
 
 -- Returns an array of the timer bars that currently apply to `sprite`:
---   name       => The bar's name in ZJAttackInfo_Private_TargetBarNames
+--   name       => The bar's name in ZJCreatureInfo_Private_TargetBarNames
 --   percentage => [0-1], how full the bar is
 --   markers    => Array of the points [0-100] along the bar that have a tick
-function ZJAttackInfo_Private_GetTargetBars(sprite)
+function ZJCreatureInfo_Private_GetTargetBars(sprite)
 
 	local bars = {}
 
-	bars[#bars + 1] = ZJAttackInfo_Private_GetAttackBar(sprite)
-	bars[#bars + 1] = ZJAttackInfo_Private_GetCastBar(sprite)
+	bars[#bars + 1] = ZJCreatureInfo_Private_GetAttackBar(sprite)
+	bars[#bars + 1] = ZJCreatureInfo_Private_GetCastBar(sprite)
 
 	-- The interval of the sprite's modal action
 	if ZJBarColors_IsShown("Modal") and sprite:getModalState() ~= 0 then
@@ -1231,9 +1231,9 @@ end
 
 -- The name of a spell as the Effect Menu module of EEex shows it, or false if it hides the spell:
 -- ["<resref>:<caster level>"] = name / false. Kept for the whole session, a spell's name doesn't change.
-ZJAttackInfo_Private_SpellEffectNames = {}
+ZJCreatureInfo_Private_SpellEffectNames = {}
 
-function ZJAttackInfo_Private_ReadSpellEffectName(resref, casterLevel)
+function ZJCreatureInfo_Private_ReadSpellEffectName(resref, casterLevel)
 
 	local spellHeader = EEex_Resource_Demand(resref, "SPL")
 	if spellHeader == nil then return false end
@@ -1265,10 +1265,10 @@ end
 
 -- The name of portrait icon `icon` as the character record shows it, (STATDESC.2DA), or false if it has none:
 -- [icon] = name / false
-ZJAttackInfo_Private_StatusIconNames = {}
+ZJCreatureInfo_Private_StatusIconNames = {}
 
-function ZJAttackInfo_Private_GetStatusIconName(icon)
-	local name = ZJAttackInfo_Private_StatusIconNames[icon]
+function ZJCreatureInfo_Private_GetStatusIconName(icon)
+	local name = ZJCreatureInfo_Private_StatusIconNames[icon]
 	if name ~= nil then return name end
 	name = false
 	local ok, strref = pcall(function() return tonumber(EEex_Resource_Load2DA("STATDESC"):getAtPoint(0, icon)) end)
@@ -1276,7 +1276,7 @@ function ZJAttackInfo_Private_GetStatusIconName(icon)
 		local str = Infinity_FetchString(strref)
 		if str ~= nil and str ~= "" then name = str end
 	end
-	ZJAttackInfo_Private_StatusIconNames[icon] = name
+	ZJCreatureInfo_Private_StatusIconNames[icon] = name
 	return name
 end
 
@@ -1286,7 +1286,7 @@ end
 --
 -- A condition from something that isn't listed, (a creature's or weapon's on-hit effect, a hidden spell), is listed by
 -- the name of its portrait icon instead, (op142, "Confused", "Feebleminded"), as the character record shows it.
-function ZJAttackInfo_Private_GetSpellEffectNames(sprite)
+function ZJCreatureInfo_Private_GetSpellEffectNames(sprite)
 
 	local names = {}
 	local seenResrefs = {}
@@ -1337,11 +1337,11 @@ function ZJAttackInfo_Private_GetSpellEffectNames(sprite)
 
 		local casterLevel = math.max(effect.m_casterLevel, 1)
 		local cacheKey = resref..":"..casterLevel
-		local name = ZJAttackInfo_Private_SpellEffectNames[cacheKey]
+		local name = ZJCreatureInfo_Private_SpellEffectNames[cacheKey]
 
 		if name == nil then
-			name = ZJAttackInfo_Private_ReadSpellEffectName(resref, casterLevel)
-			ZJAttackInfo_Private_SpellEffectNames[cacheKey] = name
+			name = ZJCreatureInfo_Private_ReadSpellEffectName(resref, casterLevel)
+			ZJCreatureInfo_Private_SpellEffectNames[cacheKey] = name
 		end
 
 		seenResrefs[resref] = name
@@ -1372,7 +1372,7 @@ function ZJAttackInfo_Private_GetSpellEffectNames(sprite)
 	end
 	for icon, entry in pairs(icons) do
 		if not isListed(entry.resref) and not isListed(entry.resref:match("^(.-%d)%a+$")) then
-			local name = ZJAttackInfo_Private_GetStatusIconName(icon)
+			local name = ZJCreatureInfo_Private_GetStatusIconName(icon)
 			if name then
 				local known = nameExpiries[name]
 				if known == nil then
@@ -1392,7 +1392,7 @@ function ZJAttackInfo_Private_GetSpellEffectNames(sprite)
 	for i, name in ipairs(names) do
 		local expiry = nameExpiries[name]
 		if expiry then
-			names[i] = name.." "..ZJAttackInfo_Private_FormatRemaining(expiry - now)
+			names[i] = name.." "..ZJCreatureInfo_Private_FormatRemaining(expiry - now)
 		end
 	end
 
@@ -1401,7 +1401,7 @@ end
 
 -- Formats the game ticks an effect still lasts as "(<turns>,<rounds>)". 15 ticks are a second, a round is 6 seconds
 -- and a turn 10 rounds. Rounds are rounded up, so an effect that is about to end still shows "(0,1)".
-function ZJAttackInfo_Private_FormatRemaining(ticks)
+function ZJCreatureInfo_Private_FormatRemaining(ticks)
 	local totalRounds = math.max(math.ceil(ticks / 90), 0)
 	return string.format("(%d,%d)", math.floor(totalRounds / 10), totalRounds % 10)
 end
@@ -1411,23 +1411,23 @@ end
 -----------
 
 -- Whether the world screen's action bar is open: the panel only shows while it is, (see the listeners at the end)
-ZJAttackInfo_Private_ActionbarOpen = false
+ZJCreatureInfo_Private_ActionbarOpen = false
 
 -- The popup has two panels next to each other: the left one lists the attacks of `targetSprite` on `selectedSprites`,
 -- the right one lists their attacks on the target.
 --
 -- `compact` is used for the party and its summons / allies: `selectedSprites` are then the creatures the target is fighting.
-function ZJAttackInfo_Private_Layout(selectedSprites, targetSprite, compact)
+function ZJCreatureInfo_Private_Layout(selectedSprites, targetSprite, compact)
 
 	--------------------------
 	--     Read options     --
 	--------------------------
 
-	local fontPoint                     = ZJAttackInfo_Private_FontPoint:get()
-	local hitDisplayType                = ZJAttackInfo_Private_HitDisplayType:get()
-	local resistanceColor               = ZJAttackInfo_Private_ResistanceColor:get()
-	local immunityColor                 = ZJAttackInfo_Private_ImmunityColor:get()
-	local showRowTimers                 = ZJAttackInfo_Private_ShowRowTimers:get() ~= 0
+	local fontPoint                     = ZJCreatureInfo_Private_FontPoint:get()
+	local hitDisplayType                = ZJCreatureInfo_Private_HitDisplayType:get()
+	local resistanceColor               = ZJCreatureInfo_Private_ResistanceColor:get()
+	local immunityColor                 = ZJCreatureInfo_Private_ImmunityColor:get()
+	local showRowTimers                 = ZJCreatureInfo_Private_ShowRowTimers:get() ~= 0
 
 	------------------------------
 	--     Layout constants     --
@@ -1513,8 +1513,8 @@ function ZJAttackInfo_Private_Layout(selectedSprites, targetSprite, compact)
 	local divider3ColumnIndex   = 4
 
 	-- Extra (non-text) field in each list entry: false, or the icon to show in front of the name, (left list only):
-	-- what the target is doing to the creature on that row. It is an icon of ZJATKDMG.BAM, see
-	-- ZJAttackInfo_Private_DamageTypeIcons.
+	-- what the target is doing to the creature on that row. It is an icon of ZJCREDMG.BAM, see
+	-- ZJCreatureInfo_Private_DamageTypeIcons.
 	local attackIconEntryIndex  = 4
 	local attackIconPadRight    = 4
 
@@ -1532,18 +1532,18 @@ function ZJAttackInfo_Private_Layout(selectedSprites, targetSprite, compact)
 	local _, handIconSize = measure("X")
 	local handIconGapW = 3
 
-	-- Extra fields in each list entry: what is behind the damage of each hand, (see ZJAttackInfo_Private_GetHandDisplay()),
+	-- Extra fields in each list entry: what is behind the damage of each hand, (see ZJCreatureInfo_Private_GetHandDisplay()),
 	-- with `variant` added: the color of the damage type icons, 0 = green, 1 = red, 2 = dimmed red, 3 = dimmed green
 	local handDisplayEntryIndexes = { [mainHandColumnIndex] = 8, [offHandColumnIndex] = 9 }
 
-	local panels = ZJAttackInfo_Private_Menu_Panels
+	local panels = ZJCreatureInfo_Private_Menu_Panels
 
 	---------------------------------------
 	--     Calculate header labels       --
 	---------------------------------------
 
 	-- 1 = attacking, 2 = casting a spell, 3 = using an item, false = something else
-	local targetActionIcon = ZJAttackInfo_Private_GetActionIcon(targetSprite)
+	local targetActionIcon = ZJCreatureInfo_Private_GetActionIcon(targetSprite)
 	local targetIsCasting = targetActionIcon == 2 or targetActionIcon == 3
 
 	-- The left panel's header has the target's name and what it attacks with, the right panel's header has the text below
@@ -1558,12 +1558,12 @@ function ZJAttackInfo_Private_Layout(selectedSprites, targetSprite, compact)
 			local targetStats = targetSprite:getActiveStats()
 			local stoneSkins = targetStats.m_nStoneSkins + targetStats.m_nStoneSkinsGolem
 			if stoneSkins > 0 then
-				table.insert(defenses, string.format("%s: %d", uiStrings["ZJBattleSense_TRANSLATION_AttackInfo_Stoneskins"], stoneSkins))
+				table.insert(defenses, string.format("%s: %d", uiStrings["ZJBattleSense_TRANSLATION_CreatureInfo_Stoneskins"], stoneSkins))
 			end
 
 			local mirrorImages = targetSprite.m_nMirrorImages
 			if mirrorImages > 0 then
-				table.insert(defenses, string.format("%s: %d", uiStrings["ZJBattleSense_TRANSLATION_AttackInfo_MirrorImages"], mirrorImages))
+				table.insert(defenses, string.format("%s: %d", uiStrings["ZJBattleSense_TRANSLATION_CreatureInfo_MirrorImages"], mirrorImages))
 			end
 
 			return table.concat(defenses, ", ")
@@ -1577,8 +1577,8 @@ function ZJAttackInfo_Private_Layout(selectedSprites, targetSprite, compact)
 	-- The spells affecting the target are listed below the right panel's header, (see "Lay out spell effects")
 	local spellEffectNames = {}
 
-	if ZJAttackInfo_Private_ShowSpellEffects:get() ~= 0 then
-		local ok, names = pcall(ZJAttackInfo_Private_GetSpellEffectNames, targetSprite)
+	if ZJCreatureInfo_Private_ShowSpellEffects:get() ~= 0 then
+		local ok, names = pcall(ZJCreatureInfo_Private_GetSpellEffectNames, targetSprite)
 		if ok then
 			spellEffectNames = names
 		end
@@ -1597,7 +1597,7 @@ function ZJAttackInfo_Private_Layout(selectedSprites, targetSprite, compact)
 	local targetAttackW = 0
 
 	if targetIsCasting then
-		local actionName = ZJAttackInfo_Private_GetActionName(targetSprite)
+		local actionName = ZJCreatureInfo_Private_GetActionName(targetSprite)
 		if actionName ~= nil then
 			table.insert(targetAttackHands, { ["text"] = actionName, ["icons"] = {}, ["extra"] = "", ["extraIcons"] = {} })
 		end
@@ -1608,12 +1608,12 @@ function ZJAttackInfo_Private_Layout(selectedSprites, targetSprite, compact)
 		local addHand = function(weapon, abilityNum, leftHand)
 
 			-- Reading the weapon's damage is cosmetic, never let it take the popup down
-			local ok, damageStr, extras, _, iconDamageType = pcall(ZJAttackInfo_Private_GetWeaponDamageString,
+			local ok, damageStr, extras, _, iconDamageType = pcall(ZJCreatureInfo_Private_GetWeaponDamageString,
 				targetSprite, weapon, abilityNum, leftHand)
 
 			if not ok or damageStr == nil then return end
 
-			local okDisplay, handDisplay = pcall(ZJAttackInfo_Private_GetHandDisplay, iconDamageType, extras)
+			local okDisplay, handDisplay = pcall(ZJCreatureInfo_Private_GetHandDisplay, iconDamageType, extras)
 
 			table.insert(targetAttackHands, {
 				["text"]       = damageStr,
@@ -1688,11 +1688,11 @@ function ZJAttackInfo_Private_Layout(selectedSprites, targetSprite, compact)
 	local dimGreenColorStr  = "^0xFF207020"
 
 	-- The "Immunity Color" and "Resistance Color" options, (the resistances that take damage away). When Off, there is
-	-- nothing to color: ZJAttackInfo_Private_GetWeaponHitChance() leaves the immunity / resistances out.
-	local immuneColorStr       = ZJAttackInfo_Private_LabelColorStr(immunityColor, false)
-	local dimImmuneColorStr    = ZJAttackInfo_Private_LabelColorStr(immunityColor, true)
-	local resistColorStr       = ZJAttackInfo_Private_LabelColorStr(resistanceColor, false)
-	local dimResistColorStr    = ZJAttackInfo_Private_LabelColorStr(resistanceColor, true)
+	-- nothing to color: ZJCreatureInfo_Private_GetWeaponHitChance() leaves the immunity / resistances out.
+	local immuneColorStr       = ZJCreatureInfo_Private_LabelColorStr(immunityColor, false)
+	local dimImmuneColorStr    = ZJCreatureInfo_Private_LabelColorStr(immunityColor, true)
+	local resistColorStr       = ZJCreatureInfo_Private_LabelColorStr(resistanceColor, false)
+	local dimResistColorStr    = ZJCreatureInfo_Private_LabelColorStr(resistanceColor, true)
 
 	local dimRowsLeft  = {} -- [index in selectedSprites] = true
 	local dimRowsRight = {} -- [index in selectedSprites] = true
@@ -1705,12 +1705,12 @@ function ZJAttackInfo_Private_Layout(selectedSprites, targetSprite, compact)
 				["sprite"] = selectedSprite,
 				["index"]  = spriteIndex,
 				["dimLeft"]  = not (
-					   ZJAttackInfo_Private_IsEngaging(targetSprite, selectedSprite)
-					or ZJAttackInfo_Private_IsCastingSpellAt(targetSprite, selectedSprite)
+					   ZJCreatureInfo_Private_IsEngaging(targetSprite, selectedSprite)
+					or ZJCreatureInfo_Private_IsCastingSpellAt(targetSprite, selectedSprite)
 				),
 				["dimRight"] = not (
-					   ZJAttackInfo_Private_IsEngaging(selectedSprite, targetSprite)
-					or ZJAttackInfo_Private_IsCastingSpellAt(selectedSprite, targetSprite)
+					   ZJCreatureInfo_Private_IsEngaging(selectedSprite, targetSprite)
+					or ZJCreatureInfo_Private_IsCastingSpellAt(selectedSprite, targetSprite)
 				),
 			}
 
@@ -1718,7 +1718,7 @@ function ZJAttackInfo_Private_Layout(selectedSprites, targetSprite, compact)
 			local portraitIndex = selectedSprite:getPortraitIndex()
 			rows[spriteIndex].portraitIndex = portraitIndex
 			rows[spriteIndex].group = portraitIndex ~= -1 and 1
-				or selectedSprite.m_typeAI.m_EnemyAlly <= ZJAttackInfo_Private_GoodCutoff and 2
+				or selectedSprite.m_typeAI.m_EnemyAlly <= ZJCreatureInfo_Private_GoodCutoff and 2
 				or 3
 		end
 
@@ -1755,7 +1755,7 @@ function ZJAttackInfo_Private_Layout(selectedSprites, targetSprite, compact)
 		if hitDisplayType == 1 then
 			rollStr = string.format("%d%%", chance)
 		else
-			local minimumRoll = ZJAttackInfo_Private_GetMinimumHitRoll(chance)
+			local minimumRoll = ZJCreatureInfo_Private_GetMinimumHitRoll(chance)
 			if minimumRoll > 20 then
 				rollStr = "-" -- No roll can hit
 			else
@@ -1776,10 +1776,10 @@ function ZJAttackInfo_Private_Layout(selectedSprites, targetSprite, compact)
 				return rollStr, rollStr, "", false
 			end
 			-- Without the damage, (the left panel), "Immune" still takes its place
-			weaponDamageStr = uiStrings["ZJBattleSense_TRANSLATION_AttackInfo_Immune"]
+			weaponDamageStr = uiStrings["ZJBattleSense_TRANSLATION_CreatureInfo_Immune"]
 		end
 
-		weaponDamageStr = ZJAttackInfo_Private_ColorResistance(weaponDamageStr,
+		weaponDamageStr = ZJCreatureInfo_Private_ColorResistance(weaponDamageStr,
 			dim and dimResistColorStr or resistColorStr, dim and dimGreenColorStr or greenColorStr, colorStr)
 
 		return rollStr..hitDamageGapStr..weaponDamageStr, rollStr, colorStr..weaponDamageStr, false
@@ -1787,7 +1787,7 @@ function ZJAttackInfo_Private_Layout(selectedSprites, targetSprite, compact)
 
 	-- Builds the list of a panel. `reverse` => the target's attacks on the listed sprites, (the left panel).
 	-- Returns:
-	--   entries          => The list's rows, (ZJAttackInfo_Private_Menu_InfoList[2]_Table)
+	--   entries          => The list's rows, (ZJCreatureInfo_Private_Menu_InfoList[2]_Table)
 	--   columnWidths     => The width every column needs
 	--   tallestRowHeight => The height of the tallest row
 	--   anyAttackIcon    => Whether any row shows the "currently attacking" icon
@@ -1912,10 +1912,10 @@ function ZJAttackInfo_Private_Layout(selectedSprites, targetSprite, compact)
 
 			-- Left panel:  Is the target currently attacking this sprite?
 			-- Right panel: Is this sprite currently attacking the target?
-			local isAttacking = ZJAttackInfo_Private_IsAttacking(attackerSprite, defenderSprite)
+			local isAttacking = ZJCreatureInfo_Private_IsAttacking(attackerSprite, defenderSprite)
 
 			-- Casting a spell at the defender counts as fighting it too, (for the timer bars and the compact popup)
-			local isEngaging = isAttacking or ZJAttackInfo_Private_IsCastingAt(attackerSprite, defenderSprite)
+			local isEngaging = isAttacking or ZJCreatureInfo_Private_IsCastingAt(attackerSprite, defenderSprite)
 
 			local entry
 
@@ -1936,7 +1936,7 @@ function ZJAttackInfo_Private_Layout(selectedSprites, targetSprite, compact)
 				local attackerIsCasting = targetIsCasting
 				local attackerActionIcon = targetActionIcon
 				if not reverse then
-					attackerActionIcon = ZJAttackInfo_Private_GetActionIcon(attackerSprite)
+					attackerActionIcon = ZJCreatureInfo_Private_GetActionIcon(attackerSprite)
 					attackerIsCasting = attackerActionIcon == 2 or attackerActionIcon == 3
 				end
 
@@ -1945,7 +1945,7 @@ function ZJAttackInfo_Private_Layout(selectedSprites, targetSprite, compact)
 					-- A creature that is casting a spell / using an item isn't swinging its weapon: the roll it needs to hit and
 					-- its weapon damage are replaced by the name of the spell / item. In the left panel that name is in the header.
 					if not reverse then
-						local actionName = ZJAttackInfo_Private_GetActionName(attackerSprite)
+						local actionName = ZJCreatureInfo_Private_GetActionName(attackerSprite)
 						if actionName ~= nil then
 							rightHandString = string.format(" %s%s", dim and dimColorStr or "", actionName)
 							rightHandRollString = rightHandString
@@ -1961,7 +1961,7 @@ function ZJAttackInfo_Private_Layout(selectedSprites, targetSprite, compact)
 				else
 					local rightHandChance, rightHandDamage
 					rightHandChance, rightHandIneffective, _, rightHandDamage, rightHandDisplay =
-						ZJAttackInfo_Private_GetWeaponHitChance(attackerSprite, defenderSprite, false)
+						ZJCreatureInfo_Private_GetWeaponHitChance(attackerSprite, defenderSprite, false)
 
 					rightHandString, rightHandRollString, rightHandDamageString, rightHandSpans = formatChanceStr(
 						rightHandChance, rightHandIneffective, not reverse and rightHandDamage or nil, dim)
@@ -1970,7 +1970,7 @@ function ZJAttackInfo_Private_Layout(selectedSprites, targetSprite, compact)
 
 						local leftHandChance, leftHandDamage
 						leftHandChance, leftHandIneffective, _, leftHandDamage, leftHandDisplay =
-							ZJAttackInfo_Private_GetWeaponHitChance(attackerSprite, defenderSprite, true)
+							ZJCreatureInfo_Private_GetWeaponHitChance(attackerSprite, defenderSprite, true)
 
 						leftHandString, leftHandRollString, leftHandDamageString, leftHandSpans = formatChanceStr(
 							leftHandChance, leftHandIneffective, not reverse and leftHandDamage or nil, dim)
@@ -1989,7 +1989,7 @@ function ZJAttackInfo_Private_Layout(selectedSprites, targetSprite, compact)
 					end
 
 					for _, handDisplay in pairs({ rightHandDisplay, leftHandDisplay }) do
-						handDisplay.extraText = ZJAttackInfo_Private_ColorResistance(handDisplay.extraText,
+						handDisplay.extraText = ZJCreatureInfo_Private_ColorResistance(handDisplay.extraText,
 							dim and dimResistColorStr or resistColorStr, dim and dimGreenColorStr or greenColorStr, dim and dimColorStr or "")
 					end
 				end
@@ -2020,7 +2020,7 @@ function ZJAttackInfo_Private_Layout(selectedSprites, targetSprite, compact)
 				if reverse and not compact then
 					if isAttacking then
 						attackIcon = targetTypeIcon
-					elseif ZJAttackInfo_Private_IsCastingSpellAt(attackerSprite, defenderSprite) then
+					elseif ZJCreatureInfo_Private_IsCastingSpellAt(attackerSprite, defenderSprite) then
 						attackIcon = targetActionIcon == 3 and 7 or 6
 					end
 				end
@@ -2035,8 +2035,8 @@ function ZJAttackInfo_Private_Layout(selectedSprites, targetSprite, compact)
 
 				-- The right panel shows the attack round of every listed sprite that is attacking the target, and the
 				-- spell cooldown of every listed sprite, (a spell cast at a point has no target to check against)
-				if showRowTimers and not reverse and rowBarsCount < ZJAttackInfo_Private_MaxRowBars then
-					local rowBars = ZJAttackInfo_Private_GetRowBars(selectedSprite, isAttacking)
+				if showRowTimers and not reverse and rowBarsCount < ZJCreatureInfo_Private_MaxRowBars then
+					local rowBars = ZJCreatureInfo_Private_GetRowBars(selectedSprite, isAttacking)
 					if rowBars[1] ~= nil then
 						rowBarsCount = rowBarsCount + 1
 						build.rowBars[spriteIndex] = rowBars
@@ -2151,7 +2151,7 @@ function ZJAttackInfo_Private_Layout(selectedSprites, targetSprite, compact)
 	-- They are stacked below the name of the sprite the target is attacking, in the left panel. If it isn't attacking
 	-- any of the listed sprites, they are stacked below the left panel's header, which makes that header taller.
 	-- `targetBars` and `targetBarsSpriteIndex` used in layout
-	local targetBars = ZJAttackInfo_Private_GetTargetBars(targetSprite)
+	local targetBars = ZJCreatureInfo_Private_GetTargetBars(targetSprite)
 	local targetBarsCount = #targetBars
 	local targetBarsSpriteIndex = builds[1].targetBarsSpriteIndex
 	local targetBarsHeaderH = 0
@@ -2182,10 +2182,10 @@ function ZJAttackInfo_Private_Layout(selectedSprites, targetSprite, compact)
 	--     Finalize panel lists      --
 	-----------------------------------
 
-	ZJAttackInfo_Private_Menu_TargetName = targetNameText
-	ZJAttackInfo_Private_Menu_TargetNameUD.text.point = fontPoint
+	ZJCreatureInfo_Private_Menu_TargetName = targetNameText
+	ZJCreatureInfo_Private_Menu_TargetNameUD.text.point = fontPoint
 
-	for _, textItemUD in ipairs(ZJAttackInfo_Private_Menu_TargetAttackTextUDs) do
+	for _, textItemUD in ipairs(ZJCreatureInfo_Private_Menu_TargetAttackTextUDs) do
 		textItemUD.text.point = fontPoint
 	end
 
@@ -2283,7 +2283,7 @@ function ZJAttackInfo_Private_Layout(selectedSprites, targetSprite, compact)
 
 			local item = damageItem
 
-			for slot = 1, ZJAttackInfo_Private_MaxHandIcons do
+			for slot = 1, ZJCreatureInfo_Private_MaxHandIcons do
 				item = item.next
 				item.area.x = offsets.typeIcons + (slot - 1) * handIconSize
 				item.area.y = iconY
@@ -2297,7 +2297,7 @@ function ZJAttackInfo_Private_Layout(selectedSprites, targetSprite, compact)
 			item.area.y = 0
 			item.area.h = textRowHeight
 
-			for slot = 1, ZJAttackInfo_Private_MaxHandIcons do
+			for slot = 1, ZJCreatureInfo_Private_MaxHandIcons do
 				item = item.next
 				item.area.x = offsets.extraIcons + (slot - 1) * handIconSize
 				item.area.y = iconY
@@ -2398,8 +2398,8 @@ function ZJAttackInfo_Private_Layout(selectedSprites, targetSprite, compact)
 		builds[2].panelW = math.max(builds[2].panelW, spellEffectsW)
 	end
 
-	ZJAttackInfo_Private_Menu_SpellEffects = spellEffectsText
-	ZJAttackInfo_Private_Menu_SpellEffectsUD.text.point = fontPoint
+	ZJCreatureInfo_Private_Menu_SpellEffects = spellEffectsText
+	ZJCreatureInfo_Private_Menu_SpellEffectsUD.text.point = fontPoint
 
 	----------------------------
 	--     Layout panels      --
@@ -2428,7 +2428,7 @@ function ZJAttackInfo_Private_Layout(selectedSprites, targetSprite, compact)
 			-- The separator runs from the top of the headers to the bottom of the lists
 			local panelSeparatorX = panelX + panelGap
 			local panelSeparatorH = infoListY + infoListH - headerY
-			Infinity_SetArea("ZJAttackInfo_Menu_PanelSeparator", panelSeparatorX, headerY, panelSeparatorW, panelSeparatorH)
+			Infinity_SetArea("ZJCreatureInfo_Menu_PanelSeparator", panelSeparatorX, headerY, panelSeparatorW, panelSeparatorH)
 			panelX = panelSeparatorX + panelSeparatorW + panelGap
 		end
 
@@ -2438,7 +2438,7 @@ function ZJAttackInfo_Private_Layout(selectedSprites, targetSprite, compact)
 		local headerLabelY = headerY
 
 		if panelIndex == 1 then
-			Infinity_SetArea("ZJAttackInfo_Menu_TargetName", panelX, headerY, targetNameW, maxHeaderLabelH)
+			Infinity_SetArea("ZJCreatureInfo_Menu_TargetName", panelX, headerY, targetNameW, maxHeaderLabelH)
 
 			-- What the target attacks with is on the second line
 			local line2Y = headerY + maxHeaderLabelH
@@ -2447,8 +2447,8 @@ function ZJAttackInfo_Private_Layout(selectedSprites, targetSprite, compact)
 			for handIndex = 1, 2 do
 
 				local hand = targetAttackHands[handIndex]
-				local handState = ZJAttackInfo_Private_Menu_TargetAttack[handIndex]
-				local itemPrefix = "ZJAttackInfo_Menu_TargetAttack"..handIndex
+				local handState = ZJCreatureInfo_Private_Menu_TargetAttack[handIndex]
+				local itemPrefix = "ZJCreatureInfo_Menu_TargetAttack"..handIndex
 
 				handState.text  = hand and hand.text or ""
 				handState.icons = hand and hand.icons or {}
@@ -2458,7 +2458,7 @@ function ZJAttackInfo_Private_Layout(selectedSprites, targetSprite, compact)
 				if hand ~= nil then
 					Infinity_SetArea(itemPrefix.."Text", panelX + hand.textX, line2Y, hand.textW, maxHeaderLabelH)
 					Infinity_SetArea(itemPrefix.."Extra", panelX + hand.extraX, line2Y, hand.extraW, maxHeaderLabelH)
-					for slot = 1, ZJAttackInfo_Private_MaxHandIcons do
+					for slot = 1, ZJCreatureInfo_Private_MaxHandIcons do
 						Infinity_SetArea(itemPrefix.."Icon"..slot, panelX + hand.iconsX + (slot - 1) * handIconSize, iconY, handIconSize, handIconSize)
 						Infinity_SetArea(itemPrefix.."ExtraIcon"..slot, panelX + hand.extraIconsX + (slot - 1) * handIconSize, iconY, handIconSize, handIconSize)
 					end
@@ -2466,16 +2466,16 @@ function ZJAttackInfo_Private_Layout(selectedSprites, targetSprite, compact)
 			end
 
 			local separatorX = targetAttackSeparatorXs[1]
-			ZJAttackInfo_Private_Menu_TargetAttackSeparator = separatorX and targetAttackSeparatorStr or ""
+			ZJCreatureInfo_Private_Menu_TargetAttackSeparator = separatorX and targetAttackSeparatorStr or ""
 			if separatorX ~= nil then
-				Infinity_SetArea("ZJAttackInfo_Menu_TargetAttackSeparator", panelX + separatorX, line2Y,
+				Infinity_SetArea("ZJCreatureInfo_Menu_TargetAttackSeparator", panelX + separatorX, line2Y,
 					measure(targetAttackSeparatorStr), maxHeaderLabelH)
 			end
 		end
 		Infinity_SetArea(panel.labelName, headerLabelX, headerLabelY, build.labelW, maxHeaderLabelH)
 
 		if panelIndex == 2 then
-			Infinity_SetArea("ZJAttackInfo_Menu_SpellEffects", panelX, spellEffectsY, spellEffectsW, spellEffectsH)
+			Infinity_SetArea("ZJCreatureInfo_Menu_SpellEffects", panelX, spellEffectsY, spellEffectsW, spellEffectsH)
 		end
 
 		Infinity_SetArea(panel.listName, panelX, infoListY, build.infoListW, infoListH)
@@ -2493,7 +2493,7 @@ function ZJAttackInfo_Private_Layout(selectedSprites, targetSprite, compact)
 	local headerHorizontalSepX = backgroundPad
 	local headerHorizontalSepW = backgroundWidth - backgroundPad * 2
 
-	Infinity_SetArea("ZJAttackInfo_Menu_LabelSeparator", headerHorizontalSepX, headerHorizontalSepY, headerHorizontalSepW, headerHorizontalSepH)
+	Infinity_SetArea("ZJCreatureInfo_Menu_LabelSeparator", headerHorizontalSepX, headerHorizontalSepY, headerHorizontalSepW, headerHorizontalSepH)
 
 	-------------------------------
 	--     Layout background     --
@@ -2502,7 +2502,7 @@ function ZJAttackInfo_Private_Layout(selectedSprites, targetSprite, compact)
 	local backgroundHeight = infoListY + infoListH + backgroundPad
 
 	local cursorX, cursorY = EEex_Menu_GetMousePos()
-	local cursorCenterX, cursorCenterY, cursorW, cursorH = ZJAttackInfo_Private_GetCursorRenderData()
+	local cursorCenterX, cursorCenterY, cursorW, cursorH = ZJCreatureInfo_Private_GetCursorRenderData()
 
 	local cursorRenderX = cursorX - cursorCenterX
 	local cursorRenderY = cursorY - cursorCenterY
@@ -2527,8 +2527,8 @@ function ZJAttackInfo_Private_Layout(selectedSprites, targetSprite, compact)
 		backgroundY = backgroundY - (backgroundBottom - screenH)
 	end
 
-	Infinity_SetOffset("ZJAttackInfo_Menu", backgroundX, backgroundY)
-	Infinity_SetArea("ZJAttackInfo_Menu_BackgroundRect", 0, 0, backgroundWidth, backgroundHeight)
+	Infinity_SetOffset("ZJCreatureInfo_Menu", backgroundX, backgroundY)
+	Infinity_SetArea("ZJCreatureInfo_Menu_BackgroundRect", 0, 0, backgroundWidth, backgroundHeight)
 
 	-------------------------
 	--     Layout bars     --
@@ -2560,7 +2560,7 @@ function ZJAttackInfo_Private_Layout(selectedSprites, targetSprite, compact)
 		-- White ticks, (attack rolls / spell release)
 		for i, value in ipairs(bar.markers) do
 
-			if i > ZJAttackInfo_Private_TargetBarMaxMarkers[bar.name] then break end
+			if i > ZJCreatureInfo_Private_TargetBarMaxMarkers[bar.name] then break end
 
 			local markerX = barX + math.floor(barW * value / 100 + 0.5) - math.floor(markerW / 2)
 			markerX = math.max(barX, math.min(markerX, barX + barW - markerW))
@@ -2574,9 +2574,9 @@ function ZJAttackInfo_Private_Layout(selectedSprites, targetSprite, compact)
 	-- Target bars --
 	-----------------
 
-	local targetBarStates = ZJAttackInfo_Private_Menu_TargetBars
+	local targetBarStates = ZJCreatureInfo_Private_Menu_TargetBars
 
-	for _, barName in ipairs(ZJAttackInfo_Private_TargetBarNames) do
+	for _, barName in ipairs(ZJCreatureInfo_Private_TargetBarNames) do
 		hideBar(targetBarStates[barName])
 	end
 
@@ -2599,7 +2599,7 @@ function ZJAttackInfo_Private_Layout(selectedSprites, targetSprite, compact)
 
 	for _, targetBar in ipairs(targetBars) do
 		local barName = targetBar.name
-		layoutBar("ZJAttackInfo_Menu_Target"..barName.."Bar", targetBarStates[barName], targetBar,
+		layoutBar("ZJCreatureInfo_Menu_Target"..barName.."Bar", targetBarStates[barName], targetBar,
 			targetBarX, targetBarY, targetBarW, targetBarStepH, targetBarStepMarkerW)
 		targetBarY = targetBarY + targetBarStepH + targetBarStepGap
 	end
@@ -2608,10 +2608,10 @@ function ZJAttackInfo_Private_Layout(selectedSprites, targetSprite, compact)
 	-- Row bars --
 	--------------
 
-	local rowBarStates = ZJAttackInfo_Private_Menu_RowBars
+	local rowBarStates = ZJCreatureInfo_Private_Menu_RowBars
 
 	for _, rowBarState in ipairs(rowBarStates) do
-		for _, barName in ipairs(ZJAttackInfo_Private_RowBarNames) do
+		for _, barName in ipairs(ZJCreatureInfo_Private_RowBarNames) do
 			hideBar(rowBarState[barName])
 		end
 	end
@@ -2636,7 +2636,7 @@ function ZJAttackInfo_Private_Layout(selectedSprites, targetSprite, compact)
 
 			for _, rowBar in ipairs(rowBars) do
 				local barName = rowBar.name
-				layoutBar("ZJAttackInfo_Menu_Row"..rowBarSet..barName.."Bar", rowBarStates[rowBarSet][barName], rowBar,
+				layoutBar("ZJCreatureInfo_Menu_Row"..rowBarSet..barName.."Bar", rowBarStates[rowBarSet][barName], rowBar,
 					rowBarX, rowBarY, rowBarW, rowBarH, rowBarMarkerW)
 				rowBarY = rowBarY + rowBarH + rowBarGap
 			end
@@ -2648,11 +2648,11 @@ end
 -- comes first, (Spell Info), shows. Lays out and opens the popup over the creature under the cursor and returns true, or
 -- closes it and returns false if there is nothing to show. The popup opens over any creature: the compact popup over an
 -- ally, the full one over anyone else, (hostile or neutral, whatever the cursor's shape).
-function ZJAttackInfo_Private_Panel_Show()
+function ZJCreatureInfo_Private_Panel_Show()
 
 	-- Only on the world screen, while its action bar is open
-	if not ZJAttackInfo_Private_Enabled or not ZJAttackInfo_Private_ActionbarOpen then
-		ZJAttackInfo_Private_Menu_SetOpen(false)
+	if not ZJCreatureInfo_Private_Enabled or not ZJCreatureInfo_Private_ActionbarOpen then
+		ZJCreatureInfo_Private_Menu_SetOpen(false)
 		return false
 	end
 
@@ -2660,130 +2660,130 @@ function ZJAttackInfo_Private_Panel_Show()
 
 	if not EEex_GameObject_IsSprite(targetSprite) then
 		-- Hide the popup if no sprite is under the cursor
-		ZJAttackInfo_Private_LastTargetID = -1
-		ZJAttackInfo_Private_Menu_SetOpen(false)
+		ZJCreatureInfo_Private_LastTargetID = -1
+		ZJCreatureInfo_Private_Menu_SetOpen(false)
 		return false
 	end
 
-	local lastTargetId = ZJAttackInfo_Private_LastTargetID
+	local lastTargetId = ZJCreatureInfo_Private_LastTargetID
 	local targetId = targetSprite.m_id
-	ZJAttackInfo_Private_LastTargetID = targetId
+	ZJCreatureInfo_Private_LastTargetID = targetId
 
 	local chitin = EngineGlobals.g_pBaldurChitin
 
 	if (chitin.m_pObjectGame.m_nState ~= 2 and EEex_Key_IsDown(SDL_Keycode.SDLK_TAB)) or (B3EffectMenu_IsOpen ~= nil and B3EffectMenu_IsOpen()) then
 		-- Hide the popup if a tooltip is being forced or the effect menu popup is open
-		ZJAttackInfo_Private_Menu_SetOpen(false)
+		ZJCreatureInfo_Private_Menu_SetOpen(false)
 		return false
 	end
 
 	local nCurrentCursor = chitin.m_pObjectCursor.nCurrentCursor
 	local attackCursor = nCurrentCursor == 12 or (nCurrentCursor == 101 and EEex.IsDefaultAttackCursor())
 
-	local selectedSprites, compact = ZJAttackInfo_Private_GetRowSprites(targetSprite, attackCursor)
+	local selectedSprites, compact = ZJCreatureInfo_Private_GetRowSprites(targetSprite, attackCursor)
 
-	if (selectedSprites[1] == nil and not compact) or not ZJAttackInfo_Private_IsPopupAllowed(compact, targetSprite) then
+	if (selectedSprites[1] == nil and not compact) or not ZJCreatureInfo_Private_IsPopupAllowed(compact, targetSprite) then
 		-- Hide the popup if no currently selected sprites are eligible, or the popup is turned off for this side.
 		-- The compact popup also opens over an ally that isn't fighting anyone: it then only has its headers, (the
 		-- ally's weapon damage, timers and the spells affecting it).
-		ZJAttackInfo_Private_Menu_SetOpen(false)
+		ZJCreatureInfo_Private_Menu_SetOpen(false)
 		return false
 	end
 
 	local waiting = true
 
 	-- Delay opening by 1 tick to wait for the cursor shape to update
-	if targetId ~= lastTargetId or ZJAttackInfo_Private_OpenDelayTarget == -1 then
-		ZJAttackInfo_Private_OpenDelayTarget = Infinity_GetFrameCounter() + 1
-	elseif Infinity_GetFrameCounter() >= ZJAttackInfo_Private_OpenDelayTarget then
+	if targetId ~= lastTargetId or ZJCreatureInfo_Private_OpenDelayTarget == -1 then
+		ZJCreatureInfo_Private_OpenDelayTarget = Infinity_GetFrameCounter() + 1
+	elseif Infinity_GetFrameCounter() >= ZJCreatureInfo_Private_OpenDelayTarget then
 		waiting = false
 	end
 
 	if waiting then
 
 		-- Attempt to layout with the previous target if we are currently waiting
-		local lastTarget = EEex_GameObject_Get(ZJAttackInfo_Private_CurrentTargetID)
+		local lastTarget = EEex_GameObject_Get(ZJCreatureInfo_Private_CurrentTargetID)
 		local lastSelectedSprites, lastCompact
 		if EEex_GameObject_IsSprite(lastTarget) then
-			lastSelectedSprites, lastCompact = ZJAttackInfo_Private_GetRowSprites(lastTarget, attackCursor)
+			lastSelectedSprites, lastCompact = ZJCreatureInfo_Private_GetRowSprites(lastTarget, attackCursor)
 		end
 
 		if lastSelectedSprites ~= nil and (lastSelectedSprites[1] ~= nil or lastCompact)
-			and ZJAttackInfo_Private_IsPopupAllowed(lastCompact, lastTarget)
+			and ZJCreatureInfo_Private_IsPopupAllowed(lastCompact, lastTarget)
 		then
-			ZJAttackInfo_Private_Layout(lastSelectedSprites, lastTarget, lastCompact)
+			ZJCreatureInfo_Private_Layout(lastSelectedSprites, lastTarget, lastCompact)
 		else
-			ZJAttackInfo_Private_Menu_SetOpen(false, true)
+			ZJCreatureInfo_Private_Menu_SetOpen(false, true)
 		end
 
 		-- The creature is this panel's, even while it waits: no panel after it describes creatures
 		return true
 	end
 
-	ZJAttackInfo_Private_CurrentTargetID = targetId
-	ZJAttackInfo_Private_Layout(selectedSprites, targetSprite, compact)
-	ZJAttackInfo_Private_Menu_SetOpen(true)
+	ZJCreatureInfo_Private_CurrentTargetID = targetId
+	ZJCreatureInfo_Private_Layout(selectedSprites, targetSprite, compact)
+	ZJCreatureInfo_Private_Menu_SetOpen(true)
 	return true
 end
 
 -- The panel's "hide": another panel shows, or the "Popup Key" isn't held
-function ZJAttackInfo_Private_Panel_Hide()
-	ZJAttackInfo_Private_Menu_SetOpen(false)
+function ZJCreatureInfo_Private_Panel_Hide()
+	ZJCreatureInfo_Private_Menu_SetOpen(false)
 end
 
 -----------------------
--- ZJAttackInfo_Menu --
+-- ZJCreatureInfo_Menu --
 -----------------------
 
-ZJAttackInfo_Private_Menu_SpellEffects          = ""    -- The spells affecting the target, one or more lines
-ZJAttackInfo_Private_Menu_SpellEffectsUD        = nil   -- uiItem
-ZJAttackInfo_Private_Menu_InfoList_SelectedRow  = 0
-ZJAttackInfo_Private_Menu_InfoList_Table        = {}    -- Left panel:  The target's attacks on the listed sprites
-ZJAttackInfo_Private_Menu_InfoList2_SelectedRow = 0
-ZJAttackInfo_Private_Menu_InfoList2_Table       = {}    -- Right panel: The listed sprites' attacks on the target
-ZJAttackInfo_Private_Menu_IsOpen                = false
-ZJAttackInfo_Private_Menu_Label                 = ""    -- Left panel's header
-ZJAttackInfo_Private_Menu_Label2                = ""    -- Right panel's header
-ZJAttackInfo_Private_Menu_Panels                = nil   -- table, see the main file loaded listener
-ZJAttackInfo_Private_Menu_TargetName            = ""    -- The target's name, at the start of the left panel's header
-ZJAttackInfo_Private_Menu_TargetNameUD          = nil   -- uiItem
+ZJCreatureInfo_Private_Menu_SpellEffects          = ""    -- The spells affecting the target, one or more lines
+ZJCreatureInfo_Private_Menu_SpellEffectsUD        = nil   -- uiItem
+ZJCreatureInfo_Private_Menu_InfoList_SelectedRow  = 0
+ZJCreatureInfo_Private_Menu_InfoList_Table        = {}    -- Left panel:  The target's attacks on the listed sprites
+ZJCreatureInfo_Private_Menu_InfoList2_SelectedRow = 0
+ZJCreatureInfo_Private_Menu_InfoList2_Table       = {}    -- Right panel: The listed sprites' attacks on the target
+ZJCreatureInfo_Private_Menu_IsOpen                = false
+ZJCreatureInfo_Private_Menu_Label                 = ""    -- Left panel's header
+ZJCreatureInfo_Private_Menu_Label2                = ""    -- Right panel's header
+ZJCreatureInfo_Private_Menu_Panels                = nil   -- table, see the main file loaded listener
+ZJCreatureInfo_Private_Menu_TargetName            = ""    -- The target's name, at the start of the left panel's header
+ZJCreatureInfo_Private_Menu_TargetNameUD          = nil   -- uiItem
 
 -- What the target attacks with, below the target's name in the left panel's header: for each hand, its damage, the icons of
--- the damage type(s), (see ZJAttackInfo_Private_DamageTypeIcons), the extra damage, and the icons of the elements
--- of that extra damage, (frames in ZJATKELM.BAM)
-ZJAttackInfo_Private_Menu_TargetAttack = {
+-- the damage type(s), (see ZJCreatureInfo_Private_DamageTypeIcons), the extra damage, and the icons of the elements
+-- of that extra damage, (frames in ZJCREELM.BAM)
+ZJCreatureInfo_Private_Menu_TargetAttack = {
 	{ ["text"] = "", ["icons"] = {}, ["extra"] = "", ["extraIcons"] = {} },
 	{ ["text"] = "", ["icons"] = {}, ["extra"] = "", ["extraIcons"] = {} },
 }
-ZJAttackInfo_Private_Menu_TargetAttackSeparator = ""    -- Between the two hands
-ZJAttackInfo_Private_Menu_TargetAttackTextUDs   = {}    -- Array of uiItem, the text items of the above
+ZJCreatureInfo_Private_Menu_TargetAttackSeparator = ""    -- Between the two hands
+ZJCreatureInfo_Private_Menu_TargetAttackTextUDs   = {}    -- Array of uiItem, the text items of the above
 
 -- Which items of a timer bar are shown: { track = boolean, fill = boolean, markers = { [markerIndex] = boolean } }
-ZJAttackInfo_Private_Menu_TargetBars            = {}    -- table, [barName] = bar state, below the left panel's header
-ZJAttackInfo_Private_Menu_RowBars               = {}    -- table, [bar set][barName] = bar state, below the right panel's names
+ZJCreatureInfo_Private_Menu_TargetBars            = {}    -- table, [barName] = bar state, below the left panel's header
+ZJCreatureInfo_Private_Menu_RowBars               = {}    -- table, [bar set][barName] = bar state, below the right panel's names
 
-for _, barName in ipairs(ZJAttackInfo_Private_TargetBarNames) do
-	ZJAttackInfo_Private_Menu_TargetBars[barName] = { ["track"] = false, ["fill"] = false, ["markers"] = {} }
+for _, barName in ipairs(ZJCreatureInfo_Private_TargetBarNames) do
+	ZJCreatureInfo_Private_Menu_TargetBars[barName] = { ["track"] = false, ["fill"] = false, ["markers"] = {} }
 end
 
-for rowBarSet = 1, ZJAttackInfo_Private_MaxRowBars do
+for rowBarSet = 1, ZJCreatureInfo_Private_MaxRowBars do
 	local rowBarState = {}
-	for _, barName in ipairs(ZJAttackInfo_Private_RowBarNames) do
+	for _, barName in ipairs(ZJCreatureInfo_Private_RowBarNames) do
 		rowBarState[barName] = { ["track"] = false, ["fill"] = false, ["markers"] = {} }
 	end
-	ZJAttackInfo_Private_Menu_RowBars[rowBarSet] = rowBarState
+	ZJCreatureInfo_Private_Menu_RowBars[rowBarSet] = rowBarState
 end
 
--- The frame in ZJATKDMG.BAM of the icon in front of a name in the left list, nil if the row has none
-function ZJAttackInfo_Private_Menu_InfoList_RowIcon(infoListTable, rowNumber)
+-- The frame in ZJCREDMG.BAM of the icon in front of a name in the left list, nil if the row has none
+function ZJCreatureInfo_Private_Menu_InfoList_RowIcon(infoListTable, rowNumber)
 	local entry = infoListTable[rowNumber]
 	local icon = entry and entry[4]
 	if not icon then return nil end
 	return icon * 4 -- The green variant
 end
 
--- The frame in ZJATKDMG.BAM of an icon in front of the roll of a hand, nil if that slot isn't used
-function ZJAttackInfo_Private_Menu_InfoList_TypeIcon(infoListTable, rowNumber, handEntryIndex, slot)
+-- The frame in ZJCREDMG.BAM of an icon in front of the roll of a hand, nil if that slot isn't used
+function ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(infoListTable, rowNumber, handEntryIndex, slot)
 	local entry = infoListTable[rowNumber]
 	local handDisplay = entry and entry[handEntryIndex]
 	local icon = handDisplay and handDisplay.typeIcons[slot]
@@ -2792,45 +2792,45 @@ function ZJAttackInfo_Private_Menu_InfoList_TypeIcon(infoListTable, rowNumber, h
 end
 
 -- The extra damage behind the damage of a hand
-function ZJAttackInfo_Private_Menu_InfoList_ExtraText(infoListTable, rowNumber, handEntryIndex)
+function ZJCreatureInfo_Private_Menu_InfoList_ExtraText(infoListTable, rowNumber, handEntryIndex)
 	local entry = infoListTable[rowNumber]
 	local handDisplay = entry and entry[handEntryIndex]
 	return handDisplay and handDisplay.extraText or ""
 end
 
--- The frame in ZJATKELM.BAM of an extra damage icon behind the damage of a hand, nil if that slot isn't used
-function ZJAttackInfo_Private_Menu_InfoList_ExtraIcon(infoListTable, rowNumber, handEntryIndex, slot)
+-- The frame in ZJCREELM.BAM of an extra damage icon behind the damage of a hand, nil if that slot isn't used
+function ZJCreatureInfo_Private_Menu_InfoList_ExtraIcon(infoListTable, rowNumber, handEntryIndex, slot)
 	local entry = infoListTable[rowNumber]
 	local handDisplay = entry and entry[handEntryIndex]
 	return handDisplay and handDisplay.extraIcons[slot] or nil
 end
 
-function ZJAttackInfo_Private_Menu_Open()
+function ZJCreatureInfo_Private_Menu_Open()
 	EngineGlobals.g_pBaldurChitin.m_pObjectGame.m_tempCursor = 4 -- Clear tooltip
-	Infinity_PushMenu("ZJAttackInfo_Menu")
-	ZJAttackInfo_Private_Menu_IsOpen = true
+	Infinity_PushMenu("ZJCreatureInfo_Menu")
+	ZJCreatureInfo_Private_Menu_IsOpen = true
 end
 
-function ZJAttackInfo_Private_Menu_Close()
-	Infinity_PopMenu("ZJAttackInfo_Menu")
-	ZJAttackInfo_Private_Menu_IsOpen = false
-	ZJAttackInfo_Private_AttackRollFramesCaches = {}
-	ZJAttackInfo_Private_CastTargets = {}
-	ZJAttackInfo_Private_ActionNameCaches = {}
-	ZJAttackInfo_Private_ActionAreaCaches = {}
+function ZJCreatureInfo_Private_Menu_Close()
+	Infinity_PopMenu("ZJCreatureInfo_Menu")
+	ZJCreatureInfo_Private_Menu_IsOpen = false
+	ZJCreatureInfo_Private_AttackRollFramesCaches = {}
+	ZJCreatureInfo_Private_CastTargets = {}
+	ZJCreatureInfo_Private_ActionNameCaches = {}
+	ZJCreatureInfo_Private_ActionAreaCaches = {}
 end
 
-function ZJAttackInfo_Private_Menu_SetOpen(open, dontResetOpenDelay)
+function ZJCreatureInfo_Private_Menu_SetOpen(open, dontResetOpenDelay)
 	if open then
-		if not ZJAttackInfo_Private_Menu_IsOpen then
-			ZJAttackInfo_Private_Menu_Open()
+		if not ZJCreatureInfo_Private_Menu_IsOpen then
+			ZJCreatureInfo_Private_Menu_Open()
 		end
-	elseif ZJAttackInfo_Private_Menu_IsOpen then
+	elseif ZJCreatureInfo_Private_Menu_IsOpen then
 		if not dontResetOpenDelay then
-			ZJAttackInfo_Private_OpenDelayTarget = -1
+			ZJCreatureInfo_Private_OpenDelayTarget = -1
 		end
-		ZJAttackInfo_Private_CurrentTargetID = -1
-		ZJAttackInfo_Private_Menu_Close()
+		ZJCreatureInfo_Private_CurrentTargetID = -1
+		ZJCreatureInfo_Private_Menu_Close()
 	end
 end
 
@@ -2838,39 +2838,39 @@ end
 -- Other Listeners --
 ---------------------
 
-function ZJAttackInfo_Private_OnActionbarOpened()
-	ZJAttackInfo_Private_ActionbarOpen = true
+function ZJCreatureInfo_Private_OnActionbarOpened()
+	ZJCreatureInfo_Private_ActionbarOpen = true
 end
 
-function ZJAttackInfo_Private_OnActionbarClosed()
-	ZJAttackInfo_Private_ActionbarOpen = false
-	ZJAttackInfo_Private_Menu_SetOpen(false)
+function ZJCreatureInfo_Private_OnActionbarClosed()
+	ZJCreatureInfo_Private_ActionbarOpen = false
+	ZJCreatureInfo_Private_Menu_SetOpen(false)
 end
 
 EEex_Menu_AddMainFileLoadedListener(function()
 
-	EEex_Menu_LoadFile("ZJAtkInf")
+	EEex_Menu_LoadFile("ZJCreInf")
 
 	---------------
 	-- Store UDs --
 	---------------
 
-	ZJAttackInfo_Private_Menu_TargetNameUD = EEex_Menu_GetItem("ZJAttackInfo_Menu_TargetName")
-	ZJAttackInfo_Private_Menu_SpellEffectsUD = EEex_Menu_GetItem("ZJAttackInfo_Menu_SpellEffects")
+	ZJCreatureInfo_Private_Menu_TargetNameUD = EEex_Menu_GetItem("ZJCreatureInfo_Menu_TargetName")
+	ZJCreatureInfo_Private_Menu_SpellEffectsUD = EEex_Menu_GetItem("ZJCreatureInfo_Menu_SpellEffects")
 
-	ZJAttackInfo_Private_Menu_TargetAttackTextUDs = {
-		EEex_Menu_GetItem("ZJAttackInfo_Menu_TargetAttack1Text"),
-		EEex_Menu_GetItem("ZJAttackInfo_Menu_TargetAttack1Extra"),
-		EEex_Menu_GetItem("ZJAttackInfo_Menu_TargetAttack2Text"),
-		EEex_Menu_GetItem("ZJAttackInfo_Menu_TargetAttack2Extra"),
-		EEex_Menu_GetItem("ZJAttackInfo_Menu_TargetAttackSeparator"),
+	ZJCreatureInfo_Private_Menu_TargetAttackTextUDs = {
+		EEex_Menu_GetItem("ZJCreatureInfo_Menu_TargetAttack1Text"),
+		EEex_Menu_GetItem("ZJCreatureInfo_Menu_TargetAttack1Extra"),
+		EEex_Menu_GetItem("ZJCreatureInfo_Menu_TargetAttack2Text"),
+		EEex_Menu_GetItem("ZJCreatureInfo_Menu_TargetAttack2Extra"),
+		EEex_Menu_GetItem("ZJCreatureInfo_Menu_TargetAttackSeparator"),
 	}
 	-- The left and right panel, whose items and variables only differ by a suffix
-	ZJAttackInfo_Private_Menu_Panels = {}
+	ZJCreatureInfo_Private_Menu_Panels = {}
 
 	for panelIndex, suffix in ipairs({ "", "2" }) do
 
-		local listUD = EEex_Menu_GetItem("ZJAttackInfo_Menu_InfoList"..suffix)
+		local listUD = EEex_Menu_GetItem("ZJCreatureInfo_Menu_InfoList"..suffix)
 
 		local columnUDs = {}
 		local columnUDsSize = 0
@@ -2883,15 +2883,15 @@ EEex_Menu_AddMainFileLoadedListener(function()
 			columnUD = columnUD.next
 		end
 
-		ZJAttackInfo_Private_Menu_Panels[panelIndex] = {
-			["labelName"]     = "ZJAttackInfo_Menu_Label"..suffix,
-			["labelUD"]       = EEex_Menu_GetItem("ZJAttackInfo_Menu_Label"..suffix),
-			["labelVarName"]  = "ZJAttackInfo_Private_Menu_Label"..suffix,
-			["listName"]      = "ZJAttackInfo_Menu_InfoList"..suffix,
+		ZJCreatureInfo_Private_Menu_Panels[panelIndex] = {
+			["labelName"]     = "ZJCreatureInfo_Menu_Label"..suffix,
+			["labelUD"]       = EEex_Menu_GetItem("ZJCreatureInfo_Menu_Label"..suffix),
+			["labelVarName"]  = "ZJCreatureInfo_Private_Menu_Label"..suffix,
+			["listName"]      = "ZJCreatureInfo_Menu_InfoList"..suffix,
 			["listUD"]        = listUD,
 			["columnUDs"]     = columnUDs,
 			["columnUDsSize"] = columnUDsSize,
-			["tableVarName"]  = "ZJAttackInfo_Private_Menu_InfoList"..suffix.."_Table",
+			["tableVarName"]  = "ZJCreatureInfo_Private_Menu_InfoList"..suffix.."_Table",
 		}
 	end
 
@@ -2909,11 +2909,11 @@ EEex_Menu_AddMainFileLoadedListener(function()
 	end
 
 	local menu = EEex_Menu_Find("WORLD_ACTIONBAR")
-	listenToEngineEvent(menu.reference_onOpen, ZJAttackInfo_Private_OnActionbarOpened)
-	listenToEngineEvent(menu.reference_onClose, ZJAttackInfo_Private_OnActionbarClosed)
+	listenToEngineEvent(menu.reference_onOpen, ZJCreatureInfo_Private_OnActionbarOpened)
+	listenToEngineEvent(menu.reference_onClose, ZJCreatureInfo_Private_OnActionbarClosed)
 end)
 
-EEex.RegisterSlicedRect("ZJAttackInfo_BackgroundRect", {
+EEex.RegisterSlicedRect("ZJCreatureInfo_BackgroundRect", {
 	["topLeft"]     = {  0,  0, 32, 32 },
 	["top"]         = { 16,  0, 32, 32 },
 	["topRight"]    = { 32,  0, 32, 32 },
@@ -2928,23 +2928,23 @@ EEex.RegisterSlicedRect("ZJAttackInfo_BackgroundRect", {
 	["flags"]       = 0,
 })
 
-function ZJAttackInfo_Private_Background_Render(item)
-	EEex.DrawSlicedRect("ZJAttackInfo_BackgroundRect", { item:getArea() }, 255 * 0.85)
+function ZJCreatureInfo_Private_Background_Render(item)
+	EEex.DrawSlicedRect("ZJCreatureInfo_BackgroundRect", { item:getArea() }, 255 * 0.85)
 end
 
-EEex_Menu_AddBeforeUIItemRenderListener("ZJAttackInfo_Menu_BackgroundRect", ZJAttackInfo_Private_Background_Render)
+EEex_Menu_AddBeforeUIItemRenderListener("ZJCreatureInfo_Menu_BackgroundRect", ZJCreatureInfo_Private_Background_Render)
 
 EEex_Utility_NewScope(function()
 	local old = EEex_Sprite_Hook_CheckSuppressTooltip
 	EEex_Sprite_Hook_CheckSuppressTooltip = function()
-		return ZJAttackInfo_Private_Menu_IsOpen or old()
+		return ZJCreatureInfo_Private_Menu_IsOpen or old()
 	end
 end)
 
 -- Between Spell Info, (a spell waiting for a target describes the creature instead), and Lock Info, (never a creature)
 ZJPopup_AddPanel({
-	["name"]     = "Attack Info",
+	["name"]     = "Creature Info",
 	["priority"] = 20,
-	["show"]     = ZJAttackInfo_Private_Panel_Show,
-	["hide"]     = ZJAttackInfo_Private_Panel_Hide,
+	["show"]     = ZJCreatureInfo_Private_Panel_Show,
+	["hide"]     = ZJCreatureInfo_Private_Panel_Hide,
 })

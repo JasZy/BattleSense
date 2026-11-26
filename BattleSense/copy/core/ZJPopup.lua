@@ -168,7 +168,7 @@ ZJPopup_Private_Panels = {}
 --
 --   "name"         - The module's name, (for ZJPopup_GetCursorPanel() and error messages).
 --   "priority"     - Lower is asked first. Item Info = 5, (an item on the screen, on top of the game world), Spell
---                    Info = 10, (a spell waiting for a target, over a creature), Attack Info = 20, (a creature), Lock
+--                    Info = 10, (a spell waiting for a target, over a creature), Creature Info = 20, (a creature), Lock
 --                    Info = 30, (a container, door or trap), Ability Info = 40 and Proficiency Info = 50, (a row of
 --                    their character creation screen).
 --
@@ -184,7 +184,7 @@ ZJPopup_Private_Panels = {}
 --   "wrap"         - true to wrap the text at a width that follows the size of the text, (optional, otherwise the box
 --                    is as wide as the longest line).
 --
--- A panel that draws itself, in a menu of its own, (Attack Info):
+-- A panel that draws itself, in a menu of its own, (Creature Info):
 --
 --   "show"         - function() that lays out and opens the module's menu and returns true, or returns false if the
 --                    module has nothing to say about what is under the cursor.

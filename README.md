@@ -16,7 +16,7 @@ Each component can be installed on its own.
 
 The popups open while you hold a key and hover what they describe. It is the same key for all of them: Left Ctrl by default, the "Popup Key" at the top of the "Battle Sense Modules" tab picks another one, (left or right Ctrl, Alt or Shift).
 
-### Attack Info
+### Creature Info
 
 Hover over an enemy or a neutral creature to open a popup with, for every selected character:
 
@@ -123,7 +123,7 @@ The settings of each component are in the game under Options > EEex Options. The
 
 ## Good to know
 
-- **EEex's own modules are switched off.** When the Attack Info, Timer or Container Colors component is installed and EEex's module of the same name, (Empty Container for Container Colors), is enabled, Battle Sense turns the EEex one off, so that nothing is drawn twice. If you uninstall Battle Sense, turn EEex's module back on under Options > EEex Options > Modules.
+- **EEex's own modules are switched off.** When the Creature Info, Timer or Container Colors component is installed and the EEex module it replaces, (Attack Info, Timer or Empty Container), is enabled, Battle Sense turns the EEex one off, so that nothing is drawn twice. If you uninstall Battle Sense, turn EEex's module back on under Options > EEex Options > Modules.
 - **Battle Sense has its own settings.** They are stored separately from EEex's; settings you changed for EEex's Attack Info or Timer module are not carried over.
 - **The Combat Log component changes save games.** To report why a spell did nothing, it adds a hidden effect to every creature, and that effect is saved with the creature. Keep the component installed for saves that were made with it.
 
@@ -133,7 +133,7 @@ Battle Sense only adds files with the `ZJ` prefix to the override folder, and do
 
 ## Credits
 
-- [Bubb](https://github.com/Bubb13), for EEex, and for the Attack Info and Timer modules that the components of the same name are built on
+- [Bubb](https://github.com/Bubb13), for EEex, and for the Attack Info and Timer modules that the Creature Info and Timer components are built on
 - JasZy, for Battle Sense
 
 ## For developers
@@ -143,12 +143,12 @@ BattleSense/
   BattleSense.tp2          The installer
   language/                Installer strings
   copy/core/               Installed with the first component: startup file, strings, shared sprite helpers
-  copy/attackinfo/         Attack Info component
+  copy/creatureinfo/       Creature Info component
   copy/timer/              Timer component
   copy/combatlog/          Combat Log component
 ```
 
 - `M_ZJBSen.lua` is run by the engine during startup and starts the installed modules.
 - `ZJ-en_US.lua` holds the English strings. A translation goes in a file named after the game's language code, for example `ZJ-de_DE.lua`, and only needs the strings it translates.
-- `ZJPopup.lua` holds the one popup the modules share, and its key. While the key is held, the modules' panels are asked in order of priority whether they have something to say about what is under the cursor, and the first one that does fills the popup, (`ZJPopup_AddPanel()`). A text panel is shown in the popup's box of text, (`ZJPopup.menu`), a panel that draws itself, (Attack Info), opens its own menu.
+- `ZJPopup.lua` holds the one popup the modules share, and its key. While the key is held, the modules' panels are asked in order of priority whether they have something to say about what is under the cursor, and the first one that does fills the popup, (`ZJPopup_AddPanel()`). A text panel is shown in the popup's box of text, (`ZJPopup.menu`), a panel that draws itself, (Creature Info), opens its own menu.
 - `ZJSprite.lua` holds the functions that read the engine's casting and attack round state. They are also available as methods on `CGameSprite`, prefixed with `zj`.

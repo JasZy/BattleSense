@@ -18,7 +18,7 @@ uiStrings["ZJBattleSense_Options_TRANSLATION_PopupKey"] = "Popup Key"
 uiStrings["ZJBattleSense_Options_TRANSLATION_PopupKey_Description"] = [[
 The key that opens the Battle Sense popup: left / right Ctrl, Alt or Shift. Click to pick the next one.
 
-The popup only opens while this key is held down. It describes what is under the cursor: a creature, (Attack Info, or Spell Info while a spell waits for a target), a locked container or door, (Lock Info), an item, (Item Info), or an ability or proficiency at character creation, (Ability Info, Proficiency Info). Letting go of the key closes it. Each of these modules is switched on or off below.
+The popup only opens while this key is held down. It describes what is under the cursor: a creature, (Creature Info, or Spell Info while a spell waits for a target), a locked container or door, (Lock Info), an item, (Item Info), or an ability or proficiency at character creation, (Ability Info, Proficiency Info). Letting go of the key closes it. Each of these modules is switched on or off below.
 ]]
 
 uiStrings["ZJBattleSense_TRANSLATION_OpenOn_LeftCtrl"]      = "Left Ctrl"
@@ -29,14 +29,14 @@ uiStrings["ZJBattleSense_TRANSLATION_OpenOn_RightAlt"]      = "Right Alt"
 uiStrings["ZJBattleSense_TRANSLATION_OpenOn_RightShift"]    = "Right Shift"
 
 -----------------
--- Attack Info --
+-- Creature Info --
 -----------------
 
-uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_TabTitle"] = "Battle Sense: Attack Info"
+uiStrings["ZJBattleSense_Options_TRANSLATION_CreatureInfo_TabTitle"] = "Battle Sense: Creature Info"
 
-uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_Enable"] = "Enable Attack Info Module"
+uiStrings["ZJBattleSense_Options_TRANSLATION_CreatureInfo_Enable"] = "Enable Creature Info Module"
 
-uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_Enable_Description"] = [[
+uiStrings["ZJBattleSense_Options_TRANSLATION_CreatureInfo_Enable_Description"] = [[
 The popup opens when hovering any creature while the "Popup Key" is held: a hostile or neutral creature, or a party member or ally, (see "Enabled For Friendly"). Letting go of the key closes it.
 
 It has two panels, with a row for each selected party member:
@@ -52,9 +52,9 @@ The right panel's header also lists the creature's stoneskins and mirror images,
 This replaces Bubb's "Attack Info" module that comes with EEex. That module has to be turned off, (Modules tab), or both popups are drawn on top of each other. Battle Sense turns it off by itself when the game starts, which takes effect from the next time the game is started.
 ]]
 
-uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_ShowAllies"] = "Show Allies"
+uiStrings["ZJBattleSense_Options_TRANSLATION_CreatureInfo_ShowAllies"] = "Show Allies"
 
-uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_ShowAllies_Description"] = [[
+uiStrings["ZJBattleSense_Options_TRANSLATION_CreatureInfo_ShowAllies_Description"] = [[
 Includes the party's summons and other allies, not just the party members, (companions).
 
 On: the popup over a creature lists the party's summons / allies that are fighting it, and hovering a summon / ally opens the compact popup, (see "Enabled For Friendly").
@@ -62,23 +62,23 @@ On: the popup over a creature lists the party's summons / allies that are fighti
 Off: the popup only lists party members, and the compact popup only opens over party members.
 ]]
 
-uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_MaxRows"] = "Max Creatures"
+uiStrings["ZJBattleSense_Options_TRANSLATION_CreatureInfo_MaxRows"] = "Max Creatures"
 
-uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_MaxRows_Description"] = [[
+uiStrings["ZJBattleSense_Options_TRANSLATION_CreatureInfo_MaxRows_Description"] = [[
 The most creatures listed in the popup. Click to step through 6, (a full party), 10, 15 and 20. "Off" lists them all.
 
 When more creatures are eligible, the ones closest to the creature under the cursor are listed.
 ]]
 
-uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_FontPoint"] = "Font Point"
+uiStrings["ZJBattleSense_Options_TRANSLATION_CreatureInfo_FontPoint"] = "Font Point"
 
-uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_FontPoint_Description"] = [[
-The point (size) of the font used to display the attack information.
+uiStrings["ZJBattleSense_Options_TRANSLATION_CreatureInfo_FontPoint_Description"] = [[
+The point (size) of the font used in the popup.
 ]]
 
-uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_HitDisplayType"] = "Hit Display Type"
+uiStrings["ZJBattleSense_Options_TRANSLATION_CreatureInfo_HitDisplayType"] = "Hit Display Type"
 
-uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_HitDisplayType_Description"] = [[
+uiStrings["ZJBattleSense_Options_TRANSLATION_CreatureInfo_HitDisplayType_Description"] = [[
 How the popup displays an attacker's odds of hitting.
 
 'Roll' - The minimum d20 roll needed to land the attack, e.g. "14+". A dash means no roll can hit.
@@ -86,21 +86,21 @@ How the popup displays an attacker's odds of hitting.
 'Percentage' - The chance to hit as a percentage, e.g. "35%".
 ]]
 
-uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_HitDisplayType_Roll"] = "Roll"
+uiStrings["ZJBattleSense_Options_TRANSLATION_CreatureInfo_HitDisplayType_Roll"] = "Roll"
 
-uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_HitDisplayType_Percentage"] = "Percentage"
+uiStrings["ZJBattleSense_Options_TRANSLATION_CreatureInfo_HitDisplayType_Percentage"] = "Percentage"
 
-uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_ResistanceColor"] = "Resistance Color"
+uiStrings["ZJBattleSense_Options_TRANSLATION_CreatureInfo_ResistanceColor"] = "Resistance Color"
 
-uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_ResistanceColor_Description"] = [[
+uiStrings["ZJBattleSense_Options_TRANSLATION_CreatureInfo_ResistanceColor_Description"] = [[
 The color of the creature's resistance behind the damage, e.g. "-50%", where it takes damage away. Click to pick the next color, "Off" hides the resistances: the damage is shown as if the creature had none.
 
 A resistance that adds damage, (a negative resistance, e.g. "+25%"), is always green.
 ]]
 
-uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_ImmunityColor"] = "Immunity Color"
+uiStrings["ZJBattleSense_Options_TRANSLATION_CreatureInfo_ImmunityColor"] = "Immunity Color"
 
-uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_ImmunityColor_Description"] = [[
+uiStrings["ZJBattleSense_Options_TRANSLATION_CreatureInfo_ImmunityColor_Description"] = [[
 The color of the hit roll and damage of the rows where the creature is immune to the attacker's weapon, with "Immune" behind the damage. Click to pick the next color, "Off" shows the rows as if the creature wasn't immune: the normal roll and damage, with its resistance and the extra damage of a hit.
 ]]
 
@@ -120,9 +120,9 @@ uiStrings["ZJBattleSense_TRANSLATION_BarColor_Blue"]   = "Blue"
 uiStrings["ZJBattleSense_TRANSLATION_BarColor_Purple"] = "Purple"
 uiStrings["ZJBattleSense_TRANSLATION_BarColor_Pink"]   = "Pink"
 
-uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_AttackBar"] = "Attack Timer"
+uiStrings["ZJBattleSense_Options_TRANSLATION_CreatureInfo_AttackBar"] = "Attack Timer"
 
-uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_AttackBar_Description"] = [[
+uiStrings["ZJBattleSense_Options_TRANSLATION_CreatureInfo_AttackBar_Description"] = [[
 The color of the attack bar, which the left panel shows while the creature under the cursor is attacking. Click to pick the next color, "Off" hides the bar.
 
 This indicator displays how far the creature is through its attack round. The white ticks mark the points in the round where it makes its attack rolls. The right panel's row timers use the same bar.
@@ -130,9 +130,9 @@ This indicator displays how far the creature is through its attack round. The wh
 The color is shared with the attack timer beside the party portraits, (Battle Sense: Timer).
 ]]
 
-uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_CastBar"] = "Cast Timer"
+uiStrings["ZJBattleSense_Options_TRANSLATION_CreatureInfo_CastBar"] = "Cast Timer"
 
-uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_CastBar_Description"] = [[
+uiStrings["ZJBattleSense_Options_TRANSLATION_CreatureInfo_CastBar_Description"] = [[
 The color of the cast bar, which the left panel shows while the creature under the cursor is casting a spell or is waiting to be able to use spells / items again. Click to pick the next color, "Off" hides the bar.
 
 This indicator displays the creature's cooldown for using spells / items. While a spell is being cast, a white tick marks the point where it is released. The right panel's row timers use the same bar.
@@ -140,9 +140,9 @@ This indicator displays the creature's cooldown for using spells / items. While 
 The color is shared with the cast timer beside the party portraits, (Battle Sense: Timer).
 ]]
 
-uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_ContingencyBar"] = "Contingency Timer"
+uiStrings["ZJBattleSense_Options_TRANSLATION_CreatureInfo_ContingencyBar"] = "Contingency Timer"
 
-uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_ContingencyBar_Description"] = [[
+uiStrings["ZJBattleSense_Options_TRANSLATION_CreatureInfo_ContingencyBar_Description"] = [[
 The color of the contingency bar, which the left panel shows while the creature under the cursor has contingency effects. Click to pick the next color, "Off" hides the bar.
 
 This indicator displays the interval at which the creature's contingency conditions are checked.
@@ -152,9 +152,9 @@ Note that some mods add contingency effects behind-the-scenes to implement certa
 The color is shared with the contingency timer beside the party portraits, (Battle Sense: Timer).
 ]]
 
-uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_ModalBar"] = "Modal Timer"
+uiStrings["ZJBattleSense_Options_TRANSLATION_CreatureInfo_ModalBar"] = "Modal Timer"
 
-uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_ModalBar_Description"] = [[
+uiStrings["ZJBattleSense_Options_TRANSLATION_CreatureInfo_ModalBar_Description"] = [[
 The color of the modal bar, which the left panel shows while the creature under the cursor is using a modal action. Click to pick the next color, "Off" hides the bar.
 
 This indicator displays the interval of the creature's modal action: bard song, turn undead, etc.
@@ -162,9 +162,9 @@ This indicator displays the interval of the creature's modal action: bard song, 
 The color is shared with the modal timer beside the party portraits, (Battle Sense: Timer).
 ]]
 
-uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_ShowRowTimers"] = "Show Row Timers"
+uiStrings["ZJBattleSense_Options_TRANSLATION_CreatureInfo_ShowRowTimers"] = "Show Row Timers"
 
-uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_ShowRowTimers_Description"] = [[
+uiStrings["ZJBattleSense_Options_TRANSLATION_CreatureInfo_ShowRowTimers_Description"] = [[
 Adds timer bars below the names in the right panel, for every listed creature that is attacking the creature under the cursor.
 
 The attack bar is displayed while the creature is attacking, and shows how far it is through its attack round. The white ticks mark its attack rolls.
@@ -175,13 +175,13 @@ The bars have the colors set by "Attack Timer" and "Cast Timer", and a bar whose
 ]]
 
 -----------------
--- Attack Info --
+-- Creature Info --
 -----------------
 
-uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_CompactForAllies"] = "Enabled For Friendly"
+uiStrings["ZJBattleSense_Options_TRANSLATION_CreatureInfo_CompactForAllies"] = "Enabled For Friendly"
 
-uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_CompactForAllies_Description"] = [[
-Enables a compact attack information popup over party members and the party's summons / allies, (only while the Attack Info module is enabled, see "Battle Sense Modules").
+uiStrings["ZJBattleSense_Options_TRANSLATION_CreatureInfo_CompactForAllies_Description"] = [[
+Enables a compact creature info popup over party members and the party's summons / allies, (only while the Creature Info module is enabled, see "Battle Sense Modules").
 
 The compact popup lists the creatures that the creature under the cursor is attacking or is being attacked by, with the roll the creature needs to hit them and the damage it does in the left panel, and their rolls and damage against the creature in the right panel.
 
@@ -192,9 +192,9 @@ Over a party member or ally that isn't fighting anyone, the compact popup only h
 Turn this off to not open a popup over them at all.
 ]]
 
-uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_ShowSpellEffects"] = "Show Spell Effects"
+uiStrings["ZJBattleSense_Options_TRANSLATION_CreatureInfo_ShowSpellEffects"] = "Show Spell Effects"
 
-uiStrings["ZJBattleSense_Options_TRANSLATION_AttackInfo_ShowSpellEffects_Description"] = [[
+uiStrings["ZJBattleSense_Options_TRANSLATION_CreatureInfo_ShowSpellEffects_Description"] = [[
 Lists the spells affecting the creature under the cursor in the right panel's header, one per line. A spell with a set duration shows the time it has left in turns and rounds, e.g. "Haste (1,5)".
 
 A condition from something else, (a creature's or weapon's attack, a hidden spell), is listed by the name of its portrait icon, as the character record shows it, e.g. "Confused".
@@ -320,13 +320,13 @@ uiStrings["ZJBattleSense_TRANSLATION_SpellInfo_ImmuneToType"]       = "Immune to
 uiStrings["ZJBattleSense_TRANSLATION_SpellInfo_ProtectedFromSpell"] = "Protected from this spell"
 uiStrings["ZJBattleSense_TRANSLATION_SpellInfo_Excludes"]           = "Unaffected: the spell excludes %s"
 
-uiStrings["ZJBattleSense_TRANSLATION_AttackInfo_Immune"] = "Immune"
+uiStrings["ZJBattleSense_TRANSLATION_CreatureInfo_Immune"] = "Immune"
 
-uiStrings["ZJBattleSense_TRANSLATION_AttackInfo_Stoneskins"] = "Stoneskins"
+uiStrings["ZJBattleSense_TRANSLATION_CreatureInfo_Stoneskins"] = "Stoneskins"
 
-uiStrings["ZJBattleSense_TRANSLATION_AttackInfo_MirrorImages"] = "Mirror images"
+uiStrings["ZJBattleSense_TRANSLATION_CreatureInfo_MirrorImages"] = "Mirror images"
 
-uiStrings["ZJBattleSense_TRANSLATION_AttackInfo_Poison"] = "poison"
+uiStrings["ZJBattleSense_TRANSLATION_CreatureInfo_Poison"] = "poison"
 
 -----------
 -- Timer --
@@ -357,7 +357,7 @@ The color of the cast bar next to party member portraits. Click to pick the next
 
 This indicator displays the cooldown for using spells / items.
 
-The color is shared with the attack info popup's cast timer, (Battle Sense: Attack Info).
+The color is shared with the creature info popup's cast timer, (Battle Sense: Creature Info).
 ]]
 
 uiStrings["ZJBattleSense_Options_TRANSLATION_Timer_ShowCastMarker"] = "Show Cast Marker"
@@ -377,7 +377,7 @@ This indicator displays the interval at which contingency conditions are checked
 
 Note that some mods add contingency effects behind-the-scenes to implement certain behaviors - this may cause the contingency indicator to appear unexpectedly.
 
-The color is shared with the attack info popup's contingency timer, (Battle Sense: Attack Info).
+The color is shared with the creature info popup's contingency timer, (Battle Sense: Creature Info).
 ]]
 
 uiStrings["ZJBattleSense_Options_TRANSLATION_Timer_ModalBar"] = "Modal Timer"
@@ -387,7 +387,7 @@ The color of the modal bar next to party member portraits. Click to pick the nex
 
 This indicator displays the interval of modal actions: find traps, turn undead, etc.
 
-The color is shared with the attack info popup's modal timer, (Battle Sense: Attack Info).
+The color is shared with the creature info popup's modal timer, (Battle Sense: Creature Info).
 ]]
 
 uiStrings["ZJBattleSense_Options_TRANSLATION_Timer_AttackBar"] = "Attack Timer"
@@ -397,7 +397,7 @@ The color of the attack bar next to party member portraits. Click to pick the ne
 
 This indicator displays how far a party member is through their attack round.
 
-The color is shared with the attack info popup's attack timer, (Battle Sense: Attack Info).
+The color is shared with the creature info popup's attack timer, (Battle Sense: Creature Info).
 ]]
 
 uiStrings["ZJBattleSense_Options_TRANSLATION_Timer_ShowAttackMarkers"] = "Show Attack Markers"

@@ -239,7 +239,7 @@ end
 -- Panel --
 -----------
 
--- After Spell Info and Attack Info: a creature is never a container, door or trap, so they never compete
+-- After Spell Info and Creature Info: a creature is never a container, door or trap, so they never compete
 ZJPopup_AddPanel({
 	["name"]         = "Lock Info",
 	["priority"]     = 30,
