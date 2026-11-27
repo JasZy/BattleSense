@@ -278,6 +278,8 @@ Shows how far the creature is from the caster, next to the range of the spell / 
 
 The caster also has to see the creature, so a range longer than the caster's sight range is cut down to it, e.g. "Distance: 26 (range 35, sight 28)". Sight is 28 for most creatures.
 
+With the cursor over the ground instead of a creature, the popup shows only this line, measured to the cursor.
+
 Distances are measured from the caster's center to the creature's center, in the same units as the range.
 ]]
 
@@ -607,10 +609,10 @@ uiStrings["ZJBattleSense_Options_TRANSLATION_ItemInfo_WorseColor_Description"] =
 The color of a value that is worse than that of the item it replaces, or than before drinking a potion, and of "can't be used". Click to pick the next color.
 ]]
 
-uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_IfEquippedReplacing"] = "If %s equips this instead of %s:"
-uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_NotUsable"]           = "Not usable by %s"
 uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Unidentified"]        = "Not identified"
 uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_IfEquipped"]          = "If %s equips this:"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_IfEquippedReplacing"] = "If %s equips this instead of %s:"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_NotUsable"]           = "Not usable by %s"
 
 uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Stat_ArmorClass"]         = "Armor Class"
 uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Stat_ArmorClassCrushing"] = "Armor Class vs. crushing"

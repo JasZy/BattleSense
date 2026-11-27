@@ -803,10 +803,69 @@ function ZJSpellInfo_Private_BuildText(caster, target)
 	local title = string.format(ZJSpellInfo_Private_T("Title"), name, target:getName())
 	local lines = ZJSpellInfo_Private_Describe(target, effects)
 	if ZJSpellInfo_Private_ShowDistance:get() ~= 0 then
-		table.insert(lines, 1, ZJSpellInfo_Private_DescribeDistance(caster, target, range))
+		table.insert(lines, 1, ZJSpellInfo_Private_DescribeDistance(caster, target.m_pos.x, target.m_pos.y, range))
 	end
 	table.insert(lines, 1, title)
 	return table.concat(lines, "\n")
+end
+
+-- Returns the popup's text for `caster` aiming what it is about to use at the ground under the cursor: only the
+-- distance line, or nil if there is nothing to show
+function ZJSpellInfo_Private_BuildGroundText(caster)
+
+	if ZJSpellInfo_Private_ShowDistance:get() == 0 then return nil end
+
+	local name, _, range = ZJSpellInfo_Private_ReadUsed(caster)
+	if name == nil then return nil end
+
+	local cursorX, cursorY = ZJSpellInfo_Private_GetCursorGamePos()
+	if cursorX == nil then return nil end
+
+	return name.."\n"..ZJSpellInfo_Private_DescribeDistance(caster, cursorX, cursorY, range)
+end
+
+-- Returns the game coordinates of the cursor, (the inverse of EEex_Menu_TranslateXYFromGame()), or nil
+function ZJSpellInfo_Private_GetCursorGamePos()
+
+	local game = EEex_EngineGlobal_CBaldurChitin.m_pObjectGame
+	local area = game.m_gameAreas:get(game.m_visibleArea)
+	if area == nil then return nil end
+
+	local infinity = area.m_cInfinity
+	local viewPort = infinity.rViewPort
+	local screenW, screenH = Infinity_GetScreenSize()
+	if screenW <= 0 or screenH <= 0 then return nil end
+
+	local mouseX, mouseY = EEex_Menu_GetMousePos()
+	local gameX = mouseX / screenW * viewPort.right + infinity.nNewX - viewPort.left
+	local gameY = mouseY / screenH * viewPort.bottom + infinity.nNewY - viewPort.top
+	return gameX, gameY
+end
+
+-- The world screen's menus that the cursor can be over instead of the ground
+ZJSpellInfo_Private_WorldMenuNames = {
+	"WORLD_ACTIONBAR",
+	"LEFT_SIDEBAR", "LEFT_SIDEBAR_BOTTOM",
+	"RIGHT_SIDEBAR", "RIGHT_SIDEBAR_BOTTOM",
+	"WORLD_MESSAGES",
+}
+
+-- Whether the cursor is over an item of one of the world screen's menus, (the action bar, the portraits, ...)
+function ZJSpellInfo_Private_IsCursorOverWorldMenu()
+	for _, menuName in ipairs(ZJSpellInfo_Private_WorldMenuNames) do
+		if Infinity_IsMenuOnStack(menuName) then
+			local menu = EEex_Menu_Find(menuName)
+			local item = menu ~= nil and menu.items or nil
+			while item do
+				local ok, x, y, w, h = pcall(function() return item:getArea() end)
+				if ok and w ~= nil and w > 0 and h > 0 and EEex_Menu_IsCursorWithinRect(x, y, w, h) then
+					return true
+				end
+				item = item.next
+			end
+		end
+	end
+	return false
 end
 
 -- Returns the line with how far `target` is from `caster`, and how far it is out of reach, in the units of an ability's
@@ -816,11 +875,11 @@ end
 -- A caster also has to see the target: its visual range, (14 by default, in units of 32 pixels), caps the range.
 -- Tested in game: Command, (range 35), and Magic Missile, (range 60), both walk until about 416 pixels away, straight
 -- up as well as sideways, (inside the 448 pixels of the default visual range, the caster stops on the walking grid).
-function ZJSpellInfo_Private_DescribeDistance(caster, target, range)
+function ZJSpellInfo_Private_DescribeDistance(caster, targetX, targetY, range)
 
-	local casterPos, targetPos = caster.m_pos, target.m_pos
-	local offsetX = targetPos.x - casterPos.x
-	local offsetY = (targetPos.y - casterPos.y) * 4 / 3
+	local casterPos = caster.m_pos
+	local offsetX = targetX - casterPos.x
+	local offsetY = (targetY - casterPos.y) * 4 / 3
 	local distance = math.floor(math.sqrt(offsetX * offsetX + offsetY * offsetY) / 16 + 0.5)
 
 	local ok, visualRange = pcall(function() return caster:getActiveStats().m_nVisualRange end)
@@ -868,21 +927,25 @@ function ZJSpellInfo_Private_GetText()
 	local state = EngineGlobals.g_pBaldurChitin.m_pObjectGame.m_nState
 	if state ~= 1 and state ~= 2 then return nil end
 
-	local target = EEex_GameObject_GetUnderCursor()
-	if not EEex_GameObject_IsSprite(target) then return nil end
-
-	-- PC, FAMILIAR, ALLY, CONTROLLED, CHARMED, ... up to GOODCUTOFF, (EA.IDS)
-	if ZJSpellInfo_Private_ShowOnParty:get() == 0 then
-		local ea = target.m_typeAI.m_EnemyAlly
-		if ea >= 2 and ea <= 30 then return nil end
-	end
-
 	-- The selected creature that is about to use something
 	local caster = nil
 	EEex_Sprite_IterateSelected(function(sprite)
 		if caster == nil then caster = sprite end
 	end)
 	if caster == nil then return nil end
+
+	-- Over the ground, (or a door / container): only how far the cursor is, not over the action bar / portraits
+	local target = EEex_GameObject_GetUnderCursor()
+	if not EEex_GameObject_IsSprite(target) then
+		if ZJSpellInfo_Private_IsCursorOverWorldMenu() then return nil end
+		return ZJSpellInfo_Private_BuildGroundText(caster)
+	end
+
+	-- PC, FAMILIAR, ALLY, CONTROLLED, CHARMED, ... up to GOODCUTOFF, (EA.IDS)
+	if ZJSpellInfo_Private_ShowOnParty:get() == 0 then
+		local ea = target.m_typeAI.m_EnemyAlly
+		if ea >= 2 and ea <= 30 then return nil end
+	end
 
 	return ZJSpellInfo_Private_BuildText(caster, target)
 end
