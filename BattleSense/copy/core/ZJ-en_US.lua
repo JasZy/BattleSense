@@ -282,15 +282,33 @@ uiStrings["ZJBattleSense_Options_TRANSLATION_SpellInfo_ShowAreas"] = "Show Areas
 uiStrings["ZJBattleSense_Options_TRANSLATION_SpellInfo_ShowAreas_Description"] = [[
 Marks the ground a spell / item will affect, while the "Open Popup" key is held, (the "Battle Sense Modules" tab).
 
-While a spell / item with an area waits for a target, its area is marked in blue around the creature under the cursor, or around the cursor. A spell that affects the area around the caster, like Chant, is marked around the caster.
+While a spell / item with an area waits for a target, its area is marked around the creature under the cursor, or around the cursor. A spell that affects the area around the caster, like Chant, is marked around the caster.
 
 Over a button of the action bar it marks:
-  - a spell that is cast on the caster, like Chant, around the character, in blue
-  - turn undead and find traps around the character, in gold, (half the character's sight; turn undead only affects the undead the character can see)
+  - a spell that is cast on the caster, like Chant, around the character
+  - turn undead and find traps around the character, (half the character's sight; turn undead only affects the undead the character can see)
 
 A cone, like Burning Hands or Cone of Cold, is marked from the caster towards the creature under the cursor, or towards the cursor.
 
 An area affects whoever stands in it when the spell is released, it doesn't stay on the ground.
+
+The colors are set by "Spell Area Color" and "Turn Undead / Find Traps Area Color".
+]]
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_SpellInfo_SpellAreaColor"] = "Spell Area Color"
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_SpellInfo_SpellAreaColor_Description"] = [[
+The color of the area of a spell / item, and of a cone, (see "Show Areas"). Click to pick the next color.
+
+Pick the color of the "Cast Timer", (Timer and Creature Info), to match it.
+]]
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_SpellInfo_ModalAreaColor"] = "Turn Undead / Find Traps Area Color"
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_SpellInfo_ModalAreaColor_Description"] = [[
+The color of the area of turn undead and find traps, (see "Show Areas"). Click to pick the next color.
+
+Pick the color of the "Modal Timer", (Timer and Creature Info), to match it.
 ]]
 
 uiStrings["ZJBattleSense_TRANSLATION_SpellInfo_Title"]              = "%s on %s"

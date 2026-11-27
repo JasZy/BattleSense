@@ -21,6 +21,8 @@
 Infinity_DoFile("ZJPopup")
 -- The areas of spells / items, (shared with Creature Info)
 Infinity_DoFile("ZJArea")
+-- The colors, and the button that steps through them, (shared with Timer and Creature Info)
+Infinity_DoFile("ZJBarCol")
 
 -------------
 -- Options --
@@ -93,6 +95,38 @@ ZJSpellInfo_Private_ShowAreas = EEex_Options_Register("ZJSpellInfo_ShowAreas", E
 	["accessor"] = EEex_Options_ClampedAccessor.new({ ["min"] = 0, ["max"] = 1 }),
 	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Spell Info Module: Show Areas" }),
 }))
+
+-- The colors of the areas, one of the bar colors, (ZJBarCol.lua), so an area can match its timer bar. No Off: "Show
+-- Areas" turns them off.
+local registerAreaColorOption = function(name, default)
+	return EEex_Options_Register("ZJSpellInfo_"..name.."AreaColor", EEex_Options_Option.new({
+		["default"]  = default,
+		["accessor"] = EEex_Options_ClampedAccessor.new({ ["min"] = 1, ["max"] = #ZJBarColors_Colors }),
+		["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Spell Info Module: "..name.." Area Color" }),
+	}))
+end
+
+-- [area type] = Its color option, "spell" = a spell / item ability, (and a cone), "modal" = turn undead / find traps
+ZJSpellInfo_Private_AreaColors = {
+	["spell"] = registerAreaColorOption("Spell", 6), -- Blue
+	["modal"] = registerAreaColorOption("Modal", 3), -- Yellow
+}
+
+-- A color button that steps through the colors, without Off
+ZJSpellInfo_AreaColorWidget = {}
+ZJSpellInfo_AreaColorWidget.__index = ZJSpellInfo_AreaColorWidget
+setmetatable(ZJSpellInfo_AreaColorWidget, ZJBarColors_CycleWidget)
+
+ZJSpellInfo_AreaColorWidget.new = function(o)
+	if o == nil then o = {} end
+	setmetatable(o, ZJSpellInfo_AreaColorWidget)
+	o:_init()
+	return o
+end
+
+function ZJSpellInfo_AreaColorWidget:_getMin()
+	return 1
+end
 
 EEex_Options_AddTab("ZJBattleSense_Options_TRANSLATION_SpellInfo_TabTitle", function() return {
 	{
@@ -167,6 +201,18 @@ EEex_Options_AddTab("ZJBattleSense_Options_TRANSLATION_SpellInfo_TabTitle", func
 			["label"]       = "ZJBattleSense_Options_TRANSLATION_SpellInfo_ShowAreas",
 			["description"] = "ZJBattleSense_Options_TRANSLATION_SpellInfo_ShowAreas_Description",
 			["widget"]      = EEex_Options_ToggleWidget.new(),
+		}),
+		EEex_Options_DisplayEntry.new({
+			["optionID"]    = "ZJSpellInfo_SpellAreaColor",
+			["label"]       = "ZJBattleSense_Options_TRANSLATION_SpellInfo_SpellAreaColor",
+			["description"] = "ZJBattleSense_Options_TRANSLATION_SpellInfo_SpellAreaColor_Description",
+			["widget"]      = ZJSpellInfo_AreaColorWidget.new(),
+		}),
+		EEex_Options_DisplayEntry.new({
+			["optionID"]    = "ZJSpellInfo_ModalAreaColor",
+			["label"]       = "ZJBattleSense_Options_TRANSLATION_SpellInfo_ModalAreaColor",
+			["description"] = "ZJBattleSense_Options_TRANSLATION_SpellInfo_ModalAreaColor_Description",
+			["widget"]      = ZJSpellInfo_AreaColorWidget.new(),
 		}),
 	},
 } end)
@@ -882,14 +928,15 @@ ZJPopup_AddPanel({
 --
 -- Both only while the "Open Popup" key is held. A cone, (from the caster, while it is aimed), is drawn by its own label.
 
-ZJSpellInfo_Private_AreaSequences = { ["spell"] = 0, ["modal"] = 1 } -- In ZJSPLARE.BAM
-ZJSpellInfo_Private_Menu_Area = { ["enabled"] = false, ["sequence"] = 0 }
+-- ZJSPLARE.BAM and ZJSPLCON.BAM are white. ZJSplInf.menu has one label for each of them per color, (the bar colors,
+-- ZJBarCol.lua), that tints it with `overlayTint`, and only the label of the area's color is enabled.
+ZJSpellInfo_Private_Menu_Area = { ["enabled"] = false, ["color"] = 1 }
 
 -- ZJSPLCON.BAM has one sequence per cone width, (the widths of the game's cone projectiles, a cone of any other width
 -- uses the closest), with a frame per direction, (see tools/make-cone-bam.ps1)
 ZJSpellInfo_Private_ConeWidths = { 45, 90, 120, 140 }
 ZJSpellInfo_Private_ConeDirections = 64
-ZJSpellInfo_Private_Menu_Cone = { ["enabled"] = false, ["sequence"] = 0, ["frame"] = 0 }
+ZJSpellInfo_Private_Menu_Cone = { ["enabled"] = false, ["color"] = 1, ["sequence"] = 0, ["frame"] = 0 }
 ZJSpellInfo_Private_Menu_AreaDrawing = false -- True while ZJSpellInfo_Menu_Area is being drawn
 ZJSpellInfo_Private_Menu_AreaOpacity = 170 -- Of 255, on top of the see-through fill of ZJSPLARE.BAM
 
@@ -953,7 +1000,8 @@ function ZJSpellInfo_Private_IsDrawableArea(area)
 	return area and area.range > 0 and not ZJArea_IsCone(area)
 end
 
--- The area of the spell / item waiting for a target: { gameX, gameY } or { uiX, uiY }, range, sequence; or nil.
+-- The area of the spell / item waiting for a target: { gameX, gameY } or { uiX, uiY }, range, areaType, (a key of
+-- ZJSpellInfo_Private_AreaColors); or nil.
 -- A cone also has coneSize and aimUIX, aimUIY, (the point it is aimed at), and gameX, gameY is the caster.
 function ZJSpellInfo_Private_GetAimArea()
 
@@ -973,7 +1021,7 @@ function ZJSpellInfo_Private_GetAimArea()
 	local area = ZJArea_ReadAbilityArea(headerAddress, abilityAddress, missileType)
 	if not area or area.range <= 0 then return nil end
 
-	local result = { ["range"] = area.range, ["sequence"] = ZJSpellInfo_Private_AreaSequences.spell }
+	local result = { ["range"] = area.range, ["areaType"] = "spell" }
 
 	local target = EEex_GameObject_GetUnderCursor()
 	if ZJArea_IsCone(area) then
@@ -1069,7 +1117,7 @@ function ZJSpellInfo_Private_GetHoverArea()
 		return {
 			["gameX"] = pos.x, ["gameY"] = pos.y,
 			["range"] = ZJArea_GetModalRange(sprite),
-			["sequence"] = ZJSpellInfo_Private_AreaSequences.modal,
+			["areaType"] = "modal",
 		}
 	end
 
@@ -1102,7 +1150,7 @@ function ZJSpellInfo_Private_GetHoverArea()
 	return {
 		["gameX"] = pos.x, ["gameY"] = pos.y,
 		["range"] = area.range,
-		["sequence"] = ZJSpellInfo_Private_AreaSequences.spell,
+		["areaType"] = "spell",
 	}
 end
 
@@ -1138,6 +1186,7 @@ function ZJSpellInfo_Private_UpdateArea()
 
 	if radiusX <= 0 then return end
 	local x, y, w, h = centerX - radiusX, centerY - radiusY, radiusX * 2, radiusY * 2
+	local color = ZJSpellInfo_Private_AreaColors[area.areaType]:get()
 
 	if area.coneSize ~= nil then
 
@@ -1160,15 +1209,16 @@ function ZJSpellInfo_Private_UpdateArea()
 			end
 			cone.sequence = closest - 1
 
-			Infinity_SetArea("ZJSpellInfo_Menu_AreaCone", x, y, w, h)
+			Infinity_SetArea("ZJSpellInfo_Menu_AreaCone"..color, x, y, w, h)
 			cone.enabled = true
+			cone.color = color
 			return
 		end
 	end
 
-	Infinity_SetArea("ZJSpellInfo_Menu_AreaLabel", x, y, w, h)
+	Infinity_SetArea("ZJSpellInfo_Menu_AreaLabel"..color, x, y, w, h)
 	entry.enabled = true
-	entry.sequence = area.sequence
+	entry.color = color
 end
 
 -- Over an enabled item the engine doesn't pick the creature under the cursor, and a spell can't be cast on it. The
@@ -1184,12 +1234,15 @@ function ZJSpellInfo_Private_Menu_AreaDrawEnd()
 	return 0
 end
 
-function ZJSpellInfo_Private_Menu_Area_Enabled()
-	return ZJSpellInfo_Private_Menu_AreaDrawing and ZJSpellInfo_Private_Menu_Area.enabled
+-- Whether the area label of `color` is shown, (one label per color, see ZJSplInf.menu)
+function ZJSpellInfo_Private_Menu_Area_Enabled(color)
+	local entry = ZJSpellInfo_Private_Menu_Area
+	return ZJSpellInfo_Private_Menu_AreaDrawing and entry.enabled and entry.color == color
 end
 
-function ZJSpellInfo_Private_Menu_Cone_Enabled()
-	return ZJSpellInfo_Private_Menu_AreaDrawing and ZJSpellInfo_Private_Menu_Cone.enabled
+function ZJSpellInfo_Private_Menu_Cone_Enabled(color)
+	local cone = ZJSpellInfo_Private_Menu_Cone
+	return ZJSpellInfo_Private_Menu_AreaDrawing and cone.enabled and cone.color == color
 end
 
 -- Called every frame by the ticker menu, (the popup's text is asked for by the popup itself, see ZJPopup_AddPanel())

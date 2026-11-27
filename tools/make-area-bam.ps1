@@ -1,7 +1,7 @@
 # Builds BattleSense/copy/spellinfo/ZJSPLARE.BAM, the areas the Spell Info module draws on the ground.
 #
-# One sequence per color, (sequence = ZJSpellInfo_Private_AreaSequences in ZJSplInf.lua), each with one frame:
-# a 256x192 ellipse, (the engine stretches distances vertically by 4/3, so its circles are 4:3 ellipses on screen),
+# One sequence per color, each with one frame. There is one: white, which ZJSplInf.menu tints with the color of the
+# area's option. The frame is a 256x192 ellipse, (the engine stretches distances vertically by 4/3, so its circles are 4:3 ellipses on screen),
 # with a faint fill and a stronger rim. The label scales it to the area's size.
 #
 # The see-through parts use the alpha channel of the palette, which the Enhanced Editions honor, (1 - 255, 0 = opaque).
@@ -9,9 +9,9 @@
 #
 # Run from anywhere: powershell -ExecutionPolicy Bypass -File tools\make-area-bam.ps1
 
+# The leading comma keeps PowerShell from flattening a list of one color
 $colors = [byte[][]]@(
-	[byte[]](40,  110, 255), # 0 = A spell / item ability, (blue)
-	[byte[]](255, 215, 0  )  # 1 = Turn undead / find traps, (gold)
+	,[byte[]](255, 255, 255) # 0 = Every area, (white, tinted by the menu)
 )
 
 $source = @'

@@ -15,6 +15,10 @@ menu
 -- ZJSpellInfo_Private_UpdateArea()). Over an enabled item the engine doesn't pick the creature under the cursor, and a
 -- spell can't be cast on it. So the area is only enabled while this menu is drawn: the labels before and after it mark
 -- that, (opacity is only asked for while drawing), and the engine finds it disabled whenever it checks the mouse.
+--
+-- ZJSPLARE.BAM and ZJSPLCON.BAM are white: every color has its own label, tinted with `overlayTint`, (the colors of
+-- ZJBarColors_Colors in ZJBarCol.lua, in the same order: change a color there too), and only the label of the color
+-- of the area's option is enabled.
 menu
 {
 	name "ZJSpellInfo_Menu_Area"
@@ -27,27 +31,226 @@ menu
 
 	label
 	{
-		name "ZJSpellInfo_Menu_AreaLabel"
+		name "ZJSpellInfo_Menu_AreaLabel1"
 		area -1 -1 -1 -1
-		enabled "ZJSpellInfo_Private_Menu_Area_Enabled()"
+		enabled "ZJSpellInfo_Private_Menu_Area_Enabled(1)"
 		bam "ZJSPLARE"
 		scaleToClip
-		sequence lua "ZJSpellInfo_Private_Menu_Area.sequence"
 		opacity lua "ZJSpellInfo_Private_Menu_AreaOpacity"
+		useOverlayTint "true"
+		overlayTint 230 0 0
+		ignoreEvents
+	}
+
+	label
+	{
+		name "ZJSpellInfo_Menu_AreaLabel2"
+		area -1 -1 -1 -1
+		enabled "ZJSpellInfo_Private_Menu_Area_Enabled(2)"
+		bam "ZJSPLARE"
+		scaleToClip
+		opacity lua "ZJSpellInfo_Private_Menu_AreaOpacity"
+		useOverlayTint "true"
+		overlayTint 255 145 0
+		ignoreEvents
+	}
+
+	label
+	{
+		name "ZJSpellInfo_Menu_AreaLabel3"
+		area -1 -1 -1 -1
+		enabled "ZJSpellInfo_Private_Menu_Area_Enabled(3)"
+		bam "ZJSPLARE"
+		scaleToClip
+		opacity lua "ZJSpellInfo_Private_Menu_AreaOpacity"
+		useOverlayTint "true"
+		overlayTint 255 225 0
+		ignoreEvents
+	}
+
+	label
+	{
+		name "ZJSpellInfo_Menu_AreaLabel4"
+		area -1 -1 -1 -1
+		enabled "ZJSpellInfo_Private_Menu_Area_Enabled(4)"
+		bam "ZJSPLARE"
+		scaleToClip
+		opacity lua "ZJSpellInfo_Private_Menu_AreaOpacity"
+		useOverlayTint "true"
+		overlayTint 0 210 0
+		ignoreEvents
+	}
+
+	label
+	{
+		name "ZJSpellInfo_Menu_AreaLabel5"
+		area -1 -1 -1 -1
+		enabled "ZJSpellInfo_Private_Menu_Area_Enabled(5)"
+		bam "ZJSPLARE"
+		scaleToClip
+		opacity lua "ZJSpellInfo_Private_Menu_AreaOpacity"
+		useOverlayTint "true"
+		overlayTint 0 225 225
+		ignoreEvents
+	}
+
+	label
+	{
+		name "ZJSpellInfo_Menu_AreaLabel6"
+		area -1 -1 -1 -1
+		enabled "ZJSpellInfo_Private_Menu_Area_Enabled(6)"
+		bam "ZJSPLARE"
+		scaleToClip
+		opacity lua "ZJSpellInfo_Private_Menu_AreaOpacity"
+		useOverlayTint "true"
+		overlayTint 40 110 255
+		ignoreEvents
+	}
+
+	label
+	{
+		name "ZJSpellInfo_Menu_AreaLabel7"
+		area -1 -1 -1 -1
+		enabled "ZJSpellInfo_Private_Menu_Area_Enabled(7)"
+		bam "ZJSPLARE"
+		scaleToClip
+		opacity lua "ZJSpellInfo_Private_Menu_AreaOpacity"
+		useOverlayTint "true"
+		overlayTint 175 80 255
+		ignoreEvents
+	}
+
+	label
+	{
+		name "ZJSpellInfo_Menu_AreaLabel8"
+		area -1 -1 -1 -1
+		enabled "ZJSpellInfo_Private_Menu_Area_Enabled(8)"
+		bam "ZJSPLARE"
+		scaleToClip
+		opacity lua "ZJSpellInfo_Private_Menu_AreaOpacity"
+		useOverlayTint "true"
+		overlayTint 255 100 200
 		ignoreEvents
 	}
 
 	-- A cone, (one sequence per width, one frame per direction)
 	label
 	{
-		name "ZJSpellInfo_Menu_AreaCone"
+		name "ZJSpellInfo_Menu_AreaCone1"
 		area -1 -1 -1 -1
-		enabled "ZJSpellInfo_Private_Menu_Cone_Enabled()"
+		enabled "ZJSpellInfo_Private_Menu_Cone_Enabled(1)"
 		bam "ZJSPLCON"
 		scaleToClip
 		sequence lua "ZJSpellInfo_Private_Menu_Cone.sequence"
 		frame lua "ZJSpellInfo_Private_Menu_Cone.frame"
 		opacity lua "ZJSpellInfo_Private_Menu_AreaOpacity"
+		useOverlayTint "true"
+		overlayTint 230 0 0
+		ignoreEvents
+	}
+
+	label
+	{
+		name "ZJSpellInfo_Menu_AreaCone2"
+		area -1 -1 -1 -1
+		enabled "ZJSpellInfo_Private_Menu_Cone_Enabled(2)"
+		bam "ZJSPLCON"
+		scaleToClip
+		sequence lua "ZJSpellInfo_Private_Menu_Cone.sequence"
+		frame lua "ZJSpellInfo_Private_Menu_Cone.frame"
+		opacity lua "ZJSpellInfo_Private_Menu_AreaOpacity"
+		useOverlayTint "true"
+		overlayTint 255 145 0
+		ignoreEvents
+	}
+
+	label
+	{
+		name "ZJSpellInfo_Menu_AreaCone3"
+		area -1 -1 -1 -1
+		enabled "ZJSpellInfo_Private_Menu_Cone_Enabled(3)"
+		bam "ZJSPLCON"
+		scaleToClip
+		sequence lua "ZJSpellInfo_Private_Menu_Cone.sequence"
+		frame lua "ZJSpellInfo_Private_Menu_Cone.frame"
+		opacity lua "ZJSpellInfo_Private_Menu_AreaOpacity"
+		useOverlayTint "true"
+		overlayTint 255 225 0
+		ignoreEvents
+	}
+
+	label
+	{
+		name "ZJSpellInfo_Menu_AreaCone4"
+		area -1 -1 -1 -1
+		enabled "ZJSpellInfo_Private_Menu_Cone_Enabled(4)"
+		bam "ZJSPLCON"
+		scaleToClip
+		sequence lua "ZJSpellInfo_Private_Menu_Cone.sequence"
+		frame lua "ZJSpellInfo_Private_Menu_Cone.frame"
+		opacity lua "ZJSpellInfo_Private_Menu_AreaOpacity"
+		useOverlayTint "true"
+		overlayTint 0 210 0
+		ignoreEvents
+	}
+
+	label
+	{
+		name "ZJSpellInfo_Menu_AreaCone5"
+		area -1 -1 -1 -1
+		enabled "ZJSpellInfo_Private_Menu_Cone_Enabled(5)"
+		bam "ZJSPLCON"
+		scaleToClip
+		sequence lua "ZJSpellInfo_Private_Menu_Cone.sequence"
+		frame lua "ZJSpellInfo_Private_Menu_Cone.frame"
+		opacity lua "ZJSpellInfo_Private_Menu_AreaOpacity"
+		useOverlayTint "true"
+		overlayTint 0 225 225
+		ignoreEvents
+	}
+
+	label
+	{
+		name "ZJSpellInfo_Menu_AreaCone6"
+		area -1 -1 -1 -1
+		enabled "ZJSpellInfo_Private_Menu_Cone_Enabled(6)"
+		bam "ZJSPLCON"
+		scaleToClip
+		sequence lua "ZJSpellInfo_Private_Menu_Cone.sequence"
+		frame lua "ZJSpellInfo_Private_Menu_Cone.frame"
+		opacity lua "ZJSpellInfo_Private_Menu_AreaOpacity"
+		useOverlayTint "true"
+		overlayTint 40 110 255
+		ignoreEvents
+	}
+
+	label
+	{
+		name "ZJSpellInfo_Menu_AreaCone7"
+		area -1 -1 -1 -1
+		enabled "ZJSpellInfo_Private_Menu_Cone_Enabled(7)"
+		bam "ZJSPLCON"
+		scaleToClip
+		sequence lua "ZJSpellInfo_Private_Menu_Cone.sequence"
+		frame lua "ZJSpellInfo_Private_Menu_Cone.frame"
+		opacity lua "ZJSpellInfo_Private_Menu_AreaOpacity"
+		useOverlayTint "true"
+		overlayTint 175 80 255
+		ignoreEvents
+	}
+
+	label
+	{
+		name "ZJSpellInfo_Menu_AreaCone8"
+		area -1 -1 -1 -1
+		enabled "ZJSpellInfo_Private_Menu_Cone_Enabled(8)"
+		bam "ZJSPLCON"
+		scaleToClip
+		sequence lua "ZJSpellInfo_Private_Menu_Cone.sequence"
+		frame lua "ZJSpellInfo_Private_Menu_Cone.frame"
+		opacity lua "ZJSpellInfo_Private_Menu_AreaOpacity"
+		useOverlayTint "true"
+		overlayTint 255 100 200
 		ignoreEvents
 	}
 

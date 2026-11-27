@@ -14,7 +14,7 @@
 # Run from anywhere: powershell -ExecutionPolicy Bypass -File tools\make-cone-bam.ps1
 
 $widths = [int[]]@(45, 90, 120, 140)
-$color = [byte[]](40, 110, 255) # Blue, (the spell color of ZJSPLARE.BAM)
+$color = [byte[]](255, 255, 255) # White, ZJSplInf.menu tints it with the color of the spell area option
 
 $source = @'
 using System; using System.IO; using System.Text; using System.Collections.Generic;
