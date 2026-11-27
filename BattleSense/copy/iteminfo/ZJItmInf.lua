@@ -672,6 +672,8 @@ end
 
 -- Returns `weapon` with what `sprite`'s proficiency in `proficiencyType` does to it added to its THAC0 bonus, damage
 -- bonus and speed factor. A creature without a class, (most monsters), gets no penalty for having no points.
+-- The speed factor may go below 0 here: the engine adds the proficiency and the style first, and stops the total at 0,
+-- (ZJItemInfo_Private_ApplyStyle()).
 function ZJItemInfo_Private_ApplyProficiency(sprite, weapon, proficiencyType)
 
 	local hit, damage, speed = 0, 0, 0
@@ -692,7 +694,7 @@ function ZJItemInfo_Private_ApplyProficiency(sprite, weapon, proficiencyType)
 		["diceSize"]    = weapon.diceSize,
 		["bonus"]       = weapon.bonus + damage,
 		["thac0Bonus"]  = weapon.thac0Bonus + hit,
-		["speedFactor"] = math.max(0, weapon.speedFactor + speed),
+		["speedFactor"] = weapon.speedFactor + speed,
 	}
 end
 
@@ -963,7 +965,8 @@ function ZJItemInfo_Private_ApplyAttackKind(weapon, kind, side)
 	}
 end
 
--- Returns `weapon` with `styleBonus` added to its THAC0 bonus, damage bonus and speed factor
+-- Returns `weapon` with `styleBonus` added to its THAC0 bonus, damage bonus and speed factor. This is the last step
+-- of an attack, so the speed factor stops at 0 here: a bonus larger than the weapon's own speed does nothing.
 function ZJItemInfo_Private_ApplyStyle(weapon, styleBonus)
 	return {
 		["diceCount"]   = weapon.diceCount,
