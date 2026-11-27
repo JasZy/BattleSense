@@ -595,8 +595,6 @@ Opens a popup when hovering a quick item on the action bar that is used on its o
 Items aimed at a creature, (a wand, a thrown potion), are described by Spell Info once a target is under the cursor.
 ]]
 
-uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Unidentified"]        = "Not identified"
-uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_IfEquipped"]          = "If %s equips this:"
 uiStrings["ZJBattleSense_Options_TRANSLATION_ItemInfo_BetterColor"] = "Better Color"
 
 uiStrings["ZJBattleSense_Options_TRANSLATION_ItemInfo_BetterColor_Description"] = [[
@@ -611,6 +609,8 @@ The color of a value that is worse than that of the item it replaces, or than be
 
 uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_IfEquippedReplacing"] = "If %s equips this instead of %s:"
 uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_NotUsable"]           = "Not usable by %s"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Unidentified"]        = "Not identified"
+uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_IfEquipped"]          = "If %s equips this:"
 
 uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Stat_ArmorClass"]         = "Armor Class"
 uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Stat_ArmorClassCrushing"] = "Armor Class vs. crushing"
