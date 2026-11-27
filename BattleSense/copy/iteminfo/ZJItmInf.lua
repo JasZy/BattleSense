@@ -1002,6 +1002,38 @@ function ZJItemInfo_Private_ApplyStyle(weapon, styleBonus)
 	}
 end
 
+-- Returns the weapon of `weaponInfo` as `sprite` would use it, with its strength bonus, its proficiency in it, its
+-- bonuses for that kind of attack, (`side`, see ZJItemInfo_Private_GetAttackSide()), and the weapon style it fights in
+-- with it, (`styleBonus`). No weapon is a fist, a launcher fires the ammunition the character has for it.
+function ZJItemInfo_Private_ApplyAll(sprite, weaponInfo, strength, extra, styleBonus, side)
+	local weapon = weaponInfo and weaponInfo.weapon or ZJItemInfo_Private_FistWeapon
+	local kind = "fist"
+	if weaponInfo ~= nil and weaponInfo.weapon ~= nil then
+		kind = ZJItemInfo_Private_IsRangedWeapon(weaponInfo) and "ranged" or "melee"
+	end
+	if weapon.launcher then
+		local ammoInfo = ZJItemInfo_Private_GetAmmoInfo(sprite, weaponInfo)
+		weapon = ZJItemInfo_Private_ApplyAmmo(weapon, ammoInfo and ammoInfo.weapon or nil)
+	end
+	weapon = ZJItemInfo_Private_ApplyStrength(weapon, weapon.addStrength, strength, extra)
+	weapon = ZJItemInfo_Private_ApplyProficiency(sprite, weapon, weaponInfo and weaponInfo.weapon and weaponInfo.proficiencyType or nil)
+	weapon = ZJItemInfo_Private_ApplyAttackKind(weapon, kind, side)
+	return ZJItemInfo_Private_ApplyStyle(weapon, styleBonus)
+end
+
+-- The character's bonuses for each kind of attack, from its derived stats `stats`
+function ZJItemInfo_Private_GetAttackSide(stats)
+	return {
+		["dexterity"]     = stats.m_nDEX,
+		["missileTHAC0"]  = stats.m_nMissileTHAC0Bonus,
+		["meleeTHAC0"]    = stats.m_nMeleeTHAC0Bonus,
+		["fistTHAC0"]     = stats.m_nFistTHAC0Bonus,
+		["missileDamage"] = stats.m_nMissileDamageBonus,
+		["meleeDamage"]   = stats.m_nMeleeDamageBonus,
+		["fistDamage"]    = stats.m_nFistDamageBonus,
+	}
+end
+
 -- Returns the items the character takes off to equip an item of `info`, as an array of { resref, info }
 function ZJItemInfo_Private_GetReplacedItems(sprite, info)
 
@@ -1337,34 +1369,12 @@ function ZJItemInfo_Private_GetComparisonLines(sprite, info)
 	local newStrength = newValues["STR"] or oldStrength
 	local newExtra = newStrength == oldStrength and oldExtra or 0
 
-	-- The weapon as the character would use it, with its strength bonus, its proficiency in it, and the weapon style it
-	-- fights in with it. No weapon is a fist, a launcher fires the ammunition the character has for it.
 	local applyAll = function(weaponInfo, strength, extra, styleBonus, side)
-		local weapon = weaponInfo and weaponInfo.weapon or ZJItemInfo_Private_FistWeapon
-		local kind = "fist"
-		if weaponInfo ~= nil and weaponInfo.weapon ~= nil then
-			kind = ZJItemInfo_Private_IsRangedWeapon(weaponInfo) and "ranged" or "melee"
-		end
-		if weapon.launcher then
-			local ammoInfo = ZJItemInfo_Private_GetAmmoInfo(sprite, weaponInfo)
-			weapon = ZJItemInfo_Private_ApplyAmmo(weapon, ammoInfo and ammoInfo.weapon or nil)
-		end
-		weapon = ZJItemInfo_Private_ApplyStrength(weapon, weapon.addStrength, strength, extra)
-		weapon = ZJItemInfo_Private_ApplyProficiency(sprite, weapon, weaponInfo and weaponInfo.weapon and weaponInfo.proficiencyType or nil)
-		weapon = ZJItemInfo_Private_ApplyAttackKind(weapon, kind, side)
-		return ZJItemInfo_Private_ApplyStyle(weapon, styleBonus)
+		return ZJItemInfo_Private_ApplyAll(sprite, weaponInfo, strength, extra, styleBonus, side)
 	end
 
 	-- The character's bonuses for each kind of attack, now and with the item equipped
-	local oldSide = {
-		["dexterity"]     = stats.m_nDEX,
-		["missileTHAC0"]  = stats.m_nMissileTHAC0Bonus,
-		["meleeTHAC0"]    = stats.m_nMeleeTHAC0Bonus,
-		["fistTHAC0"]     = stats.m_nFistTHAC0Bonus,
-		["missileDamage"] = stats.m_nMissileDamageBonus,
-		["meleeDamage"]   = stats.m_nMeleeDamageBonus,
-		["fistDamage"]    = stats.m_nFistDamageBonus,
-	}
+	local oldSide = ZJItemInfo_Private_GetAttackSide(stats)
 	local newSide = {
 		["dexterity"]     = newValues["DEX"] or oldSide.dexterity,
 		["missileTHAC0"]  = oldSide.missileTHAC0 + (totals.add["MissileTHAC0"] or 0),
@@ -1710,12 +1720,34 @@ function ZJItemInfo_Private_GetUseLines(sprite, use)
 		end
 	end
 
+	-- The THAC0 stat leaves out what the weapon in hand adds to it, (proficiency, style, the weapon's own bonus, ...),
+	-- as the equip comparison and the inventory screen do: those are taken off both sides. A changed strength or
+	-- dexterity changes them too.
+	local weaponTHAC0 = { ["old"] = 0, ["new"] = 0 }
+	pcall(function()
+		local handInfo = ZJItemInfo_Private_GetWeaponInHand(sprite)
+		local styleBonus = ZJItemInfo_Private_GetStyleBonus(sprite,
+			ZJItemInfo_Private_GetWeaponStyle(ZJItemInfo_Private_GetHandInfos(sprite)))
+		local oldSide = ZJItemInfo_Private_GetAttackSide(stats)
+		local newSide = ZJItemInfo_Private_GetAttackSide(stats)
+		newSide.dexterity = values["DEX"] or oldSide.dexterity
+		local oldStrength, oldExtra = stats.m_nSTR, stats.m_nSTRExtra
+		local newStrength = values["STR"] or oldStrength
+		local newExtra = newStrength == oldStrength and oldExtra or 0 -- Exceptional strength only counts while it stays 18
+		local oldWeapon = ZJItemInfo_Private_ApplyAll(sprite, handInfo, oldStrength, oldExtra, styleBonus, oldSide)
+		local newWeapon = ZJItemInfo_Private_ApplyAll(sprite, handInfo, newStrength, newExtra, styleBonus, newSide)
+		weaponTHAC0.old, weaponTHAC0.new = oldWeapon.thac0Bonus, newWeapon.thac0Bonus
+	end)
+
 	-- Durations are filled in at the end, once the most common one is known
 	local pending = {} -- Array of { text, duration }
 
 	for _, stat in ipairs(ZJItemInfo_Private_Stats) do
 		local key = stat.key
 		local oldValue, newValue = stats[stat.field], values[key]
+		if key == "THAC0" then
+			oldValue, newValue = oldValue - weaponTHAC0.old, newValue - weaponTHAC0.new
+		end
 		if newValue ~= oldValue then
 			table.insert(pending, { ZJItemInfo_Private_FormatChangeLine(ZJItemInfo_Private_T("Stat_"..key), oldValue, newValue,
 				stat.lowerIsBetter, stat.suffix), durations[key] })
