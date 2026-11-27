@@ -1,4 +1,4 @@
--- Always open while a game is running: while the "Popup Key" is held, asks the modules' panels for what is under the
+-- Always open while a game is running: while the "Open Popup" key is held, asks the modules' panels for what is under the
 -- cursor, (ZJPopup_Tick(), which the character creation screens also call themselves)
 menu
 {

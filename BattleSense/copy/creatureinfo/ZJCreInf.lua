@@ -2671,7 +2671,7 @@ function ZJCreatureInfo_Private_Layout(selectedSprites, targetSprite, compact)
 	end
 end
 
--- The panel's "show", (see ZJPopup_AddPanel()): called every frame while the "Popup Key" is held and no panel that
+-- The panel's "show", (see ZJPopup_AddPanel()): called every frame while the "Open Popup" key is held and no panel that
 -- comes first, (Spell Info), shows. Lays out and opens the popup over the creature under the cursor and returns true, or
 -- closes it and returns false if there is nothing to show. The popup opens over any creature: the compact popup over an
 -- ally, the full one over anyone else, (hostile or neutral, whatever the cursor's shape).
@@ -2753,7 +2753,7 @@ function ZJCreatureInfo_Private_Panel_Show()
 	return true
 end
 
--- The panel's "hide": another panel shows, or the "Popup Key" isn't held
+-- The panel's "hide": another panel shows, or the "Open Popup" key isn't held
 function ZJCreatureInfo_Private_Panel_Hide()
 	ZJCreatureInfo_Private_Menu_SetOpen(false)
 end

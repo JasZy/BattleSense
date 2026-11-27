@@ -2,8 +2,9 @@
 +--------------------------------------------------------------------------------------------------+
 | ZJPopup - The popup of the modules                                                               |
 +--------------------------------------------------------------------------------------------------+
-|   Battle Sense has one popup, and one key that opens it, (the "Popup Key": left / right Ctrl,    |
-|   Alt or Shift, in the "Battle Sense Modules" tab). While the key is held, the modules are asked |
+|   Battle Sense has one popup, and one key that opens it, (the "Open Popup" option: left / right  |
+|   Ctrl, Alt or Shift, or "Automatic" to open on hover without a key, in the "Battle Sense        |
+|   Modules" tab). While the key is held, (or always, if "Automatic"), the modules are asked       |
 |   in order of priority whether they have something to say about what is under the cursor, and   |
 |   the first one that does fills the popup with its panel. If none does, there is no popup.       |
 |                                                                                                  |
@@ -19,7 +20,7 @@
 if ZJPopup_Loaded then return end
 ZJPopup_Loaded = true
 
--- The cycle widget the "Popup Key" button is built on
+-- The cycle widget the "Open Popup" button is built on
 Infinity_DoFile("ZJBarCol")
 
 ---------
@@ -34,6 +35,7 @@ ZJPopup_OpenOnKeys = {
 	{ ["name"] = "ZJBattleSense_TRANSLATION_OpenOn_RightCtrl",  ["key"] = 0x400000E4 }, -- SDLK_RCTRL
 	{ ["name"] = "ZJBattleSense_TRANSLATION_OpenOn_RightAlt",   ["key"] = 0x400000E6 }, -- SDLK_RALT
 	{ ["name"] = "ZJBattleSense_TRANSLATION_OpenOn_RightShift", ["key"] = 0x400000E5 }, -- SDLK_RSHIFT
+	{ ["name"] = "ZJBattleSense_TRANSLATION_OpenOn_Automatic"                         }, -- No key: opens on hover
 }
 
 ZJPopup_OpenOnDefault = 1 -- Left Ctrl
@@ -42,9 +44,9 @@ ZJPopup_OpenOnSection = "Battle Sense"
 ZJPopup_KeyStorageKey = "Popup Key"
 ZJPopup_KeyOptionID = "ZJPopup_Key"
 
-ZJPopup_Private_Key = nil -- The "Popup Key" option, see ZJPopup_RegisterKey()
+ZJPopup_Private_Key = nil -- The "Open Popup" option, see ZJPopup_RegisterKey()
 
--- Registers the "Popup Key" option. Called by the startup file once the old settings have been moved over, (see
+-- Registers the "Open Popup" option. Called by the startup file once the old settings have been moved over, (see
 -- ZJPopup_MigrateSwitch()), before the modules are loaded.
 function ZJPopup_RegisterKey()
 	if ZJPopup_Private_Key ~= nil then return end
@@ -55,10 +57,11 @@ function ZJPopup_RegisterKey()
 	}))
 end
 
--- Whether the "Popup Key" is held down
+-- Whether the "Open Popup" key is held down, (always true when it is set to "Automatic")
 function ZJPopup_IsKeyDown()
 	local value = ZJPopup_Private_Key ~= nil and ZJPopup_Private_Key:get() or ZJPopup_OpenOnDefault
 	local entry = ZJPopup_OpenOnKeys[value] or ZJPopup_OpenOnKeys[ZJPopup_OpenOnDefault]
+	if entry.key == nil then return true end
 	return EEex_Key_IsDown(entry.key) == true
 end
 
@@ -77,19 +80,19 @@ function ZJPopup_NewSwitch(storageKey, fields)
 	return EEex_Options_Option.new(option)
 end
 
--- Whether the popup of a module with the switch `option` may be open now: the module is on and the "Popup Key" is held
+-- Whether the popup of a module with the switch `option` may be open now: the module is on and the "Open Popup" key is held
 function ZJPopup_IsOpenAllowed(option)
 	return option:get() ~= 0 and ZJPopup_IsKeyDown()
 end
 
--- Moves the older settings of a popup module's switch, (stored under `storageKey`), over to the "Popup Key". Called for
--- every installed popup module, in the order they start, before the switches and the "Popup Key" are registered:
+-- Moves the older settings of a popup module's switch, (stored under `storageKey`), over to the "Open Popup". Called for
+-- every installed popup module, in the order they start, before the switches and the "Open Popup" are registered:
 --
 --   * Up to v0.1.0 the switch was on / off, (1 / 0), with the key in a separate "Open On" option, (stored under
 --     `oldOpenOnKey`, never 0). That option is set to 0 once it has been read.
 --   * After that, (commit 911ecb0), the switch was the key itself: 0 = Off, 1 - 6 = the key. A key above 1 becomes On.
 --
--- The first module that is on and had a key gives the "Popup Key", if it wasn't stored yet.
+-- The first module that is on and had a key gives the "Open Popup", if it wasn't stored yet.
 function ZJPopup_MigrateSwitch(storageKey, oldOpenOnKey)
 
 	local section = ZJPopup_OpenOnSection
@@ -144,12 +147,12 @@ function ZJPopup_OpenOnWidget:_getColor(value)
 	return EEex_Options_Private_GetFontStyleColor(styles["EEex_Options_Normal"])
 end
 
--- The "Popup Key" entry of the "Battle Sense Modules" tab
+-- The "Open Popup" entry of the "Battle Sense Modules" tab
 function ZJPopup_KeyDisplayEntry()
 	return EEex_Options_DisplayEntry.new({
 		["optionID"]    = ZJPopup_KeyOptionID,
-		["label"]       = "ZJBattleSense_Options_TRANSLATION_PopupKey",
-		["description"] = "ZJBattleSense_Options_TRANSLATION_PopupKey_Description",
+		["label"]       = "ZJBattleSense_Options_TRANSLATION_OpenPopup",
+		["description"] = "ZJBattleSense_Options_TRANSLATION_OpenPopup_Description",
 		["widget"]      = ZJPopup_OpenOnWidget.new(),
 	})
 end
@@ -162,7 +165,7 @@ end
 -- The panels of the modules, in order of priority, (see ZJPopup_AddPanel())
 ZJPopup_Private_Panels = {}
 
--- Adds a module's panel to the popup. While the "Popup Key" is held, the panels are asked every frame in order of
+-- Adds a module's panel to the popup. While the "Open Popup" key is held, the panels are asked every frame in order of
 -- priority, and the first one that has something to say about what is under the cursor shows; the rest aren't asked.
 -- `panel` is a table:
 --

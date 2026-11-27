@@ -12,13 +12,13 @@ uiStrings["ZJBattleSense_Options_TRANSLATION_Modules_TabTitle"] = "Battle Sense 
 -- Popups --
 ------------
 
--- The key that opens the popup of every module, at the top of the "Battle Sense Modules" tab, (ZJPopup.lua)
-uiStrings["ZJBattleSense_Options_TRANSLATION_PopupKey"] = "Popup Key"
+-- How the popup of every module opens, at the top of the "Battle Sense Modules" tab, (ZJPopup.lua)
+uiStrings["ZJBattleSense_Options_TRANSLATION_OpenPopup"] = "Open Popup"
 
-uiStrings["ZJBattleSense_Options_TRANSLATION_PopupKey_Description"] = [[
-The key that opens the Battle Sense popup: left / right Ctrl, Alt or Shift. Click to pick the next one.
+uiStrings["ZJBattleSense_Options_TRANSLATION_OpenPopup_Description"] = [[
+How the Battle Sense popup opens: while a key is held, (left / right Ctrl, Alt or Shift), or "Automatic", whenever the cursor is over something it describes. Click to pick the next one.
 
-The popup only opens while this key is held down. It describes what is under the cursor: a creature, (Creature Info, or Spell Info while a spell waits for a target), a locked container or door, (Lock Info), an item, (Item Info), or an ability or proficiency at character creation, (Ability Info, Proficiency Info). Letting go of the key closes it. Each of these modules is switched on or off below.
+The popup describes what is under the cursor: a creature, (Creature Info, or Spell Info while a spell waits for a target), a locked container or door, (Lock Info), an item, (Item Info), or an ability or proficiency at character creation, (Ability Info, Proficiency Info). With a key, the popup only opens while the key is held down, and letting go of it closes it. Each of these modules is switched on or off below.
 ]]
 
 uiStrings["ZJBattleSense_TRANSLATION_OpenOn_LeftCtrl"]      = "Left Ctrl"
@@ -27,6 +27,7 @@ uiStrings["ZJBattleSense_TRANSLATION_OpenOn_LeftShift"]     = "Left Shift"
 uiStrings["ZJBattleSense_TRANSLATION_OpenOn_RightCtrl"]     = "Right Ctrl"
 uiStrings["ZJBattleSense_TRANSLATION_OpenOn_RightAlt"]      = "Right Alt"
 uiStrings["ZJBattleSense_TRANSLATION_OpenOn_RightShift"]    = "Right Shift"
+uiStrings["ZJBattleSense_TRANSLATION_OpenOn_Automatic"]     = "Automatic"
 
 -----------------
 -- Creature Info --
@@ -37,7 +38,7 @@ uiStrings["ZJBattleSense_Options_TRANSLATION_CreatureInfo_TabTitle"] = "Battle S
 uiStrings["ZJBattleSense_Options_TRANSLATION_CreatureInfo_Enable"] = "Enable Creature Info Module"
 
 uiStrings["ZJBattleSense_Options_TRANSLATION_CreatureInfo_Enable_Description"] = [[
-The popup opens when hovering any creature while the "Popup Key" is held: a hostile or neutral creature, or a party member or ally, (see "Enabled For Friendly"). Letting go of the key closes it.
+The popup opens when hovering any creature while the "Open Popup" key is held: a hostile or neutral creature, or a party member or ally, (see "Enabled For Friendly"). Letting go of the key closes it.
 
 It has two panels, with a row for each selected party member:
 
@@ -207,7 +208,7 @@ uiStrings["ZJBattleSense_Options_TRANSLATION_SpellInfo_TabTitle"] = "Battle Sens
 uiStrings["ZJBattleSense_Options_TRANSLATION_SpellInfo_Enable"] = "Enable Spell Info Module"
 
 uiStrings["ZJBattleSense_Options_TRANSLATION_SpellInfo_Enable_Description"] = [[
-While a spell, wand, scroll or other item ability is waiting for a target, hovering a creature with the "Popup Key" held shows what it will do to that creature: its magic resistance, the saving throws it gets and the roll it needs, the damage with its resistance to each element, and why it would be unaffected, (immunities, the spell's own exclusions and level limits).
+While a spell, wand, scroll or other item ability is waiting for a target, hovering a creature with the "Open Popup" key held shows what it will do to that creature: its magic resistance, the saving throws it gets and the roll it needs, the damage with its resistance to each element, and why it would be unaffected, (immunities, the spell's own exclusions and level limits).
 ]]
 
 uiStrings["ZJBattleSense_Options_TRANSLATION_SpellInfo_FontPoint"] = "Font Point"
@@ -279,7 +280,7 @@ Turn this off to keep the popup out of the way while healing or buffing the part
 uiStrings["ZJBattleSense_Options_TRANSLATION_SpellInfo_ShowAreas"] = "Show Areas"
 
 uiStrings["ZJBattleSense_Options_TRANSLATION_SpellInfo_ShowAreas_Description"] = [[
-Marks the ground a spell / item will affect, while the "Popup Key" is held, (the "Battle Sense Modules" tab).
+Marks the ground a spell / item will affect, while the "Open Popup" key is held, (the "Battle Sense Modules" tab).
 
 While a spell / item with an area waits for a target, its area is marked in blue around the creature under the cursor, or around the cursor. A spell that affects the area around the caster, like Chant, is marked around the caster.
 
@@ -481,7 +482,7 @@ uiStrings["ZJBattleSense_Options_TRANSLATION_ItemInfo_TabTitle"] = "Battle Sense
 uiStrings["ZJBattleSense_Options_TRANSLATION_ItemInfo_Enable"] = "Enable Item Info Module"
 
 uiStrings["ZJBattleSense_Options_TRANSLATION_ItemInfo_Enable_Description"] = [[
-The item popup opens while the "Popup Key" is held, when hovering the cursor over an item in a store, a container, the quick loot bar, or the inventory screen, and displays the properties of that item.
+The item popup opens while the "Open Popup" key is held, when hovering the cursor over an item in a store, a container, the quick loot bar, or the inventory screen, and displays the properties of that item.
 ]]
 
 uiStrings["ZJBattleSense_Options_TRANSLATION_ItemInfo_FontPoint"] = "Font Point"
@@ -640,7 +641,7 @@ uiStrings["ZJBattleSense_Options_TRANSLATION_AbilityInfo_TabTitle"] = "Battle Se
 uiStrings["ZJBattleSense_Options_TRANSLATION_AbilityInfo_Enable"] = "Enable Ability Info Module"
 
 uiStrings["ZJBattleSense_Options_TRANSLATION_AbilityInfo_Enable_Description"] = [[
-The popup opens while the "Popup Key" is held, when hovering an ability on the abilities screen of character creation. It lists what the character's current score in that ability gives: to-hit and damage bonus, armor class, hit points per level, chance to learn spells, bonus priest spells, lore, store prices, ...
+The popup opens while the "Open Popup" key is held, when hovering an ability on the abilities screen of character creation. It lists what the character's current score in that ability gives: to-hit and damage bonus, armor class, hit points per level, chance to learn spells, bonus priest spells, lore, store prices, ...
 
 Values that only matter to some classes, (spells, thieving skills), are only listed for those classes. The popup follows the score as it is rerolled or changed.
 ]]
@@ -708,7 +709,7 @@ uiStrings["ZJBattleSense_Options_TRANSLATION_ProficiencyInfo_TabTitle"] = "Battl
 uiStrings["ZJBattleSense_Options_TRANSLATION_ProficiencyInfo_Enable"] = "Enable Proficiency Info Module"
 
 uiStrings["ZJBattleSense_Options_TRANSLATION_ProficiencyInfo_Enable_Description"] = [[
-The popup opens while the "Popup Key" is held, when hovering a weapon proficiency or fighting style on the proficiencies screen, at character creation and level up. It shows what its points give now, (values of 0 are left out), and follows the points as they are changed.
+The popup opens while the "Open Popup" key is held, when hovering a weapon proficiency or fighting style on the proficiencies screen, at character creation and level up. It shows what its points give now, (values of 0 are left out), and follows the points as they are changed.
 
 For a weapon: the to-hit and damage bonus, the speed factor, and the extra attacks per round the points add at the character's level, (with no points: the class's penalty for using it). For a fighting style: its damage, to-hit, armor class, speed factor and critical hit bonuses.
 ]]
@@ -803,7 +804,7 @@ uiStrings["ZJBattleSense_Options_TRANSLATION_LockInfo_TabTitle"] = "Battle Sense
 uiStrings["ZJBattleSense_Options_TRANSLATION_LockInfo_Enable"] = "Enable Lock Info Module"
 
 uiStrings["ZJBattleSense_Options_TRANSLATION_LockInfo_Enable_Description"] = [[
-Hovering a locked container or door with the "Popup Key" held shows its lock difficulty, and each selected character's chance to pick the lock, (characters with Open Locks), and to force it, (from their strength's Bend Bars / Lift Gates). A trap that has been found, on a container, door or the floor, adds its difficulty and the chance to disarm it, (characters with Remove Traps). Traps that haven't been found are never mentioned.
+Hovering a locked container or door with the "Open Popup" key held shows its lock difficulty, and each selected character's chance to pick the lock, (characters with Open Locks), and to force it, (from their strength's Bend Bars / Lift Gates). A trap that has been found, on a container, door or the floor, adds its difficulty and the chance to disarm it, (characters with Remove Traps). Traps that haven't been found are never mentioned.
 
 Each try succeeds if the skill plus a d10 roll, (0 to 9, raised by Luck), is above the difficulty. A difficulty of 100 can never be picked, forced or disarmed.
 ]]

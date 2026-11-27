@@ -190,7 +190,7 @@ end
 --   "key"      - Where that option is stored, (the "Battle Sense" section of Baldur.lua).
 --   "name"     - The module's part of the strings' names, (ZJBattleSense_Options_TRANSLATION_<name>_Enable).
 --   "openOn"   - Only for the modules with a popup: where the module's own "Open On" key used to be stored. Battle Sense
---                now has a single "Popup Key", the old settings are moved over to it, (see ZJPopup_MigrateSwitch()).
+--                now has a single "Open Popup" key, the old settings are moved over to it, (see ZJPopup_MigrateSwitch()).
 --
 ZJBattleSense_Private_ToggleSection = "Battle Sense"
 
@@ -237,7 +237,7 @@ function ZJBattleSense_Private_HasPopupModule()
 	return false
 end
 
--- The modules with a popup used to have a key each: move those settings over to the one "Popup Key" before any switch
+-- The modules with a popup used to have a key each: move those settings over to the one "Open Popup" key before any switch
 -- or the key itself is read
 for _, moduleFile in ipairs(ZJBattleSense_Private_ModuleOrder) do
 	local toggle = ZJBattleSense_Private_ModuleToggles[moduleFile]
@@ -275,7 +275,7 @@ end
 
 -- Every module's on / off switch is in one "Battle Sense Modules" tab, like EEex's "Modules" tab, instead of in the
 -- module's own tab. Only the modules that are installed are listed. If a module with a popup is installed, the
--- "Popup Key" that opens the popup of all of them comes first.
+-- "Open Popup" key that opens the popup of all of them comes first.
 function ZJBattleSense_Private_InstalledModuleToggles()
 	local toggles = {}
 	for _, moduleFile in ipairs(ZJBattleSense_Private_ModuleOrder) do

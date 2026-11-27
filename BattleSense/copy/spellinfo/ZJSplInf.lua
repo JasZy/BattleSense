@@ -880,7 +880,7 @@ ZJPopup_AddPanel({
 --   * Over an action bar button: a spell cast on the caster, (Chant), around the character, and turn undead / find
 --     traps around the character
 --
--- Both only while the "Popup Key" is held. A cone, (from the caster, while it is aimed), is drawn by its own label.
+-- Both only while the "Open Popup" key is held. A cone, (from the caster, while it is aimed), is drawn by its own label.
 
 ZJSpellInfo_Private_AreaSequences = { ["spell"] = 0, ["modal"] = 1 } -- In ZJSPLARE.BAM
 ZJSpellInfo_Private_Menu_Area = { ["enabled"] = false, ["sequence"] = 0 }
@@ -1045,7 +1045,7 @@ function ZJSpellInfo_Private_FindSpellByTooltip(sprite, text)
 	return best
 end
 
--- The area of the action bar button under the cursor while the "Popup Key" is held, see ZJSpellInfo_Private_GetAimArea()
+-- The area of the action bar button under the cursor while the "Open Popup" key is held, see ZJSpellInfo_Private_GetAimArea()
 function ZJSpellInfo_Private_GetHoverArea()
 
 	if not Infinity_IsMenuOnStack(ZJSpellInfo_Private_ActionbarMenuName) then return nil end
@@ -1116,7 +1116,7 @@ function ZJSpellInfo_Private_UpdateArea()
 	entry.enabled = false
 	cone.enabled = false
 
-	-- Only while the "Popup Key" is held, like the popup
+	-- Only while the "Open Popup" key is held, like the popup
 	if ZJSpellInfo_Private_Enabled and ZJSpellInfo_Private_ShowAreas:get() ~= 0 and e:GetActiveEngine() == worldScreen
 		and ZJPopup_IsOpenAllowed(ZJSpellInfo_Private_OpenOn)
 	then

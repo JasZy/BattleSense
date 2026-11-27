@@ -2,9 +2,9 @@
 +--------------------------------------------------------------------------------------------------+
 | ZJLockInfo - How hard a lock / trap is, when hovering a container, door or trap                  |
 +--------------------------------------------------------------------------------------------------+
-|   Hovering a locked container or door while the "Popup Key" is held opens the popup with its     |
-|   lock difficulty, and each selected character's chance to pick and to force it. A trap that has |
-|   been detected, (on a container or door, or on the floor), adds its difficulty and each         |
+|   Hovering a locked container or door while the "Open Popup" key is held opens the popup with    |
+|   its lock difficulty, and each selected character's chance to pick and to force it. A trap that |
+|   has been detected, (on a container or door, or on the floor), adds its difficulty and each     |
 |   selected character's chance to disarm it. Undetected traps are never mentioned.                |
 |                                                                                                  |
 |     Lock difficulty 50                                                                           |

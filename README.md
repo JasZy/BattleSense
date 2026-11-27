@@ -14,7 +14,7 @@ Battle Sense is built on [EEex](https://github.com/Bubb13/EEex) and requires it.
 
 Each component can be installed on its own.
 
-The popups open while you hold a key and hover what they describe. It is the same key for all of them: Left Ctrl by default, the "Popup Key" at the top of the "Battle Sense Modules" tab picks another one, (left or right Ctrl, Alt or Shift).
+The popups open while you hold a key and hover what they describe. It is the same key for all of them: Left Ctrl by default, the "Open Popup" setting at the top of the "Battle Sense Modules" tab picks another one, (left or right Ctrl, Alt or Shift), or "Automatic" to open them on hover without a key.
 
 ### Creature Info
 
