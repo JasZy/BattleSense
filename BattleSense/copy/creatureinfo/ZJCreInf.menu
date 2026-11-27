@@ -44,21 +44,215 @@ menu
 
 	label
 	{
-		name "ZJCreatureInfo_Menu_TargetAttack1Icon1"
-		enabled "ZJCreatureInfo_Private_Menu_TargetAttack[1].icons[1] ~= nil"
+		name "ZJCreatureInfo_Menu_TargetAttack1Icon1_1"
+		enabled "ZJCreatureInfo_Private_Menu_TargetAttack[1].icons[1] ~= nil and ZJCreatureInfo_Private_Menu_TargetAttackIconColor() == 1"
 		area 0 0 -1 -1
 		bam "ZJCREDMG"
-		frame lua "(ZJCreatureInfo_Private_Menu_TargetAttack[1].icons[1] or 0) * 4"
+		useOverlayTint "true"
+		overlayTint 230 0 0
+		frame lua "ZJCreatureInfo_Private_IconFrame(ZJCreatureInfo_Private_Menu_TargetAttack[1].icons[1] or 0, true)"
 		scaleToClip
 	}
 
 	label
 	{
-		name "ZJCreatureInfo_Menu_TargetAttack1Icon2"
-		enabled "ZJCreatureInfo_Private_Menu_TargetAttack[1].icons[2] ~= nil"
+		name "ZJCreatureInfo_Menu_TargetAttack1Icon1_2"
+		enabled "ZJCreatureInfo_Private_Menu_TargetAttack[1].icons[1] ~= nil and ZJCreatureInfo_Private_Menu_TargetAttackIconColor() == 2"
 		area 0 0 -1 -1
 		bam "ZJCREDMG"
-		frame lua "(ZJCreatureInfo_Private_Menu_TargetAttack[1].icons[2] or 0) * 4"
+		useOverlayTint "true"
+		overlayTint 255 145 0
+		frame lua "ZJCreatureInfo_Private_IconFrame(ZJCreatureInfo_Private_Menu_TargetAttack[1].icons[1] or 0, true)"
+		scaleToClip
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_TargetAttack1Icon1_3"
+		enabled "ZJCreatureInfo_Private_Menu_TargetAttack[1].icons[1] ~= nil and ZJCreatureInfo_Private_Menu_TargetAttackIconColor() == 3"
+		area 0 0 -1 -1
+		bam "ZJCREDMG"
+		useOverlayTint "true"
+		overlayTint 255 225 0
+		frame lua "ZJCreatureInfo_Private_IconFrame(ZJCreatureInfo_Private_Menu_TargetAttack[1].icons[1] or 0, true)"
+		scaleToClip
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_TargetAttack1Icon1_4"
+		enabled "ZJCreatureInfo_Private_Menu_TargetAttack[1].icons[1] ~= nil and ZJCreatureInfo_Private_Menu_TargetAttackIconColor() == 4"
+		area 0 0 -1 -1
+		bam "ZJCREDMG"
+		useOverlayTint "true"
+		overlayTint 0 210 0
+		frame lua "ZJCreatureInfo_Private_IconFrame(ZJCreatureInfo_Private_Menu_TargetAttack[1].icons[1] or 0, true)"
+		scaleToClip
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_TargetAttack1Icon1_5"
+		enabled "ZJCreatureInfo_Private_Menu_TargetAttack[1].icons[1] ~= nil and ZJCreatureInfo_Private_Menu_TargetAttackIconColor() == 5"
+		area 0 0 -1 -1
+		bam "ZJCREDMG"
+		useOverlayTint "true"
+		overlayTint 0 225 225
+		frame lua "ZJCreatureInfo_Private_IconFrame(ZJCreatureInfo_Private_Menu_TargetAttack[1].icons[1] or 0, true)"
+		scaleToClip
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_TargetAttack1Icon1_6"
+		enabled "ZJCreatureInfo_Private_Menu_TargetAttack[1].icons[1] ~= nil and ZJCreatureInfo_Private_Menu_TargetAttackIconColor() == 6"
+		area 0 0 -1 -1
+		bam "ZJCREDMG"
+		useOverlayTint "true"
+		overlayTint 40 110 255
+		frame lua "ZJCreatureInfo_Private_IconFrame(ZJCreatureInfo_Private_Menu_TargetAttack[1].icons[1] or 0, true)"
+		scaleToClip
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_TargetAttack1Icon1_7"
+		enabled "ZJCreatureInfo_Private_Menu_TargetAttack[1].icons[1] ~= nil and ZJCreatureInfo_Private_Menu_TargetAttackIconColor() == 7"
+		area 0 0 -1 -1
+		bam "ZJCREDMG"
+		useOverlayTint "true"
+		overlayTint 175 80 255
+		frame lua "ZJCreatureInfo_Private_IconFrame(ZJCreatureInfo_Private_Menu_TargetAttack[1].icons[1] or 0, true)"
+		scaleToClip
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_TargetAttack1Icon1_8"
+		enabled "ZJCreatureInfo_Private_Menu_TargetAttack[1].icons[1] ~= nil and ZJCreatureInfo_Private_Menu_TargetAttackIconColor() == 8"
+		area 0 0 -1 -1
+		bam "ZJCREDMG"
+		useOverlayTint "true"
+		overlayTint 255 100 200
+		frame lua "ZJCreatureInfo_Private_IconFrame(ZJCreatureInfo_Private_Menu_TargetAttack[1].icons[1] or 0, true)"
+		scaleToClip
+	}
+
+	-- Its shading and highlights, (ZJCREDMH.BAM, not tinted)
+	label
+	{
+		name "ZJCreatureInfo_Menu_TargetAttack1Icon1_H"
+		enabled "ZJCreatureInfo_Private_Menu_TargetAttack[1].icons[1] ~= nil"
+		area 0 0 -1 -1
+		bam "ZJCREDMH"
+		frame lua "ZJCreatureInfo_Private_IconFrame(ZJCreatureInfo_Private_Menu_TargetAttack[1].icons[1] or 0, true)"
+		scaleToClip
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_TargetAttack1Icon2_1"
+		enabled "ZJCreatureInfo_Private_Menu_TargetAttack[1].icons[2] ~= nil and ZJCreatureInfo_Private_Menu_TargetAttackIconColor() == 1"
+		area 0 0 -1 -1
+		bam "ZJCREDMG"
+		useOverlayTint "true"
+		overlayTint 230 0 0
+		frame lua "ZJCreatureInfo_Private_IconFrame(ZJCreatureInfo_Private_Menu_TargetAttack[1].icons[2] or 0, true)"
+		scaleToClip
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_TargetAttack1Icon2_2"
+		enabled "ZJCreatureInfo_Private_Menu_TargetAttack[1].icons[2] ~= nil and ZJCreatureInfo_Private_Menu_TargetAttackIconColor() == 2"
+		area 0 0 -1 -1
+		bam "ZJCREDMG"
+		useOverlayTint "true"
+		overlayTint 255 145 0
+		frame lua "ZJCreatureInfo_Private_IconFrame(ZJCreatureInfo_Private_Menu_TargetAttack[1].icons[2] or 0, true)"
+		scaleToClip
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_TargetAttack1Icon2_3"
+		enabled "ZJCreatureInfo_Private_Menu_TargetAttack[1].icons[2] ~= nil and ZJCreatureInfo_Private_Menu_TargetAttackIconColor() == 3"
+		area 0 0 -1 -1
+		bam "ZJCREDMG"
+		useOverlayTint "true"
+		overlayTint 255 225 0
+		frame lua "ZJCreatureInfo_Private_IconFrame(ZJCreatureInfo_Private_Menu_TargetAttack[1].icons[2] or 0, true)"
+		scaleToClip
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_TargetAttack1Icon2_4"
+		enabled "ZJCreatureInfo_Private_Menu_TargetAttack[1].icons[2] ~= nil and ZJCreatureInfo_Private_Menu_TargetAttackIconColor() == 4"
+		area 0 0 -1 -1
+		bam "ZJCREDMG"
+		useOverlayTint "true"
+		overlayTint 0 210 0
+		frame lua "ZJCreatureInfo_Private_IconFrame(ZJCreatureInfo_Private_Menu_TargetAttack[1].icons[2] or 0, true)"
+		scaleToClip
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_TargetAttack1Icon2_5"
+		enabled "ZJCreatureInfo_Private_Menu_TargetAttack[1].icons[2] ~= nil and ZJCreatureInfo_Private_Menu_TargetAttackIconColor() == 5"
+		area 0 0 -1 -1
+		bam "ZJCREDMG"
+		useOverlayTint "true"
+		overlayTint 0 225 225
+		frame lua "ZJCreatureInfo_Private_IconFrame(ZJCreatureInfo_Private_Menu_TargetAttack[1].icons[2] or 0, true)"
+		scaleToClip
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_TargetAttack1Icon2_6"
+		enabled "ZJCreatureInfo_Private_Menu_TargetAttack[1].icons[2] ~= nil and ZJCreatureInfo_Private_Menu_TargetAttackIconColor() == 6"
+		area 0 0 -1 -1
+		bam "ZJCREDMG"
+		useOverlayTint "true"
+		overlayTint 40 110 255
+		frame lua "ZJCreatureInfo_Private_IconFrame(ZJCreatureInfo_Private_Menu_TargetAttack[1].icons[2] or 0, true)"
+		scaleToClip
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_TargetAttack1Icon2_7"
+		enabled "ZJCreatureInfo_Private_Menu_TargetAttack[1].icons[2] ~= nil and ZJCreatureInfo_Private_Menu_TargetAttackIconColor() == 7"
+		area 0 0 -1 -1
+		bam "ZJCREDMG"
+		useOverlayTint "true"
+		overlayTint 175 80 255
+		frame lua "ZJCreatureInfo_Private_IconFrame(ZJCreatureInfo_Private_Menu_TargetAttack[1].icons[2] or 0, true)"
+		scaleToClip
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_TargetAttack1Icon2_8"
+		enabled "ZJCreatureInfo_Private_Menu_TargetAttack[1].icons[2] ~= nil and ZJCreatureInfo_Private_Menu_TargetAttackIconColor() == 8"
+		area 0 0 -1 -1
+		bam "ZJCREDMG"
+		useOverlayTint "true"
+		overlayTint 255 100 200
+		frame lua "ZJCreatureInfo_Private_IconFrame(ZJCreatureInfo_Private_Menu_TargetAttack[1].icons[2] or 0, true)"
+		scaleToClip
+	}
+
+	-- Its shading and highlights, (ZJCREDMH.BAM, not tinted)
+	label
+	{
+		name "ZJCreatureInfo_Menu_TargetAttack1Icon2_H"
+		enabled "ZJCreatureInfo_Private_Menu_TargetAttack[1].icons[2] ~= nil"
+		area 0 0 -1 -1
+		bam "ZJCREDMH"
+		frame lua "ZJCreatureInfo_Private_IconFrame(ZJCreatureInfo_Private_Menu_TargetAttack[1].icons[2] or 0, true)"
 		scaleToClip
 	}
 
@@ -102,21 +296,215 @@ menu
 
 	label
 	{
-		name "ZJCreatureInfo_Menu_TargetAttack2Icon1"
-		enabled "ZJCreatureInfo_Private_Menu_TargetAttack[2].icons[1] ~= nil"
+		name "ZJCreatureInfo_Menu_TargetAttack2Icon1_1"
+		enabled "ZJCreatureInfo_Private_Menu_TargetAttack[2].icons[1] ~= nil and ZJCreatureInfo_Private_Menu_TargetAttackIconColor() == 1"
 		area 0 0 -1 -1
 		bam "ZJCREDMG"
-		frame lua "(ZJCreatureInfo_Private_Menu_TargetAttack[2].icons[1] or 0) * 4"
+		useOverlayTint "true"
+		overlayTint 230 0 0
+		frame lua "ZJCreatureInfo_Private_IconFrame(ZJCreatureInfo_Private_Menu_TargetAttack[2].icons[1] or 0, true)"
 		scaleToClip
 	}
 
 	label
 	{
-		name "ZJCreatureInfo_Menu_TargetAttack2Icon2"
-		enabled "ZJCreatureInfo_Private_Menu_TargetAttack[2].icons[2] ~= nil"
+		name "ZJCreatureInfo_Menu_TargetAttack2Icon1_2"
+		enabled "ZJCreatureInfo_Private_Menu_TargetAttack[2].icons[1] ~= nil and ZJCreatureInfo_Private_Menu_TargetAttackIconColor() == 2"
 		area 0 0 -1 -1
 		bam "ZJCREDMG"
-		frame lua "(ZJCreatureInfo_Private_Menu_TargetAttack[2].icons[2] or 0) * 4"
+		useOverlayTint "true"
+		overlayTint 255 145 0
+		frame lua "ZJCreatureInfo_Private_IconFrame(ZJCreatureInfo_Private_Menu_TargetAttack[2].icons[1] or 0, true)"
+		scaleToClip
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_TargetAttack2Icon1_3"
+		enabled "ZJCreatureInfo_Private_Menu_TargetAttack[2].icons[1] ~= nil and ZJCreatureInfo_Private_Menu_TargetAttackIconColor() == 3"
+		area 0 0 -1 -1
+		bam "ZJCREDMG"
+		useOverlayTint "true"
+		overlayTint 255 225 0
+		frame lua "ZJCreatureInfo_Private_IconFrame(ZJCreatureInfo_Private_Menu_TargetAttack[2].icons[1] or 0, true)"
+		scaleToClip
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_TargetAttack2Icon1_4"
+		enabled "ZJCreatureInfo_Private_Menu_TargetAttack[2].icons[1] ~= nil and ZJCreatureInfo_Private_Menu_TargetAttackIconColor() == 4"
+		area 0 0 -1 -1
+		bam "ZJCREDMG"
+		useOverlayTint "true"
+		overlayTint 0 210 0
+		frame lua "ZJCreatureInfo_Private_IconFrame(ZJCreatureInfo_Private_Menu_TargetAttack[2].icons[1] or 0, true)"
+		scaleToClip
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_TargetAttack2Icon1_5"
+		enabled "ZJCreatureInfo_Private_Menu_TargetAttack[2].icons[1] ~= nil and ZJCreatureInfo_Private_Menu_TargetAttackIconColor() == 5"
+		area 0 0 -1 -1
+		bam "ZJCREDMG"
+		useOverlayTint "true"
+		overlayTint 0 225 225
+		frame lua "ZJCreatureInfo_Private_IconFrame(ZJCreatureInfo_Private_Menu_TargetAttack[2].icons[1] or 0, true)"
+		scaleToClip
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_TargetAttack2Icon1_6"
+		enabled "ZJCreatureInfo_Private_Menu_TargetAttack[2].icons[1] ~= nil and ZJCreatureInfo_Private_Menu_TargetAttackIconColor() == 6"
+		area 0 0 -1 -1
+		bam "ZJCREDMG"
+		useOverlayTint "true"
+		overlayTint 40 110 255
+		frame lua "ZJCreatureInfo_Private_IconFrame(ZJCreatureInfo_Private_Menu_TargetAttack[2].icons[1] or 0, true)"
+		scaleToClip
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_TargetAttack2Icon1_7"
+		enabled "ZJCreatureInfo_Private_Menu_TargetAttack[2].icons[1] ~= nil and ZJCreatureInfo_Private_Menu_TargetAttackIconColor() == 7"
+		area 0 0 -1 -1
+		bam "ZJCREDMG"
+		useOverlayTint "true"
+		overlayTint 175 80 255
+		frame lua "ZJCreatureInfo_Private_IconFrame(ZJCreatureInfo_Private_Menu_TargetAttack[2].icons[1] or 0, true)"
+		scaleToClip
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_TargetAttack2Icon1_8"
+		enabled "ZJCreatureInfo_Private_Menu_TargetAttack[2].icons[1] ~= nil and ZJCreatureInfo_Private_Menu_TargetAttackIconColor() == 8"
+		area 0 0 -1 -1
+		bam "ZJCREDMG"
+		useOverlayTint "true"
+		overlayTint 255 100 200
+		frame lua "ZJCreatureInfo_Private_IconFrame(ZJCreatureInfo_Private_Menu_TargetAttack[2].icons[1] or 0, true)"
+		scaleToClip
+	}
+
+	-- Its shading and highlights, (ZJCREDMH.BAM, not tinted)
+	label
+	{
+		name "ZJCreatureInfo_Menu_TargetAttack2Icon1_H"
+		enabled "ZJCreatureInfo_Private_Menu_TargetAttack[2].icons[1] ~= nil"
+		area 0 0 -1 -1
+		bam "ZJCREDMH"
+		frame lua "ZJCreatureInfo_Private_IconFrame(ZJCreatureInfo_Private_Menu_TargetAttack[2].icons[1] or 0, true)"
+		scaleToClip
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_TargetAttack2Icon2_1"
+		enabled "ZJCreatureInfo_Private_Menu_TargetAttack[2].icons[2] ~= nil and ZJCreatureInfo_Private_Menu_TargetAttackIconColor() == 1"
+		area 0 0 -1 -1
+		bam "ZJCREDMG"
+		useOverlayTint "true"
+		overlayTint 230 0 0
+		frame lua "ZJCreatureInfo_Private_IconFrame(ZJCreatureInfo_Private_Menu_TargetAttack[2].icons[2] or 0, true)"
+		scaleToClip
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_TargetAttack2Icon2_2"
+		enabled "ZJCreatureInfo_Private_Menu_TargetAttack[2].icons[2] ~= nil and ZJCreatureInfo_Private_Menu_TargetAttackIconColor() == 2"
+		area 0 0 -1 -1
+		bam "ZJCREDMG"
+		useOverlayTint "true"
+		overlayTint 255 145 0
+		frame lua "ZJCreatureInfo_Private_IconFrame(ZJCreatureInfo_Private_Menu_TargetAttack[2].icons[2] or 0, true)"
+		scaleToClip
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_TargetAttack2Icon2_3"
+		enabled "ZJCreatureInfo_Private_Menu_TargetAttack[2].icons[2] ~= nil and ZJCreatureInfo_Private_Menu_TargetAttackIconColor() == 3"
+		area 0 0 -1 -1
+		bam "ZJCREDMG"
+		useOverlayTint "true"
+		overlayTint 255 225 0
+		frame lua "ZJCreatureInfo_Private_IconFrame(ZJCreatureInfo_Private_Menu_TargetAttack[2].icons[2] or 0, true)"
+		scaleToClip
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_TargetAttack2Icon2_4"
+		enabled "ZJCreatureInfo_Private_Menu_TargetAttack[2].icons[2] ~= nil and ZJCreatureInfo_Private_Menu_TargetAttackIconColor() == 4"
+		area 0 0 -1 -1
+		bam "ZJCREDMG"
+		useOverlayTint "true"
+		overlayTint 0 210 0
+		frame lua "ZJCreatureInfo_Private_IconFrame(ZJCreatureInfo_Private_Menu_TargetAttack[2].icons[2] or 0, true)"
+		scaleToClip
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_TargetAttack2Icon2_5"
+		enabled "ZJCreatureInfo_Private_Menu_TargetAttack[2].icons[2] ~= nil and ZJCreatureInfo_Private_Menu_TargetAttackIconColor() == 5"
+		area 0 0 -1 -1
+		bam "ZJCREDMG"
+		useOverlayTint "true"
+		overlayTint 0 225 225
+		frame lua "ZJCreatureInfo_Private_IconFrame(ZJCreatureInfo_Private_Menu_TargetAttack[2].icons[2] or 0, true)"
+		scaleToClip
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_TargetAttack2Icon2_6"
+		enabled "ZJCreatureInfo_Private_Menu_TargetAttack[2].icons[2] ~= nil and ZJCreatureInfo_Private_Menu_TargetAttackIconColor() == 6"
+		area 0 0 -1 -1
+		bam "ZJCREDMG"
+		useOverlayTint "true"
+		overlayTint 40 110 255
+		frame lua "ZJCreatureInfo_Private_IconFrame(ZJCreatureInfo_Private_Menu_TargetAttack[2].icons[2] or 0, true)"
+		scaleToClip
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_TargetAttack2Icon2_7"
+		enabled "ZJCreatureInfo_Private_Menu_TargetAttack[2].icons[2] ~= nil and ZJCreatureInfo_Private_Menu_TargetAttackIconColor() == 7"
+		area 0 0 -1 -1
+		bam "ZJCREDMG"
+		useOverlayTint "true"
+		overlayTint 175 80 255
+		frame lua "ZJCreatureInfo_Private_IconFrame(ZJCreatureInfo_Private_Menu_TargetAttack[2].icons[2] or 0, true)"
+		scaleToClip
+	}
+
+	label
+	{
+		name "ZJCreatureInfo_Menu_TargetAttack2Icon2_8"
+		enabled "ZJCreatureInfo_Private_Menu_TargetAttack[2].icons[2] ~= nil and ZJCreatureInfo_Private_Menu_TargetAttackIconColor() == 8"
+		area 0 0 -1 -1
+		bam "ZJCREDMG"
+		useOverlayTint "true"
+		overlayTint 255 100 200
+		frame lua "ZJCreatureInfo_Private_IconFrame(ZJCreatureInfo_Private_Menu_TargetAttack[2].icons[2] or 0, true)"
+		scaleToClip
+	}
+
+	-- Its shading and highlights, (ZJCREDMH.BAM, not tinted)
+	label
+	{
+		name "ZJCreatureInfo_Menu_TargetAttack2Icon2_H"
+		enabled "ZJCreatureInfo_Private_Menu_TargetAttack[2].icons[2] ~= nil"
+		area 0 0 -1 -1
+		bam "ZJCREDMH"
+		frame lua "ZJCreatureInfo_Private_IconFrame(ZJCreatureInfo_Private_Menu_TargetAttack[2].icons[2] or 0, true)"
 		scaleToClip
 	}
 
@@ -216,9 +604,98 @@ menu
 			-- (area set in ZJCreatureInfo_Private_Layout())
 			label
 			{
-				enabled "ZJCreatureInfo_Private_Menu_InfoList_RowIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber) ~= nil"
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_RowIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber) ~= nil and ZJCreatureInfo_Private_Menu_TargetAttackIconColor() == 1"
 				area 0 0 -1 -1
 				bam "ZJCREDMG"
+				useOverlayTint "true"
+				overlayTint 230 0 0
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_RowIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber) or 0"
+				scaleToClip
+			}
+
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_RowIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber) ~= nil and ZJCreatureInfo_Private_Menu_TargetAttackIconColor() == 2"
+				area 0 0 -1 -1
+				bam "ZJCREDMG"
+				useOverlayTint "true"
+				overlayTint 255 145 0
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_RowIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber) or 0"
+				scaleToClip
+			}
+
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_RowIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber) ~= nil and ZJCreatureInfo_Private_Menu_TargetAttackIconColor() == 3"
+				area 0 0 -1 -1
+				bam "ZJCREDMG"
+				useOverlayTint "true"
+				overlayTint 255 225 0
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_RowIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber) or 0"
+				scaleToClip
+			}
+
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_RowIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber) ~= nil and ZJCreatureInfo_Private_Menu_TargetAttackIconColor() == 4"
+				area 0 0 -1 -1
+				bam "ZJCREDMG"
+				useOverlayTint "true"
+				overlayTint 0 210 0
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_RowIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber) or 0"
+				scaleToClip
+			}
+
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_RowIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber) ~= nil and ZJCreatureInfo_Private_Menu_TargetAttackIconColor() == 5"
+				area 0 0 -1 -1
+				bam "ZJCREDMG"
+				useOverlayTint "true"
+				overlayTint 0 225 225
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_RowIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber) or 0"
+				scaleToClip
+			}
+
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_RowIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber) ~= nil and ZJCreatureInfo_Private_Menu_TargetAttackIconColor() == 6"
+				area 0 0 -1 -1
+				bam "ZJCREDMG"
+				useOverlayTint "true"
+				overlayTint 40 110 255
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_RowIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber) or 0"
+				scaleToClip
+			}
+
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_RowIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber) ~= nil and ZJCreatureInfo_Private_Menu_TargetAttackIconColor() == 7"
+				area 0 0 -1 -1
+				bam "ZJCREDMG"
+				useOverlayTint "true"
+				overlayTint 175 80 255
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_RowIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber) or 0"
+				scaleToClip
+			}
+
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_RowIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber) ~= nil and ZJCreatureInfo_Private_Menu_TargetAttackIconColor() == 8"
+				area 0 0 -1 -1
+				bam "ZJCREDMG"
+				useOverlayTint "true"
+				overlayTint 255 100 200
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_RowIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber) or 0"
+				scaleToClip
+			}
+
+			-- Its shading and highlights, (ZJCREDMH.BAM, not tinted)
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_RowIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber) ~= nil"
+				area 0 0 -1 -1
+				bam "ZJCREDMH"
 				frame lua "ZJCreatureInfo_Private_Menu_InfoList_RowIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber) or 0"
 				scaleToClip
 			}
@@ -259,18 +736,214 @@ menu
 			-- (areas set in ZJCreatureInfo_Private_Layout())
 			label
 			{
-				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 8, 1) ~= nil"
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 8, 1) ~= nil and ZJCreatureInfo_Private_Menu_InfoList_TypeIconColor(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 8) == 1"
 				area 0 0 -1 -1
 				bam "ZJCREDMG"
+				useOverlayTint "true"
+				overlayTint 230 0 0
+				opacity lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIconOpacity(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 8)"
 				frame lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 8, 1) or 0"
 				scaleToClip
 			}
 
 			label
 			{
-				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 8, 2) ~= nil"
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 8, 1) ~= nil and ZJCreatureInfo_Private_Menu_InfoList_TypeIconColor(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 8) == 2"
 				area 0 0 -1 -1
 				bam "ZJCREDMG"
+				useOverlayTint "true"
+				overlayTint 255 145 0
+				opacity lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIconOpacity(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 8)"
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 8, 1) or 0"
+				scaleToClip
+			}
+
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 8, 1) ~= nil and ZJCreatureInfo_Private_Menu_InfoList_TypeIconColor(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 8) == 3"
+				area 0 0 -1 -1
+				bam "ZJCREDMG"
+				useOverlayTint "true"
+				overlayTint 255 225 0
+				opacity lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIconOpacity(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 8)"
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 8, 1) or 0"
+				scaleToClip
+			}
+
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 8, 1) ~= nil and ZJCreatureInfo_Private_Menu_InfoList_TypeIconColor(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 8) == 4"
+				area 0 0 -1 -1
+				bam "ZJCREDMG"
+				useOverlayTint "true"
+				overlayTint 0 210 0
+				opacity lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIconOpacity(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 8)"
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 8, 1) or 0"
+				scaleToClip
+			}
+
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 8, 1) ~= nil and ZJCreatureInfo_Private_Menu_InfoList_TypeIconColor(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 8) == 5"
+				area 0 0 -1 -1
+				bam "ZJCREDMG"
+				useOverlayTint "true"
+				overlayTint 0 225 225
+				opacity lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIconOpacity(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 8)"
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 8, 1) or 0"
+				scaleToClip
+			}
+
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 8, 1) ~= nil and ZJCreatureInfo_Private_Menu_InfoList_TypeIconColor(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 8) == 6"
+				area 0 0 -1 -1
+				bam "ZJCREDMG"
+				useOverlayTint "true"
+				overlayTint 40 110 255
+				opacity lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIconOpacity(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 8)"
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 8, 1) or 0"
+				scaleToClip
+			}
+
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 8, 1) ~= nil and ZJCreatureInfo_Private_Menu_InfoList_TypeIconColor(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 8) == 7"
+				area 0 0 -1 -1
+				bam "ZJCREDMG"
+				useOverlayTint "true"
+				overlayTint 175 80 255
+				opacity lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIconOpacity(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 8)"
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 8, 1) or 0"
+				scaleToClip
+			}
+
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 8, 1) ~= nil and ZJCreatureInfo_Private_Menu_InfoList_TypeIconColor(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 8) == 8"
+				area 0 0 -1 -1
+				bam "ZJCREDMG"
+				useOverlayTint "true"
+				overlayTint 255 100 200
+				opacity lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIconOpacity(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 8)"
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 8, 1) or 0"
+				scaleToClip
+			}
+
+			-- Its shading and highlights, (ZJCREDMH.BAM, not tinted)
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 8, 1) ~= nil"
+				area 0 0 -1 -1
+				bam "ZJCREDMH"
+				opacity lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIconOpacity(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 8)"
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 8, 1) or 0"
+				scaleToClip
+			}
+
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 8, 2) ~= nil and ZJCreatureInfo_Private_Menu_InfoList_TypeIconColor(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 8) == 1"
+				area 0 0 -1 -1
+				bam "ZJCREDMG"
+				useOverlayTint "true"
+				overlayTint 230 0 0
+				opacity lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIconOpacity(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 8)"
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 8, 2) or 0"
+				scaleToClip
+			}
+
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 8, 2) ~= nil and ZJCreatureInfo_Private_Menu_InfoList_TypeIconColor(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 8) == 2"
+				area 0 0 -1 -1
+				bam "ZJCREDMG"
+				useOverlayTint "true"
+				overlayTint 255 145 0
+				opacity lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIconOpacity(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 8)"
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 8, 2) or 0"
+				scaleToClip
+			}
+
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 8, 2) ~= nil and ZJCreatureInfo_Private_Menu_InfoList_TypeIconColor(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 8) == 3"
+				area 0 0 -1 -1
+				bam "ZJCREDMG"
+				useOverlayTint "true"
+				overlayTint 255 225 0
+				opacity lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIconOpacity(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 8)"
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 8, 2) or 0"
+				scaleToClip
+			}
+
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 8, 2) ~= nil and ZJCreatureInfo_Private_Menu_InfoList_TypeIconColor(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 8) == 4"
+				area 0 0 -1 -1
+				bam "ZJCREDMG"
+				useOverlayTint "true"
+				overlayTint 0 210 0
+				opacity lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIconOpacity(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 8)"
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 8, 2) or 0"
+				scaleToClip
+			}
+
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 8, 2) ~= nil and ZJCreatureInfo_Private_Menu_InfoList_TypeIconColor(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 8) == 5"
+				area 0 0 -1 -1
+				bam "ZJCREDMG"
+				useOverlayTint "true"
+				overlayTint 0 225 225
+				opacity lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIconOpacity(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 8)"
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 8, 2) or 0"
+				scaleToClip
+			}
+
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 8, 2) ~= nil and ZJCreatureInfo_Private_Menu_InfoList_TypeIconColor(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 8) == 6"
+				area 0 0 -1 -1
+				bam "ZJCREDMG"
+				useOverlayTint "true"
+				overlayTint 40 110 255
+				opacity lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIconOpacity(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 8)"
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 8, 2) or 0"
+				scaleToClip
+			}
+
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 8, 2) ~= nil and ZJCreatureInfo_Private_Menu_InfoList_TypeIconColor(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 8) == 7"
+				area 0 0 -1 -1
+				bam "ZJCREDMG"
+				useOverlayTint "true"
+				overlayTint 175 80 255
+				opacity lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIconOpacity(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 8)"
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 8, 2) or 0"
+				scaleToClip
+			}
+
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 8, 2) ~= nil and ZJCreatureInfo_Private_Menu_InfoList_TypeIconColor(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 8) == 8"
+				area 0 0 -1 -1
+				bam "ZJCREDMG"
+				useOverlayTint "true"
+				overlayTint 255 100 200
+				opacity lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIconOpacity(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 8)"
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 8, 2) or 0"
+				scaleToClip
+			}
+
+			-- Its shading and highlights, (ZJCREDMH.BAM, not tinted)
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 8, 2) ~= nil"
+				area 0 0 -1 -1
+				bam "ZJCREDMH"
+				opacity lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIconOpacity(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 8)"
 				frame lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 8, 2) or 0"
 				scaleToClip
 			}
@@ -338,18 +1011,214 @@ menu
 			-- (areas set in ZJCreatureInfo_Private_Layout())
 			label
 			{
-				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 9, 1) ~= nil"
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 9, 1) ~= nil and ZJCreatureInfo_Private_Menu_InfoList_TypeIconColor(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 9) == 1"
 				area 0 0 -1 -1
 				bam "ZJCREDMG"
+				useOverlayTint "true"
+				overlayTint 230 0 0
+				opacity lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIconOpacity(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 9)"
 				frame lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 9, 1) or 0"
 				scaleToClip
 			}
 
 			label
 			{
-				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 9, 2) ~= nil"
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 9, 1) ~= nil and ZJCreatureInfo_Private_Menu_InfoList_TypeIconColor(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 9) == 2"
 				area 0 0 -1 -1
 				bam "ZJCREDMG"
+				useOverlayTint "true"
+				overlayTint 255 145 0
+				opacity lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIconOpacity(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 9)"
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 9, 1) or 0"
+				scaleToClip
+			}
+
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 9, 1) ~= nil and ZJCreatureInfo_Private_Menu_InfoList_TypeIconColor(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 9) == 3"
+				area 0 0 -1 -1
+				bam "ZJCREDMG"
+				useOverlayTint "true"
+				overlayTint 255 225 0
+				opacity lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIconOpacity(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 9)"
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 9, 1) or 0"
+				scaleToClip
+			}
+
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 9, 1) ~= nil and ZJCreatureInfo_Private_Menu_InfoList_TypeIconColor(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 9) == 4"
+				area 0 0 -1 -1
+				bam "ZJCREDMG"
+				useOverlayTint "true"
+				overlayTint 0 210 0
+				opacity lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIconOpacity(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 9)"
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 9, 1) or 0"
+				scaleToClip
+			}
+
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 9, 1) ~= nil and ZJCreatureInfo_Private_Menu_InfoList_TypeIconColor(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 9) == 5"
+				area 0 0 -1 -1
+				bam "ZJCREDMG"
+				useOverlayTint "true"
+				overlayTint 0 225 225
+				opacity lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIconOpacity(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 9)"
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 9, 1) or 0"
+				scaleToClip
+			}
+
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 9, 1) ~= nil and ZJCreatureInfo_Private_Menu_InfoList_TypeIconColor(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 9) == 6"
+				area 0 0 -1 -1
+				bam "ZJCREDMG"
+				useOverlayTint "true"
+				overlayTint 40 110 255
+				opacity lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIconOpacity(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 9)"
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 9, 1) or 0"
+				scaleToClip
+			}
+
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 9, 1) ~= nil and ZJCreatureInfo_Private_Menu_InfoList_TypeIconColor(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 9) == 7"
+				area 0 0 -1 -1
+				bam "ZJCREDMG"
+				useOverlayTint "true"
+				overlayTint 175 80 255
+				opacity lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIconOpacity(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 9)"
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 9, 1) or 0"
+				scaleToClip
+			}
+
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 9, 1) ~= nil and ZJCreatureInfo_Private_Menu_InfoList_TypeIconColor(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 9) == 8"
+				area 0 0 -1 -1
+				bam "ZJCREDMG"
+				useOverlayTint "true"
+				overlayTint 255 100 200
+				opacity lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIconOpacity(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 9)"
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 9, 1) or 0"
+				scaleToClip
+			}
+
+			-- Its shading and highlights, (ZJCREDMH.BAM, not tinted)
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 9, 1) ~= nil"
+				area 0 0 -1 -1
+				bam "ZJCREDMH"
+				opacity lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIconOpacity(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 9)"
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 9, 1) or 0"
+				scaleToClip
+			}
+
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 9, 2) ~= nil and ZJCreatureInfo_Private_Menu_InfoList_TypeIconColor(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 9) == 1"
+				area 0 0 -1 -1
+				bam "ZJCREDMG"
+				useOverlayTint "true"
+				overlayTint 230 0 0
+				opacity lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIconOpacity(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 9)"
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 9, 2) or 0"
+				scaleToClip
+			}
+
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 9, 2) ~= nil and ZJCreatureInfo_Private_Menu_InfoList_TypeIconColor(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 9) == 2"
+				area 0 0 -1 -1
+				bam "ZJCREDMG"
+				useOverlayTint "true"
+				overlayTint 255 145 0
+				opacity lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIconOpacity(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 9)"
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 9, 2) or 0"
+				scaleToClip
+			}
+
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 9, 2) ~= nil and ZJCreatureInfo_Private_Menu_InfoList_TypeIconColor(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 9) == 3"
+				area 0 0 -1 -1
+				bam "ZJCREDMG"
+				useOverlayTint "true"
+				overlayTint 255 225 0
+				opacity lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIconOpacity(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 9)"
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 9, 2) or 0"
+				scaleToClip
+			}
+
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 9, 2) ~= nil and ZJCreatureInfo_Private_Menu_InfoList_TypeIconColor(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 9) == 4"
+				area 0 0 -1 -1
+				bam "ZJCREDMG"
+				useOverlayTint "true"
+				overlayTint 0 210 0
+				opacity lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIconOpacity(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 9)"
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 9, 2) or 0"
+				scaleToClip
+			}
+
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 9, 2) ~= nil and ZJCreatureInfo_Private_Menu_InfoList_TypeIconColor(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 9) == 5"
+				area 0 0 -1 -1
+				bam "ZJCREDMG"
+				useOverlayTint "true"
+				overlayTint 0 225 225
+				opacity lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIconOpacity(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 9)"
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 9, 2) or 0"
+				scaleToClip
+			}
+
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 9, 2) ~= nil and ZJCreatureInfo_Private_Menu_InfoList_TypeIconColor(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 9) == 6"
+				area 0 0 -1 -1
+				bam "ZJCREDMG"
+				useOverlayTint "true"
+				overlayTint 40 110 255
+				opacity lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIconOpacity(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 9)"
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 9, 2) or 0"
+				scaleToClip
+			}
+
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 9, 2) ~= nil and ZJCreatureInfo_Private_Menu_InfoList_TypeIconColor(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 9) == 7"
+				area 0 0 -1 -1
+				bam "ZJCREDMG"
+				useOverlayTint "true"
+				overlayTint 175 80 255
+				opacity lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIconOpacity(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 9)"
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 9, 2) or 0"
+				scaleToClip
+			}
+
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 9, 2) ~= nil and ZJCreatureInfo_Private_Menu_InfoList_TypeIconColor(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 9) == 8"
+				area 0 0 -1 -1
+				bam "ZJCREDMG"
+				useOverlayTint "true"
+				overlayTint 255 100 200
+				opacity lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIconOpacity(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 9)"
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 9, 2) or 0"
+				scaleToClip
+			}
+
+			-- Its shading and highlights, (ZJCREDMH.BAM, not tinted)
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 9, 2) ~= nil"
+				area 0 0 -1 -1
+				bam "ZJCREDMH"
+				opacity lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIconOpacity(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 9)"
 				frame lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList_Table, rowNumber, 9, 2) or 0"
 				scaleToClip
 			}
@@ -455,18 +1324,214 @@ menu
 			-- (areas set in ZJCreatureInfo_Private_Layout())
 			label
 			{
-				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 8, 1) ~= nil"
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 8, 1) ~= nil and ZJCreatureInfo_Private_Menu_InfoList_TypeIconColor(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 8) == 1"
 				area 0 0 -1 -1
 				bam "ZJCREDMG"
+				useOverlayTint "true"
+				overlayTint 230 0 0
+				opacity lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIconOpacity(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 8)"
 				frame lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 8, 1) or 0"
 				scaleToClip
 			}
 
 			label
 			{
-				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 8, 2) ~= nil"
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 8, 1) ~= nil and ZJCreatureInfo_Private_Menu_InfoList_TypeIconColor(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 8) == 2"
 				area 0 0 -1 -1
 				bam "ZJCREDMG"
+				useOverlayTint "true"
+				overlayTint 255 145 0
+				opacity lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIconOpacity(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 8)"
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 8, 1) or 0"
+				scaleToClip
+			}
+
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 8, 1) ~= nil and ZJCreatureInfo_Private_Menu_InfoList_TypeIconColor(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 8) == 3"
+				area 0 0 -1 -1
+				bam "ZJCREDMG"
+				useOverlayTint "true"
+				overlayTint 255 225 0
+				opacity lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIconOpacity(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 8)"
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 8, 1) or 0"
+				scaleToClip
+			}
+
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 8, 1) ~= nil and ZJCreatureInfo_Private_Menu_InfoList_TypeIconColor(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 8) == 4"
+				area 0 0 -1 -1
+				bam "ZJCREDMG"
+				useOverlayTint "true"
+				overlayTint 0 210 0
+				opacity lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIconOpacity(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 8)"
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 8, 1) or 0"
+				scaleToClip
+			}
+
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 8, 1) ~= nil and ZJCreatureInfo_Private_Menu_InfoList_TypeIconColor(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 8) == 5"
+				area 0 0 -1 -1
+				bam "ZJCREDMG"
+				useOverlayTint "true"
+				overlayTint 0 225 225
+				opacity lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIconOpacity(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 8)"
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 8, 1) or 0"
+				scaleToClip
+			}
+
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 8, 1) ~= nil and ZJCreatureInfo_Private_Menu_InfoList_TypeIconColor(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 8) == 6"
+				area 0 0 -1 -1
+				bam "ZJCREDMG"
+				useOverlayTint "true"
+				overlayTint 40 110 255
+				opacity lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIconOpacity(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 8)"
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 8, 1) or 0"
+				scaleToClip
+			}
+
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 8, 1) ~= nil and ZJCreatureInfo_Private_Menu_InfoList_TypeIconColor(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 8) == 7"
+				area 0 0 -1 -1
+				bam "ZJCREDMG"
+				useOverlayTint "true"
+				overlayTint 175 80 255
+				opacity lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIconOpacity(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 8)"
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 8, 1) or 0"
+				scaleToClip
+			}
+
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 8, 1) ~= nil and ZJCreatureInfo_Private_Menu_InfoList_TypeIconColor(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 8) == 8"
+				area 0 0 -1 -1
+				bam "ZJCREDMG"
+				useOverlayTint "true"
+				overlayTint 255 100 200
+				opacity lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIconOpacity(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 8)"
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 8, 1) or 0"
+				scaleToClip
+			}
+
+			-- Its shading and highlights, (ZJCREDMH.BAM, not tinted)
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 8, 1) ~= nil"
+				area 0 0 -1 -1
+				bam "ZJCREDMH"
+				opacity lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIconOpacity(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 8)"
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 8, 1) or 0"
+				scaleToClip
+			}
+
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 8, 2) ~= nil and ZJCreatureInfo_Private_Menu_InfoList_TypeIconColor(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 8) == 1"
+				area 0 0 -1 -1
+				bam "ZJCREDMG"
+				useOverlayTint "true"
+				overlayTint 230 0 0
+				opacity lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIconOpacity(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 8)"
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 8, 2) or 0"
+				scaleToClip
+			}
+
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 8, 2) ~= nil and ZJCreatureInfo_Private_Menu_InfoList_TypeIconColor(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 8) == 2"
+				area 0 0 -1 -1
+				bam "ZJCREDMG"
+				useOverlayTint "true"
+				overlayTint 255 145 0
+				opacity lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIconOpacity(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 8)"
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 8, 2) or 0"
+				scaleToClip
+			}
+
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 8, 2) ~= nil and ZJCreatureInfo_Private_Menu_InfoList_TypeIconColor(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 8) == 3"
+				area 0 0 -1 -1
+				bam "ZJCREDMG"
+				useOverlayTint "true"
+				overlayTint 255 225 0
+				opacity lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIconOpacity(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 8)"
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 8, 2) or 0"
+				scaleToClip
+			}
+
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 8, 2) ~= nil and ZJCreatureInfo_Private_Menu_InfoList_TypeIconColor(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 8) == 4"
+				area 0 0 -1 -1
+				bam "ZJCREDMG"
+				useOverlayTint "true"
+				overlayTint 0 210 0
+				opacity lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIconOpacity(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 8)"
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 8, 2) or 0"
+				scaleToClip
+			}
+
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 8, 2) ~= nil and ZJCreatureInfo_Private_Menu_InfoList_TypeIconColor(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 8) == 5"
+				area 0 0 -1 -1
+				bam "ZJCREDMG"
+				useOverlayTint "true"
+				overlayTint 0 225 225
+				opacity lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIconOpacity(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 8)"
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 8, 2) or 0"
+				scaleToClip
+			}
+
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 8, 2) ~= nil and ZJCreatureInfo_Private_Menu_InfoList_TypeIconColor(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 8) == 6"
+				area 0 0 -1 -1
+				bam "ZJCREDMG"
+				useOverlayTint "true"
+				overlayTint 40 110 255
+				opacity lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIconOpacity(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 8)"
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 8, 2) or 0"
+				scaleToClip
+			}
+
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 8, 2) ~= nil and ZJCreatureInfo_Private_Menu_InfoList_TypeIconColor(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 8) == 7"
+				area 0 0 -1 -1
+				bam "ZJCREDMG"
+				useOverlayTint "true"
+				overlayTint 175 80 255
+				opacity lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIconOpacity(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 8)"
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 8, 2) or 0"
+				scaleToClip
+			}
+
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 8, 2) ~= nil and ZJCreatureInfo_Private_Menu_InfoList_TypeIconColor(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 8) == 8"
+				area 0 0 -1 -1
+				bam "ZJCREDMG"
+				useOverlayTint "true"
+				overlayTint 255 100 200
+				opacity lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIconOpacity(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 8)"
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 8, 2) or 0"
+				scaleToClip
+			}
+
+			-- Its shading and highlights, (ZJCREDMH.BAM, not tinted)
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 8, 2) ~= nil"
+				area 0 0 -1 -1
+				bam "ZJCREDMH"
+				opacity lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIconOpacity(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 8)"
 				frame lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 8, 2) or 0"
 				scaleToClip
 			}
@@ -534,18 +1599,214 @@ menu
 			-- (areas set in ZJCreatureInfo_Private_Layout())
 			label
 			{
-				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 9, 1) ~= nil"
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 9, 1) ~= nil and ZJCreatureInfo_Private_Menu_InfoList_TypeIconColor(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 9) == 1"
 				area 0 0 -1 -1
 				bam "ZJCREDMG"
+				useOverlayTint "true"
+				overlayTint 230 0 0
+				opacity lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIconOpacity(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 9)"
 				frame lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 9, 1) or 0"
 				scaleToClip
 			}
 
 			label
 			{
-				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 9, 2) ~= nil"
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 9, 1) ~= nil and ZJCreatureInfo_Private_Menu_InfoList_TypeIconColor(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 9) == 2"
 				area 0 0 -1 -1
 				bam "ZJCREDMG"
+				useOverlayTint "true"
+				overlayTint 255 145 0
+				opacity lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIconOpacity(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 9)"
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 9, 1) or 0"
+				scaleToClip
+			}
+
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 9, 1) ~= nil and ZJCreatureInfo_Private_Menu_InfoList_TypeIconColor(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 9) == 3"
+				area 0 0 -1 -1
+				bam "ZJCREDMG"
+				useOverlayTint "true"
+				overlayTint 255 225 0
+				opacity lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIconOpacity(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 9)"
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 9, 1) or 0"
+				scaleToClip
+			}
+
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 9, 1) ~= nil and ZJCreatureInfo_Private_Menu_InfoList_TypeIconColor(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 9) == 4"
+				area 0 0 -1 -1
+				bam "ZJCREDMG"
+				useOverlayTint "true"
+				overlayTint 0 210 0
+				opacity lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIconOpacity(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 9)"
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 9, 1) or 0"
+				scaleToClip
+			}
+
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 9, 1) ~= nil and ZJCreatureInfo_Private_Menu_InfoList_TypeIconColor(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 9) == 5"
+				area 0 0 -1 -1
+				bam "ZJCREDMG"
+				useOverlayTint "true"
+				overlayTint 0 225 225
+				opacity lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIconOpacity(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 9)"
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 9, 1) or 0"
+				scaleToClip
+			}
+
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 9, 1) ~= nil and ZJCreatureInfo_Private_Menu_InfoList_TypeIconColor(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 9) == 6"
+				area 0 0 -1 -1
+				bam "ZJCREDMG"
+				useOverlayTint "true"
+				overlayTint 40 110 255
+				opacity lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIconOpacity(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 9)"
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 9, 1) or 0"
+				scaleToClip
+			}
+
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 9, 1) ~= nil and ZJCreatureInfo_Private_Menu_InfoList_TypeIconColor(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 9) == 7"
+				area 0 0 -1 -1
+				bam "ZJCREDMG"
+				useOverlayTint "true"
+				overlayTint 175 80 255
+				opacity lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIconOpacity(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 9)"
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 9, 1) or 0"
+				scaleToClip
+			}
+
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 9, 1) ~= nil and ZJCreatureInfo_Private_Menu_InfoList_TypeIconColor(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 9) == 8"
+				area 0 0 -1 -1
+				bam "ZJCREDMG"
+				useOverlayTint "true"
+				overlayTint 255 100 200
+				opacity lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIconOpacity(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 9)"
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 9, 1) or 0"
+				scaleToClip
+			}
+
+			-- Its shading and highlights, (ZJCREDMH.BAM, not tinted)
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 9, 1) ~= nil"
+				area 0 0 -1 -1
+				bam "ZJCREDMH"
+				opacity lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIconOpacity(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 9)"
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 9, 1) or 0"
+				scaleToClip
+			}
+
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 9, 2) ~= nil and ZJCreatureInfo_Private_Menu_InfoList_TypeIconColor(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 9) == 1"
+				area 0 0 -1 -1
+				bam "ZJCREDMG"
+				useOverlayTint "true"
+				overlayTint 230 0 0
+				opacity lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIconOpacity(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 9)"
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 9, 2) or 0"
+				scaleToClip
+			}
+
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 9, 2) ~= nil and ZJCreatureInfo_Private_Menu_InfoList_TypeIconColor(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 9) == 2"
+				area 0 0 -1 -1
+				bam "ZJCREDMG"
+				useOverlayTint "true"
+				overlayTint 255 145 0
+				opacity lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIconOpacity(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 9)"
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 9, 2) or 0"
+				scaleToClip
+			}
+
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 9, 2) ~= nil and ZJCreatureInfo_Private_Menu_InfoList_TypeIconColor(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 9) == 3"
+				area 0 0 -1 -1
+				bam "ZJCREDMG"
+				useOverlayTint "true"
+				overlayTint 255 225 0
+				opacity lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIconOpacity(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 9)"
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 9, 2) or 0"
+				scaleToClip
+			}
+
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 9, 2) ~= nil and ZJCreatureInfo_Private_Menu_InfoList_TypeIconColor(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 9) == 4"
+				area 0 0 -1 -1
+				bam "ZJCREDMG"
+				useOverlayTint "true"
+				overlayTint 0 210 0
+				opacity lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIconOpacity(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 9)"
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 9, 2) or 0"
+				scaleToClip
+			}
+
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 9, 2) ~= nil and ZJCreatureInfo_Private_Menu_InfoList_TypeIconColor(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 9) == 5"
+				area 0 0 -1 -1
+				bam "ZJCREDMG"
+				useOverlayTint "true"
+				overlayTint 0 225 225
+				opacity lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIconOpacity(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 9)"
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 9, 2) or 0"
+				scaleToClip
+			}
+
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 9, 2) ~= nil and ZJCreatureInfo_Private_Menu_InfoList_TypeIconColor(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 9) == 6"
+				area 0 0 -1 -1
+				bam "ZJCREDMG"
+				useOverlayTint "true"
+				overlayTint 40 110 255
+				opacity lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIconOpacity(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 9)"
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 9, 2) or 0"
+				scaleToClip
+			}
+
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 9, 2) ~= nil and ZJCreatureInfo_Private_Menu_InfoList_TypeIconColor(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 9) == 7"
+				area 0 0 -1 -1
+				bam "ZJCREDMG"
+				useOverlayTint "true"
+				overlayTint 175 80 255
+				opacity lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIconOpacity(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 9)"
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 9, 2) or 0"
+				scaleToClip
+			}
+
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 9, 2) ~= nil and ZJCreatureInfo_Private_Menu_InfoList_TypeIconColor(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 9) == 8"
+				area 0 0 -1 -1
+				bam "ZJCREDMG"
+				useOverlayTint "true"
+				overlayTint 255 100 200
+				opacity lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIconOpacity(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 9)"
+				frame lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 9, 2) or 0"
+				scaleToClip
+			}
+
+			-- Its shading and highlights, (ZJCREDMH.BAM, not tinted)
+			label
+			{
+				enabled "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 9, 2) ~= nil"
+				area 0 0 -1 -1
+				bam "ZJCREDMH"
+				opacity lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIconOpacity(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 9)"
 				frame lua "ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(ZJCreatureInfo_Private_Menu_InfoList2_Table, rowNumber, 9, 2) or 0"
 				scaleToClip
 			}

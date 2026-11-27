@@ -17,8 +17,9 @@ ZJBarColors_Loaded = true
 ------------
 
 -- [option value] = The color, option value 0 is Off.
--- The Timer module's ZJTBAR.BAM has one sequence per color, (sequence = option value - 1), in the same colors.
--- tools/make-bar-bam.ps1 builds it: change a color there too, and run it.
+-- The menus that draw a white / grey BAM in these colors have a label per color, in this order, with the color as its
+-- `overlayTint`: ZJTimer.menu, (resistance rings), ZJCreInf.menu, (weapon icons) and ZJSplInf.menu, (areas). Change a
+-- color there too. The bars are fills, (ZJBarColors_Fill()).
 ZJBarColors_Colors = {
 	{ ["name"] = "ZJBattleSense_TRANSLATION_BarColor_Red",    ["r"] = 230, ["g"] = 0,   ["b"] = 0   },
 	{ ["name"] = "ZJBattleSense_TRANSLATION_BarColor_Orange", ["r"] = 255, ["g"] = 145, ["b"] = 0   },
@@ -79,11 +80,6 @@ end
 function ZJBarColors_Fill(barName)
 	local color = ZJBarColors_Colors[ZJBarColors_Get(barName)]
 	return color and color.fill or 0
-end
-
--- For a ZJTBAR.BAM `sequence lua`
-function ZJBarColors_Sequence(barName)
-	return math.max(ZJBarColors_Get(barName) - 1, 0)
 end
 
 ------------
@@ -187,6 +183,39 @@ end
 
 function ZJBarColors_CycleWidget:_onWorkingValueChanged(newValue)
 	self:_update(newValue)
+end
+
+-- The same button without Off, for a color that is always shown
+ZJBarColors_ColorWidget = {}
+ZJBarColors_ColorWidget.__index = ZJBarColors_ColorWidget
+setmetatable(ZJBarColors_ColorWidget, ZJBarColors_CycleWidget)
+
+ZJBarColors_ColorWidget.new = function(o)
+	if o == nil then o = {} end
+	setmetatable(o, ZJBarColors_ColorWidget)
+	o:_init()
+	return o
+end
+
+function ZJBarColors_ColorWidget:_getMin()
+	return 1
+end
+
+-- Registers a color option without Off, (1 - #ZJBarColors_Colors), shown with ZJBarColors_ColorWidget
+function ZJBarColors_RegisterColorOption(optionID, storageKey, default)
+	return EEex_Options_Register(optionID, EEex_Options_Option.new({
+		["default"]  = default,
+		["accessor"] = EEex_Options_ClampedAccessor.new({ ["min"] = 1, ["max"] = #ZJBarColors_Colors }),
+		["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = storageKey }),
+	}))
+end
+
+-- The text color code, (^0xAABBGGRR), of option value `value`, its brightness multiplied by `scale`, (default 1)
+function ZJBarColors_TextColorStr(value, scale)
+	local color = ZJBarColors_Colors[value]
+	if color == nil then return "" end
+	scale = scale or 1
+	return string.format("^0xFF%02X%02X%02X", math.floor(color.b * scale), math.floor(color.g * scale), math.floor(color.r * scale))
 end
 
 -- An options menu entry for the color of `barName`. The same option can be in more than one tab, each with its own

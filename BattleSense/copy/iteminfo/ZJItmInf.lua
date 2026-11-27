@@ -18,6 +18,8 @@
 
 -- The popup and its key, (shared by every module with a popup)
 Infinity_DoFile("ZJPopup")
+-- The colors, and the button that steps through them, (shared with Timer, Creature Info and Spell Info)
+Infinity_DoFile("ZJBarCol")
 
 -------------
 -- Options --
@@ -91,6 +93,10 @@ ZJItemInfo_Private_ShowOnQuickItems = EEex_Options_Register("ZJItemInfo_ShowOnQu
 	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Item Info Module: Show On Quick Items" }),
 }))
 
+-- The colors of a value that is better / worse than that of the item it replaces, (one of the bar colors, ZJBarCol.lua)
+ZJItemInfo_Private_BetterColor = ZJBarColors_RegisterColorOption("ZJItemInfo_BetterColor", "Item Info Module: Better Color", 4) -- Green
+ZJItemInfo_Private_WorseColor  = ZJBarColors_RegisterColorOption("ZJItemInfo_WorseColor",  "Item Info Module: Worse Color",  1) -- Red
+
 EEex_Options_AddTab("ZJBattleSense_Options_TRANSLATION_ItemInfo_TabTitle", function() return {
 	{
 		EEex_Options_DisplayEntry.new({
@@ -152,6 +158,18 @@ EEex_Options_AddTab("ZJBattleSense_Options_TRANSLATION_ItemInfo_TabTitle", funct
 			["description"] = "ZJBattleSense_Options_TRANSLATION_ItemInfo_ShowOnQuickItems_Description",
 			["widget"]      = EEex_Options_ToggleWidget.new(),
 		}),
+		EEex_Options_DisplayEntry.new({
+			["optionID"]    = "ZJItemInfo_BetterColor",
+			["label"]       = "ZJBattleSense_Options_TRANSLATION_ItemInfo_BetterColor",
+			["description"] = "ZJBattleSense_Options_TRANSLATION_ItemInfo_BetterColor_Description",
+			["widget"]      = ZJBarColors_ColorWidget.new(),
+		}),
+		EEex_Options_DisplayEntry.new({
+			["optionID"]    = "ZJItemInfo_WorseColor",
+			["label"]       = "ZJBattleSense_Options_TRANSLATION_ItemInfo_WorseColor",
+			["description"] = "ZJBattleSense_Options_TRANSLATION_ItemInfo_WorseColor_Description",
+			["widget"]      = ZJBarColors_ColorWidget.new(),
+		}),
 	},
 } end)
 
@@ -170,9 +188,16 @@ ZJItemInfo_Private_BlockingMenus = { "ITEM_DESCRIPTION", "POPUP_REQUESTER" }
 
 ZJItemInfo_Private_TitleColorStr  = "^0xFF64D7FF"
 ZJItemInfo_Private_DimColorStr    = "^0xFFA0A0A0"
-ZJItemInfo_Private_BetterColorStr = "^0xFF40E040"
-ZJItemInfo_Private_WorseColorStr  = "^0xFF2B4BFF"
 ZJItemInfo_Private_ColorEndStr    = "^-"
+
+-- The text color codes of the "Better Color" / "Worse Color" options
+function ZJItemInfo_Private_BetterColorStr()
+	return ZJBarColors_TextColorStr(ZJItemInfo_Private_BetterColor:get())
+end
+
+function ZJItemInfo_Private_WorseColorStr()
+	return ZJBarColors_TextColorStr(ZJItemInfo_Private_WorseColor:get())
+end
 
 -------------
 -- General --
@@ -574,7 +599,7 @@ end
 function ZJItemInfo_Private_ColorChange(text, change, lowerIsBetter)
 	if change == 0 then return text end
 	local better = (change < 0) == (lowerIsBetter == true)
-	return (better and ZJItemInfo_Private_BetterColorStr or ZJItemInfo_Private_WorseColorStr)..text..ZJItemInfo_Private_ColorEndStr
+	return (better and ZJItemInfo_Private_BetterColorStr() or ZJItemInfo_Private_WorseColorStr())..text..ZJItemInfo_Private_ColorEndStr
 end
 
 function ZJItemInfo_Private_FormatChangeLine(label, oldValue, newValue, lowerIsBetter, suffix)
@@ -1584,7 +1609,7 @@ function ZJItemInfo_Private_GetUseLines(sprite, use)
 
 	local spriteName = sprite:getName()
 	local lines = { ZJItemInfo_Private_DimColorStr..string.format(ZJItemInfo_Private_T("IfUsed"), spriteName)..ZJItemInfo_Private_ColorEndStr }
-	local good, bad = ZJItemInfo_Private_BetterColorStr, ZJItemInfo_Private_WorseColorStr
+	local good, bad = ZJItemInfo_Private_BetterColorStr(), ZJItemInfo_Private_WorseColorStr()
 	local colorEnd = ZJItemInfo_Private_ColorEndStr
 
 	-- How often each duration comes up, the most common one is said once at the end instead of on every line
@@ -2669,7 +2694,7 @@ function ZJItemInfo_Private_BuildText(hovered, sprite)
 			-- Already worn, there is nothing to compare it with
 		elseif not ZJItemInfo_Private_IsUsable(hovered) then
 			local okName, spriteName = pcall(function() return sprite:getName() end)
-			table.insert(parts, ZJItemInfo_Private_WorseColorStr
+			table.insert(parts, ZJItemInfo_Private_WorseColorStr()
 				..string.format(ZJItemInfo_Private_T("NotUsable"), okName and spriteName or "")
 				..ZJItemInfo_Private_ColorEndStr)
 		else

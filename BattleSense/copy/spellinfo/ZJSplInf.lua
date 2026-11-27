@@ -99,11 +99,7 @@ ZJSpellInfo_Private_ShowAreas = EEex_Options_Register("ZJSpellInfo_ShowAreas", E
 -- The colors of the areas, one of the bar colors, (ZJBarCol.lua), so an area can match its timer bar. No Off: "Show
 -- Areas" turns them off.
 local registerAreaColorOption = function(name, default)
-	return EEex_Options_Register("ZJSpellInfo_"..name.."AreaColor", EEex_Options_Option.new({
-		["default"]  = default,
-		["accessor"] = EEex_Options_ClampedAccessor.new({ ["min"] = 1, ["max"] = #ZJBarColors_Colors }),
-		["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Spell Info Module: "..name.." Area Color" }),
-	}))
+	return ZJBarColors_RegisterColorOption("ZJSpellInfo_"..name.."AreaColor", "Spell Info Module: "..name.." Area Color", default)
 end
 
 -- [area type] = Its color option, "spell" = a spell / item ability, (and a cone), "modal" = turn undead / find traps
@@ -111,22 +107,6 @@ ZJSpellInfo_Private_AreaColors = {
 	["spell"] = registerAreaColorOption("Spell", 6), -- Blue
 	["modal"] = registerAreaColorOption("Modal", 3), -- Yellow
 }
-
--- A color button that steps through the colors, without Off
-ZJSpellInfo_AreaColorWidget = {}
-ZJSpellInfo_AreaColorWidget.__index = ZJSpellInfo_AreaColorWidget
-setmetatable(ZJSpellInfo_AreaColorWidget, ZJBarColors_CycleWidget)
-
-ZJSpellInfo_AreaColorWidget.new = function(o)
-	if o == nil then o = {} end
-	setmetatable(o, ZJSpellInfo_AreaColorWidget)
-	o:_init()
-	return o
-end
-
-function ZJSpellInfo_AreaColorWidget:_getMin()
-	return 1
-end
 
 EEex_Options_AddTab("ZJBattleSense_Options_TRANSLATION_SpellInfo_TabTitle", function() return {
 	{
@@ -206,13 +186,13 @@ EEex_Options_AddTab("ZJBattleSense_Options_TRANSLATION_SpellInfo_TabTitle", func
 			["optionID"]    = "ZJSpellInfo_SpellAreaColor",
 			["label"]       = "ZJBattleSense_Options_TRANSLATION_SpellInfo_SpellAreaColor",
 			["description"] = "ZJBattleSense_Options_TRANSLATION_SpellInfo_SpellAreaColor_Description",
-			["widget"]      = ZJSpellInfo_AreaColorWidget.new(),
+			["widget"]      = ZJBarColors_ColorWidget.new(),
 		}),
 		EEex_Options_DisplayEntry.new({
 			["optionID"]    = "ZJSpellInfo_ModalAreaColor",
 			["label"]       = "ZJBattleSense_Options_TRANSLATION_SpellInfo_ModalAreaColor",
 			["description"] = "ZJBattleSense_Options_TRANSLATION_SpellInfo_ModalAreaColor_Description",
-			["widget"]      = ZJSpellInfo_AreaColorWidget.new(),
+			["widget"]      = ZJBarColors_ColorWidget.new(),
 		}),
 	},
 } end)

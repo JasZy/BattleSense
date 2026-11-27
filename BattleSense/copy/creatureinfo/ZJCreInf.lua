@@ -50,6 +50,11 @@ end
 ZJCreatureInfo_Private_ResistanceColor = registerLabelColorOption("Resistance", 1) -- Red
 ZJCreatureInfo_Private_ImmunityColor   = registerLabelColorOption("Immunity",   7) -- Purple
 
+-- The colors of the weapon / spell / item icons, (ZJCREDMG.BAM, one of the bar colors): what the target does to the
+-- party, and what the party does to the target
+ZJCreatureInfo_Private_TargetAttackIconColor = ZJBarColors_RegisterColorOption("ZJCreatureInfo_TargetAttackIconColor", "Creature Info Module: Target Attack Icon Color", 4) -- Green
+ZJCreatureInfo_Private_AttackIconColor       = ZJBarColors_RegisterColorOption("ZJCreatureInfo_AttackIconColor",       "Creature Info Module: Attack Icon Color",        1) -- Red
+
 -- The text color code of a label color option's value, (half as bright if `dim`), "" if it is Off
 function ZJCreatureInfo_Private_LabelColorStr(value, dim)
 	local color = ZJBarColors_Colors[value]
@@ -170,6 +175,18 @@ EEex_Options_AddTab("ZJBattleSense_Options_TRANSLATION_CreatureInfo_TabTitle", f
 			["label"]       = "ZJBattleSense_Options_TRANSLATION_CreatureInfo_ImmunityColor",
 			["description"] = "ZJBattleSense_Options_TRANSLATION_CreatureInfo_ImmunityColor_Description",
 			["widget"]      = ZJBarColors_CycleWidget.new(),
+		}),
+		EEex_Options_DisplayEntry.new({
+			["optionID"]    = "ZJCreatureInfo_TargetAttackIconColor",
+			["label"]       = "ZJBattleSense_Options_TRANSLATION_CreatureInfo_TargetAttackIconColor",
+			["description"] = "ZJBattleSense_Options_TRANSLATION_CreatureInfo_TargetAttackIconColor_Description",
+			["widget"]      = ZJBarColors_ColorWidget.new(),
+		}),
+		EEex_Options_DisplayEntry.new({
+			["optionID"]    = "ZJCreatureInfo_AttackIconColor",
+			["label"]       = "ZJBattleSense_Options_TRANSLATION_CreatureInfo_AttackIconColor",
+			["description"] = "ZJBattleSense_Options_TRANSLATION_CreatureInfo_AttackIconColor_Description",
+			["widget"]      = ZJBarColors_ColorWidget.new(),
 		}),
 		EEex_Options_DisplayEntry.new({
 			["optionID"]    = "ZJCreatureInfo_ShowSpellEffects",
@@ -425,8 +442,9 @@ function ZJCreatureInfo_Private_GetWeaponHitChance(sourceSprite, targetSprite, l
 	return hitChance, isImmune, reasoning, damageStr, okDisplay and handDisplay or nil
 end
 
--- ITM ability damage type => the icon(s) that show it, (ZJCREDMG.BAM: frame = icon * 4 + variant, the variants are
--- 0 = green, 1 = red, 2 = dimmed red, 3 = dimmed green; the green ones face the other way).
+-- ITM ability damage type => the icon(s) that show it, (ZJCREDMG.BAM: frame = icon * 2 + facing, the icon's shape,
+-- tinted by the menu with the color of its option: facing 0 = the target's attacks, 1 = attacks on the target, which
+-- face the other way, see ZJCreatureInfo_Private_IconFrame()).
 --   0 = sword (slashing), 1 = mace (crushing), 2 = spear (piercing), 3 = bow (missile), 4 = slingshot (sling ammunition), 5 = fist
 -- The file also has: 6 = spell, 7 = item
 ZJCreatureInfo_Private_DamageTypeIcons = {
@@ -1560,7 +1578,7 @@ function ZJCreatureInfo_Private_Layout(selectedSprites, targetSprite, compact)
 	local handIconGapW = 3
 
 	-- Extra fields in each list entry: what is behind the damage of each hand, (see ZJCreatureInfo_Private_GetHandDisplay()),
-	-- with `variant` added: the color of the damage type icons, 0 = green, 1 = red, 2 = dimmed red, 3 = dimmed green
+	-- with `reverse`, (the target's attacks, else attacks on the target), and `dim` added: how the damage type icons look
 	local handDisplayEntryIndexes = { [mainHandColumnIndex] = 8, [offHandColumnIndex] = 9 }
 
 	local panels = ZJCreatureInfo_Private_Menu_Panels
@@ -1873,7 +1891,8 @@ function ZJCreatureInfo_Private_Layout(selectedSprites, targetSprite, compact)
 		-- Stores the icons and extra damage of a hand in a list entry. `dim` => greyed out, like the row's text
 		local setHandDisplay = function(entry, columnIndex, handDisplay, dim)
 			if handDisplay == nil then return end
-			handDisplay.variant = reverse and (dim and 3 or 0) or (dim and 2 or 1)
+			handDisplay.reverse = reverse
+			handDisplay.dim = dim
 			if dim and handDisplay.extraText ~= "" then
 				handDisplay.extraText = dimColorStr..handDisplay.extraText
 			end
@@ -2273,13 +2292,17 @@ function ZJCreatureInfo_Private_Layout(selectedSprites, targetSprite, compact)
 		nameColumnTextItem.area.y = 0
 		nameColumnTextItem.area.h = textRowHeight
 
-		-- Only the left list has an icon in front of the names
+		-- Only the left list has an icon in front of the names, (one label per color and the highlights, see
+		-- ZJCreatureInfo_Private_IconFrame())
 		if panelIndex == 1 then
-			local nameColumnIconItem = nameColumnTextItem.next
-			nameColumnIconItem.area.x = 0
-			nameColumnIconItem.area.y = 0
-			nameColumnIconItem.area.w = attackIconSize
-			nameColumnIconItem.area.h = attackIconSize
+			local nameColumnIconItem = nameColumnTextItem
+			for _ = 1, ZJCreatureInfo_Private_IconLabelCount do
+				nameColumnIconItem = nameColumnIconItem.next
+				nameColumnIconItem.area.x = 0
+				nameColumnIconItem.area.y = 0
+				nameColumnIconItem.area.w = attackIconSize
+				nameColumnIconItem.area.h = attackIconSize
+			end
 		end
 
 		local divider1Item = columnUDs[divider1ColumnIndex].items
@@ -2310,12 +2333,15 @@ function ZJCreatureInfo_Private_Layout(selectedSprites, targetSprite, compact)
 
 			local item = damageItem
 
+			-- One label per color and the highlights for every slot, (see ZJCreatureInfo_Private_IconFrame())
 			for slot = 1, ZJCreatureInfo_Private_MaxHandIcons do
-				item = item.next
-				item.area.x = offsets.typeIcons + (slot - 1) * handIconSize
-				item.area.y = iconY
-				item.area.w = handIconSize
-				item.area.h = handIconSize
+				for _ = 1, ZJCreatureInfo_Private_IconLabelCount do
+					item = item.next
+					item.area.x = offsets.typeIcons + (slot - 1) * handIconSize
+					item.area.y = iconY
+					item.area.w = handIconSize
+					item.area.h = handIconSize
+				end
 			end
 
 			item = item.next
@@ -2486,7 +2512,11 @@ function ZJCreatureInfo_Private_Layout(selectedSprites, targetSprite, compact)
 					Infinity_SetArea(itemPrefix.."Text", panelX + hand.textX, line2Y, hand.textW, maxHeaderLabelH)
 					Infinity_SetArea(itemPrefix.."Extra", panelX + hand.extraX, line2Y, hand.extraW, maxHeaderLabelH)
 					for slot = 1, ZJCreatureInfo_Private_MaxHandIcons do
-						Infinity_SetArea(itemPrefix.."Icon"..slot, panelX + hand.iconsX + (slot - 1) * handIconSize, iconY, handIconSize, handIconSize)
+						-- One label per color and the highlights, (see ZJCreatureInfo_Private_IconFrame())
+						for color = 1, #ZJBarColors_Colors + 1 do
+							local suffix = color <= #ZJBarColors_Colors and color or "H"
+							Infinity_SetArea(itemPrefix.."Icon"..slot.."_"..suffix, panelX + hand.iconsX + (slot - 1) * handIconSize, iconY, handIconSize, handIconSize)
+						end
 						Infinity_SetArea(itemPrefix.."ExtraIcon"..slot, panelX + hand.extraIconsX + (slot - 1) * handIconSize, iconY, handIconSize, handIconSize)
 					end
 				end
@@ -2801,12 +2831,33 @@ for rowBarSet = 1, ZJCreatureInfo_Private_MaxRowBars do
 	ZJCreatureInfo_Private_Menu_RowBars[rowBarSet] = rowBarState
 end
 
+-- The weapon / spell / item icons are plain white shapes in ZJCREDMG.BAM. ZJCreInf.menu has every icon label once per
+-- color, (the bar colors, ZJBarCol.lua), each tinted with its color, and only the one of the icon's color option is
+-- enabled. After them comes one more label with the icon's shading and highlights, (ZJCREDMH.BAM: partly see-through
+-- greys, not tinted).
+ZJCreatureInfo_Private_IconLabelCount = #ZJBarColors_Colors + 1
+
+-- The frame in ZJCREDMG.BAM of `icon`: the target's attacks, (`reverse`), face one way, attacks on the target the other
+function ZJCreatureInfo_Private_IconFrame(icon, reverse)
+	return icon * 2 + (reverse and 0 or 1)
+end
+
+-- The color option value of an icon of the target's attacks, (`reverse`), or of an attack on the target
+function ZJCreatureInfo_Private_IconColor(reverse)
+	return (reverse and ZJCreatureInfo_Private_TargetAttackIconColor or ZJCreatureInfo_Private_AttackIconColor):get()
+end
+
+-- The color of the target's attacks, for the icons in the right panel's header
+function ZJCreatureInfo_Private_Menu_TargetAttackIconColor()
+	return ZJCreatureInfo_Private_IconColor(true)
+end
+
 -- The frame in ZJCREDMG.BAM of the icon in front of a name in the left list, nil if the row has none
 function ZJCreatureInfo_Private_Menu_InfoList_RowIcon(infoListTable, rowNumber)
 	local entry = infoListTable[rowNumber]
 	local icon = entry and entry[4]
 	if not icon then return nil end
-	return icon * 4 -- The green variant
+	return ZJCreatureInfo_Private_IconFrame(icon, true) -- What the target does to the creature on the row
 end
 
 -- The frame in ZJCREDMG.BAM of an icon in front of the roll of a hand, nil if that slot isn't used
@@ -2815,7 +2866,22 @@ function ZJCreatureInfo_Private_Menu_InfoList_TypeIcon(infoListTable, rowNumber,
 	local handDisplay = entry and entry[handEntryIndex]
 	local icon = handDisplay and handDisplay.typeIcons[slot]
 	if icon == nil then return nil end
-	return icon * 4 + handDisplay.variant
+	return ZJCreatureInfo_Private_IconFrame(icon, handDisplay.reverse)
+end
+
+-- The color option value of the icons in front of the roll of a hand, (nil if the row has none)
+function ZJCreatureInfo_Private_Menu_InfoList_TypeIconColor(infoListTable, rowNumber, handEntryIndex)
+	local entry = infoListTable[rowNumber]
+	local handDisplay = entry and entry[handEntryIndex]
+	if handDisplay == nil then return nil end
+	return ZJCreatureInfo_Private_IconColor(handDisplay.reverse)
+end
+
+-- The opacity of the icons in front of the roll of a hand: half on a greyed out row, so they look dimmed
+function ZJCreatureInfo_Private_Menu_InfoList_TypeIconOpacity(infoListTable, rowNumber, handEntryIndex)
+	local entry = infoListTable[rowNumber]
+	local handDisplay = entry and entry[handEntryIndex]
+	return (handDisplay and handDisplay.dim) and 128 or 255
 end
 
 -- The extra damage behind the damage of a hand

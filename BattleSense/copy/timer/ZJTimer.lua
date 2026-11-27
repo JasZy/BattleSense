@@ -42,6 +42,10 @@ ZJTimer_Private_ShowResistRings = EEex_Options_Register("ZJTimer_ShowResistRings
 	["storage"]  = EEex_Options_NumberLuaStorage.new({ ["section"] = "Battle Sense", ["key"] = "Timer Module: Show Resist Rings" }),
 }))
 
+-- The colors of a resistance ring, (one of the bar colors): the resisted part, and the rest
+ZJTimer_Private_ResistedColor   = ZJBarColors_RegisterColorOption("ZJTimer_ResistedColor",   "Timer Module: Resisted Color",   4) -- Green
+ZJTimer_Private_UnresistedColor = ZJBarColors_RegisterColorOption("ZJTimer_UnresistedColor", "Timer Module: Unresisted Color", 1) -- Red
+
 EEex_Options_AddTab("ZJBattleSense_Options_TRANSLATION_Timer_TabTitle", function() return {
 	{
 		EEex_Options_DisplayEntry.new({
@@ -79,6 +83,18 @@ EEex_Options_AddTab("ZJBattleSense_Options_TRANSLATION_Timer_TabTitle", function
 			["label"]       = "ZJBattleSense_Options_TRANSLATION_Timer_ShowResistRings",
 			["description"] = "ZJBattleSense_Options_TRANSLATION_Timer_ShowResistRings_Description",
 			["widget"]      = EEex_Options_ToggleWidget.new(),
+		}),
+		EEex_Options_DisplayEntry.new({
+			["optionID"]    = "ZJTimer_ResistedColor",
+			["label"]       = "ZJBattleSense_Options_TRANSLATION_Timer_ResistedColor",
+			["description"] = "ZJBattleSense_Options_TRANSLATION_Timer_ResistedColor_Description",
+			["widget"]      = ZJBarColors_ColorWidget.new(),
+		}),
+		EEex_Options_DisplayEntry.new({
+			["optionID"]    = "ZJTimer_UnresistedColor",
+			["label"]       = "ZJBattleSense_Options_TRANSLATION_Timer_UnresistedColor",
+			["description"] = "ZJBattleSense_Options_TRANSLATION_Timer_UnresistedColor_Description",
+			["widget"]      = ZJBarColors_ColorWidget.new(),
 		}),
 	},
 } end)
@@ -119,16 +135,62 @@ end
 
 ZJTimer_Private_TemplateInstancesByPortrait = {}
 
+-- Gives `entry` the portrait it belongs to, and lists it under `name` for that portrait
+function ZJTimer_Private_AddToPortrait(entry, name, portraitItem)
+	entry.portraitItem = portraitItem
+	entry.portraitEnabledFunc = EEex_Menu_GetItemFunction(portraitItem.reference_enabled)
+	entry.portraitIndex = EEex_Menu_GetItemVariant(portraitItem.button.portrait)
+	entry.enabled = false
+	local portraitEntry = EEex_Utility_GetOrCreate(ZJTimer_Private_TemplateInstancesByPortrait, entry.portraitIndex, {})
+	local entries = EEex_Utility_GetOrCreate(portraitEntry, name, {})
+	table.insert(entries, entry)
+end
+
 function ZJTimer_Private_CreateInstanceForPortrait(menuName, templateName, x, y, w, h, portraitItem)
 	local instanceEntry = ZJTimer_Private_CreateInstance(menuName, templateName, x, y, w, h)
-	instanceEntry.portraitItem = portraitItem
-	instanceEntry.portraitEnabledFunc = EEex_Menu_GetItemFunction(portraitItem.reference_enabled)
-	instanceEntry.portraitIndex = EEex_Menu_GetItemVariant(portraitItem.button.portrait)
-	instanceEntry.enabled = false
-	local portraitEntry = EEex_Utility_GetOrCreate(ZJTimer_Private_TemplateInstancesByPortrait, instanceEntry.portraitIndex, {})
-	local instanceEntries = EEex_Utility_GetOrCreate(portraitEntry, templateName, {})
-	table.insert(instanceEntries, instanceEntry)
+	ZJTimer_Private_AddToPortrait(instanceEntry, templateName, portraitItem)
 	return instanceEntry
+end
+
+-- One instance per color of the templates `baseName`..1 - 8, (one per bar color, see ZJTimer.menu), each enabled when
+-- the ring they show is shown in that color: returns { [color] = instance entry }
+function ZJTimer_Private_CreateColorInstances(menuName, baseName, w, h)
+	local colorEntries = {}
+	for color = 1, #ZJBarColors_Colors do
+		local instanceEntry = ZJTimer_Private_CreateInstance(menuName, baseName..color, nil, nil, w, h)
+		instanceEntry.enabled = false
+		colorEntries[color] = instanceEntry
+	end
+	return colorEntries
+end
+
+-- Finds the menu item of every instance, so ZJTimer_Private_SetInstanceArea() doesn't have to look for it
+function ZJTimer_Private_FindInstanceItems(menuName)
+	local menuEntry = ZJTimer_Private_TemplateInstances[menuName]
+	local menu = EEex_Menu_Find(menuName)
+	if menuEntry == nil or menu == nil then return end
+	local item = menu.items
+	while item do
+		local templateEntry = menuEntry[item.templateName:get()]
+		local instanceEntry = templateEntry and templateEntry.instanceData[item.instanceId]
+		if instanceEntry then
+			instanceEntry.lightItem = EEex_UDToLightUD(item)
+		end
+		item = item.next
+	end
+end
+
+-- Moves an instance of `templateName`, only when it has to: EEex_Menu_SetTemplateArea() walks the whole menu, and
+-- with a template per color the menu has hundreds of instances. `w` / `h` nil keep the instance's own.
+function ZJTimer_Private_SetInstanceArea(templateName, instanceEntry, x, y, w, h)
+	if instanceEntry.x == x and instanceEntry.y == y and instanceEntry.w == w and instanceEntry.h == h then return end
+	instanceEntry.x, instanceEntry.y, instanceEntry.w, instanceEntry.h = x, y, w, h
+	if instanceEntry.lightItem then
+		nameToItem["ZJTimer_Private_StoredInstance"] = instanceEntry.lightItem
+		Infinity_SetArea("ZJTimer_Private_StoredInstance", x, y, w, h)
+	else
+		EEex_Menu_SetTemplateArea(ZJTimer_Private_InjectingMenu, templateName, instanceEntry.id, x, y, w, h)
+	end
 end
 
 ---------------
@@ -146,18 +208,22 @@ EEex_Menu_AddMainFileLoadedListener(function()
 			local area = item.area
 			local backgroundEntry = ZJTimer_Private_CreateInstanceForPortrait(ZJTimer_Private_InjectingMenu, "ZJTimer_Menu_TEMPLATE_Background", nil, nil, 10, nil, item)
 
-			-- One resistance ring per resistance, each with a fixed slot beside the portrait
+			-- One resistance ring per resistance, each with a fixed slot beside the portrait: the element's icon, and the
+			-- ring around it in the "not resisted" color with the resisted part on top, (injected in that order, so
+			-- they are drawn in that order)
+			local size = ZJTimer_Private_ResistRingSize
 			backgroundEntry.resistRings = {}
 			for i = 1, #ZJTimer_Private_ResistRingStats do
-				local ringEntry = ZJTimer_Private_CreateInstance(ZJTimer_Private_InjectingMenu, "ZJTimer_Menu_TEMPLATE_ResistRing", nil, nil, ZJTimer_Private_ResistRingSize, ZJTimer_Private_ResistRingSize)
+				local ringEntry = ZJTimer_Private_CreateInstance(ZJTimer_Private_InjectingMenu, "ZJTimer_Menu_TEMPLATE_ResistIcon", nil, nil, size, size)
 				ringEntry.enabled = false
-				ringEntry.sequence = i - 1
-				ringEntry.frame = 0
+				ringEntry.frame = i - 1 -- The element's icon in ZJCREELM.BAM
+				ringEntry.unresisted = ZJTimer_Private_CreateColorInstances(ZJTimer_Private_InjectingMenu, "ZJTimer_Menu_TEMPLATE_ResistUnresisted", size, size)
+				ringEntry.resisted = ZJTimer_Private_CreateColorInstances(ZJTimer_Private_InjectingMenu, "ZJTimer_Menu_TEMPLATE_ResistResisted", size, size)
 				backgroundEntry.resistRings[i] = ringEntry
 			end
 
-			ZJTimer_Private_CreateInstanceForPortrait(ZJTimer_Private_InjectingMenu, "ZJTimer_Menu_TEMPLATE_TimerModal",       nil, nil, 2,  nil, item)
-			ZJTimer_Private_CreateInstanceForPortrait(ZJTimer_Private_InjectingMenu, "ZJTimer_Menu_TEMPLATE_TimerContingency", nil, nil, 2,  nil, item)
+			ZJTimer_Private_CreateInstanceForPortrait(ZJTimer_Private_InjectingMenu, "ZJTimer_Menu_TEMPLATE_TimerModal",       nil, nil, 2, nil, item)
+			ZJTimer_Private_CreateInstanceForPortrait(ZJTimer_Private_InjectingMenu, "ZJTimer_Menu_TEMPLATE_TimerContingency", nil, nil, 2, nil, item)
 
 			-- Markers are injected after their bar so that they render on top of it
 			local castEntry = ZJTimer_Private_CreateInstanceForPortrait(ZJTimer_Private_InjectingMenu, "ZJTimer_Menu_TEMPLATE_TimerCast", nil, nil, 2, nil, item)
@@ -175,6 +241,7 @@ EEex_Menu_AddMainFileLoadedListener(function()
 		end
 		item = item.next
 	end
+	ZJTimer_Private_FindInstanceItems(ZJTimer_Private_InjectingMenu)
 end)
 
 function ZJTimer_Private_PushMenuListener()
@@ -205,14 +272,7 @@ function ZJTimer_Private_PlaceMarker(templateName, markerEntry, barEntry, value,
 	local y = barY + barH - math.floor(barH * value / maxValue + 0.5) - math.floor(markerH / 2)
 	y = math.max(barY, math.min(y, barY + barH - markerH))
 
-	-- EEex_Menu_SetTemplateArea() walks the whole menu, only call it when the marker has to move
-	if markerEntry.x ~= barX or markerEntry.y ~= y or markerEntry.w ~= barW then
-		markerEntry.x = barX
-		markerEntry.y = y
-		markerEntry.w = barW
-		EEex_Menu_SetTemplateArea(ZJTimer_Private_InjectingMenu, templateName, markerEntry.id, barX, y, barW, markerH)
-	end
-
+	ZJTimer_Private_SetInstanceArea(templateName, markerEntry, barX, y, barW, markerH)
 	markerEntry.enabled = true
 end
 
@@ -304,20 +364,30 @@ end
 -- Resistance Rings --
 ----------------------
 
--- Derived stats field read for each ring, the index - 1 is the ring's sequence in ZJTRESIS.BAM
+-- Derived stats field read for each ring, the index - 1 is the frame of the element's icon in ZJCREELM.BAM
 ZJTimer_Private_ResistRingStats = { "m_nResistFire", "m_nResistCold", "m_nResistElectricity", "m_nResistAcid", "m_nResistMagic" }
 ZJTimer_Private_ResistRingSize = 13 -- Same as the portrait icons in STATES.BAM, which the rings are made from
 ZJTimer_Private_ResistRingGap = 2
-ZJTimer_Private_ResistRingMaxFrame = 60 -- ZJTRESIS.BAM frame N has N/60 of the ring green, clockwise from the top
+ZJTimer_Private_ResistRingMaxFrame = 60 -- ZJTRRING.BAM frame N has N/60 of the ring, clockwise from the top
 
-function ZJTimer_Private_DisableResistRings(backgroundEntry)
-	for _, ringEntry in ipairs(backgroundEntry.resistRings) do
-		ringEntry.enabled = false
+-- Hides a ring, (its icon and every color of it)
+function ZJTimer_Private_DisableResistRing(ringEntry)
+	ringEntry.enabled = false
+	for color = 1, #ZJBarColors_Colors do
+		ringEntry.unresisted[color].enabled = false
+		ringEntry.resisted[color].enabled = false
 	end
 end
 
--- Shows a ring for every resistance, (the elements and magic), the sprite has. The ring is fully green at 100% or more
--- and isn't shown at 0% or less. `stripLeftX` is the left edge of the timer bars beside the portrait.
+function ZJTimer_Private_DisableResistRings(backgroundEntry)
+	for _, ringEntry in ipairs(backgroundEntry.resistRings) do
+		ZJTimer_Private_DisableResistRing(ringEntry)
+	end
+end
+
+-- Shows a ring for every resistance, (the elements and magic), the sprite has. The ring is fully in the "resisted"
+-- color at 100% or more and isn't shown at 0% or less. `stripLeftX` is the left edge of the timer bars beside the
+-- portrait.
 function ZJTimer_Private_UpdateResistRings(sprite, backgroundEntry, stripLeftX)
 
 	local portraitEnabledFunc = backgroundEntry.portraitEnabledFunc
@@ -332,31 +402,43 @@ function ZJTimer_Private_UpdateResistRings(sprite, backgroundEntry, stripLeftX)
 	local x = stripLeftX - 1 - size
 	local portraitY = backgroundEntry.portraitItem.area.y
 
+	local resistedColor = ZJTimer_Private_ResistedColor:get()
+	local unresistedColor = ZJTimer_Private_UnresistedColor:get()
+
 	for i, ringEntry in ipairs(backgroundEntry.resistRings) do
 
 		local percentage = stats[ZJTimer_Private_ResistRingStats[i]]
 
 		if percentage > 0 then
 
-			if percentage >= 100 then
-				ringEntry.frame = maxFrame
-			else
-				-- A partial resistance never rounds to a completely red or completely green ring
-				ringEntry.frame = math.max(1, math.min(math.floor(maxFrame * percentage / 100 + 0.5), maxFrame - 1))
+			local frame = maxFrame
+			if percentage < 100 then
+				-- A partial resistance never rounds to a completely unresisted or completely resisted ring
+				frame = math.max(1, math.min(math.floor(maxFrame * percentage / 100 + 0.5), maxFrame - 1))
 			end
 
 			local y = portraitY + (i - 1) * (size + ZJTimer_Private_ResistRingGap)
-
-			-- EEex_Menu_SetTemplateArea() walks the whole menu, only call it when the ring has to move
-			if ringEntry.x ~= x or ringEntry.y ~= y then
-				ringEntry.x = x
-				ringEntry.y = y
-				EEex_Menu_SetTemplateArea(ZJTimer_Private_InjectingMenu, "ZJTimer_Menu_TEMPLATE_ResistRing", ringEntry.id, x, y, size, size)
-			end
-
+			ZJTimer_Private_SetInstanceArea("ZJTimer_Menu_TEMPLATE_ResistIcon", ringEntry, x, y, size, size)
 			ringEntry.enabled = true
+
+			-- The whole ring in the "not resisted" color, (not needed when the resisted part covers it), and the
+			-- resisted part on top of it
+			for color = 1, #ZJBarColors_Colors do
+				local unresistedEntry = ringEntry.unresisted[color]
+				unresistedEntry.enabled = color == unresistedColor and frame < maxFrame
+				if unresistedEntry.enabled then
+					ZJTimer_Private_SetInstanceArea("ZJTimer_Menu_TEMPLATE_ResistUnresisted"..color, unresistedEntry, x, y, size, size)
+				end
+
+				local resistedEntry = ringEntry.resisted[color]
+				resistedEntry.enabled = color == resistedColor
+				if resistedEntry.enabled then
+					resistedEntry.frame = frame
+					ZJTimer_Private_SetInstanceArea("ZJTimer_Menu_TEMPLATE_ResistResisted"..color, resistedEntry, x, y, size, size)
+				end
+			end
 		else
-			ringEntry.enabled = false
+			ZJTimer_Private_DisableResistRing(ringEntry)
 		end
 	end
 end
@@ -398,11 +480,13 @@ function ZJTimer_Private_Menu_Tick()
 			local portraitInstanceStartX = {}
 			local portraitInstanceCurX = {}
 
-			local updateTimerBar = function(templateName, condition)
+			-- A bar is a fill in its color, (ZJTimer.menu), from the bottom of the portrait up to how full it is:
+			-- `getPercentage(sprite)`, 0 - 1
+			local updateTimerBar = function(templateName, condition, getPercentage)
 
-				for i, instanceEntry in ipairs(portraitEntry[templateName]) do
+				for i, bar in ipairs(portraitEntry[templateName]) do
 
-					local portraitArea = instanceEntry.portraitItem.area
+					local portraitArea = bar.portraitItem.area
 
 					local curX = portraitInstanceCurX[i]
 					if not curX then
@@ -418,7 +502,7 @@ function ZJTimer_Private_Menu_Tick()
 						portraitInstanceCurX[i] = curX
 					end
 
-					local portraitEnabledFunc = instanceEntry.portraitEnabledFunc
+					local portraitEnabledFunc = bar.portraitEnabledFunc
 					if (not portraitEnabledFunc or portraitEnabledFunc()) and condition then
 
 						--Infinity UI++ modern hud compatibility
@@ -429,21 +513,22 @@ function ZJTimer_Private_Menu_Tick()
 							rgWidth = 1
 						end
 
-						instanceEntry.enabled = true
-						instanceEntry.barX = curX
-						instanceEntry.barW = rgWidth
+						bar.enabled = true
+						bar.barX = curX
+						bar.barW = rgWidth
 						portraitInstanceCurX[i] = curX - rgDif
-						EEex_Menu_SetTemplateArea(ZJTimer_Private_InjectingMenu, templateName, instanceEntry.id, curX, portraitArea.y, rgWidth, portraitArea.h)
+						local fillH = math.floor(portraitArea.h * math.max(0, math.min(getPercentage(sprite), 1)) + 0.5)
+						ZJTimer_Private_SetInstanceArea(templateName, bar, curX, portraitArea.y + portraitArea.h - fillH, rgWidth, fillH)
 					else
-						instanceEntry.enabled = false
+						bar.enabled = false
 					end
 				end
 			end
 
-			updateTimerBar( "ZJTimer_Menu_TEMPLATE_TimerCast",        ZJBarColors_IsShown("Cast")        and sprite:getCastTimerPercentage() > 0                     )
-			updateTimerBar( "ZJTimer_Menu_TEMPLATE_TimerContingency", ZJBarColors_IsShown("Contingency") and sprite:getActiveStats().m_cContingencyList.m_nCount > 0 )
-			updateTimerBar( "ZJTimer_Menu_TEMPLATE_TimerModal",       ZJBarColors_IsShown("Modal")       and sprite:getModalState() ~= 0                             )
-			updateTimerBar( "ZJTimer_Menu_TEMPLATE_TimerAttack",      ZJBarColors_IsShown("Attack")      and sprite:zjIsAttacking()                                  )
+			updateTimerBar( "ZJTimer_Menu_TEMPLATE_TimerCast",        ZJBarColors_IsShown("Cast")        and sprite:getCastTimerPercentage() > 0,                     EEex_Sprite_GetCastTimerPercentage        )
+			updateTimerBar( "ZJTimer_Menu_TEMPLATE_TimerContingency", ZJBarColors_IsShown("Contingency") and sprite:getActiveStats().m_cContingencyList.m_nCount > 0, EEex_Sprite_GetContingencyTimerPercentage )
+			updateTimerBar( "ZJTimer_Menu_TEMPLATE_TimerModal",       ZJBarColors_IsShown("Modal")       and sprite:getModalState() ~= 0,                             EEex_Sprite_GetModalTimerPercentage       )
+			updateTimerBar( "ZJTimer_Menu_TEMPLATE_TimerAttack",      ZJBarColors_IsShown("Attack")      and sprite:zjIsAttacking(),                                  ZJSprite_GetAttackTimerPercentage         )
 
 			for _, castEntry in ipairs(portraitEntry["ZJTimer_Menu_TEMPLATE_TimerCast"]) do
 				ZJTimer_Private_UpdateCastMarker(sprite, castEntry)
@@ -466,7 +551,7 @@ function ZJTimer_Private_Menu_Tick()
 						rgDif = 0
 					end
 
-					EEex_Menu_SetTemplateArea(ZJTimer_Private_InjectingMenu, "ZJTimer_Menu_TEMPLATE_Background", backgroundEntry.id, curX + 2, portraitArea.y, startX - curX + rgDif, portraitArea.h)
+					ZJTimer_Private_SetInstanceArea("ZJTimer_Menu_TEMPLATE_Background", backgroundEntry, curX + 2, portraitArea.y, startX - curX + rgDif, portraitArea.h)
 				else
 					backgroundEntry.enabled = false
 				end
@@ -475,16 +560,18 @@ function ZJTimer_Private_Menu_Tick()
 				ZJTimer_Private_UpdateResistRings(sprite, backgroundEntry, curX + 2)
 			end
 		else
+			for _, backgroundEntry in ipairs(portraitEntry["ZJTimer_Menu_TEMPLATE_Background"]) do
+				backgroundEntry.enabled = false
+			end
 			for _, templateName in ipairs({
-				"ZJTimer_Menu_TEMPLATE_Background",
 				"ZJTimer_Menu_TEMPLATE_TimerModal",
 				"ZJTimer_Menu_TEMPLATE_TimerContingency",
 				"ZJTimer_Menu_TEMPLATE_TimerCast",
 				"ZJTimer_Menu_TEMPLATE_TimerAttack"
 			})
 			do
-				for _, instanceEntry in ipairs(portraitEntry[templateName]) do
-					instanceEntry.enabled = false
+				for _, bar in ipairs(portraitEntry[templateName]) do
+					bar.enabled = false
 				end
 			end
 			for _, castEntry in ipairs(portraitEntry["ZJTimer_Menu_TEMPLATE_TimerCast"]) do
@@ -500,60 +587,26 @@ function ZJTimer_Private_Menu_Tick()
 	end
 end
 
-function ZJTimer_Private_Menu_TEMPLATE_ResistRing_Enabled()
-	return ZJTimer_Private_Enabled and ZJTimer_Private_TemplateInstances[ZJTimer_Private_InjectingMenu]["ZJTimer_Menu_TEMPLATE_ResistRing"].instanceData[instanceId].enabled
+-- The instance of `templateName` that is being drawn, (the engine sets `instanceId`)
+function ZJTimer_Private_Menu_TEMPLATE_Instance(templateName)
+	return ZJTimer_Private_TemplateInstances[ZJTimer_Private_InjectingMenu][templateName].instanceData[instanceId]
 end
 
-function ZJTimer_Private_Menu_TEMPLATE_ResistRing_Sequence()
-	return ZJTimer_Private_TemplateInstances[ZJTimer_Private_InjectingMenu]["ZJTimer_Menu_TEMPLATE_ResistRing"].instanceData[instanceId].sequence
+-- For the bars, and the ring's icon and its templates per color
+function ZJTimer_Private_Menu_TEMPLATE_Enabled(templateName)
+	return ZJTimer_Private_Enabled and ZJTimer_Private_Menu_TEMPLATE_Instance(templateName).enabled
 end
 
-function ZJTimer_Private_Menu_TEMPLATE_ResistRing_Frame()
-	return ZJTimer_Private_TemplateInstances[ZJTimer_Private_InjectingMenu]["ZJTimer_Menu_TEMPLATE_ResistRing"].instanceData[instanceId].frame
+function ZJTimer_Private_Menu_TEMPLATE_Frame(templateName)
+	return ZJTimer_Private_Menu_TEMPLATE_Instance(templateName).frame
 end
 
 function ZJTimer_Private_Menu_TEMPLATE_Background_Enabled()
-	return ZJTimer_Private_Enabled and ZJTimer_Private_TemplateInstances[ZJTimer_Private_InjectingMenu]["ZJTimer_Menu_TEMPLATE_Background"].instanceData[instanceId].enabled
-end
-
-function ZJTimer_Private_Menu_TEMPLATE_TimerModal_Enabled()
-	return ZJTimer_Private_Enabled and ZJTimer_Private_TemplateInstances[ZJTimer_Private_InjectingMenu]["ZJTimer_Menu_TEMPLATE_TimerModal"].instanceData[instanceId].enabled
-end
-
-function ZJTimer_Private_Menu_TEMPLATE_TimerModal_Frame()
-	local portraitIndex = ZJTimer_Private_TemplateInstances[ZJTimer_Private_InjectingMenu]["ZJTimer_Menu_TEMPLATE_TimerModal"].instanceData[instanceId].portraitIndex
-	return math.floor(90 * EEex_Sprite_GetModalTimerPercentage(EEex_Sprite_GetInPortrait(portraitIndex)) + 0.5)
-end
-
-function ZJTimer_Private_Menu_TEMPLATE_TimerContingency_Enabled()
-	return ZJTimer_Private_Enabled and ZJTimer_Private_TemplateInstances[ZJTimer_Private_InjectingMenu]["ZJTimer_Menu_TEMPLATE_TimerContingency"].instanceData[instanceId].enabled
-end
-
-function ZJTimer_Private_Menu_TEMPLATE_TimerContingency_Frame()
-	local portraitIndex = ZJTimer_Private_TemplateInstances[ZJTimer_Private_InjectingMenu]["ZJTimer_Menu_TEMPLATE_TimerContingency"].instanceData[instanceId].portraitIndex
-	return math.floor(90 * EEex_Sprite_GetContingencyTimerPercentage(EEex_Sprite_GetInPortrait(portraitIndex)) + 0.5)
-end
-
-function ZJTimer_Private_Menu_TEMPLATE_TimerCast_Enabled()
-	return ZJTimer_Private_Enabled and ZJTimer_Private_TemplateInstances[ZJTimer_Private_InjectingMenu]["ZJTimer_Menu_TEMPLATE_TimerCast"].instanceData[instanceId].enabled
-end
-
-function ZJTimer_Private_Menu_TEMPLATE_TimerCast_Frame()
-	local portraitIndex = ZJTimer_Private_TemplateInstances[ZJTimer_Private_InjectingMenu]["ZJTimer_Menu_TEMPLATE_TimerCast"].instanceData[instanceId].portraitIndex
-	return math.floor(90 * EEex_Sprite_GetCastTimerPercentage(EEex_Sprite_GetInPortrait(portraitIndex)) + 0.5)
+	return ZJTimer_Private_Enabled and ZJTimer_Private_Menu_TEMPLATE_Instance("ZJTimer_Menu_TEMPLATE_Background").enabled
 end
 
 function ZJTimer_Private_Menu_TEMPLATE_CastMarker_Enabled()
-	return ZJTimer_Private_Enabled and ZJTimer_Private_TemplateInstances[ZJTimer_Private_InjectingMenu]["ZJTimer_Menu_TEMPLATE_CastMarker"].instanceData[instanceId].enabled
-end
-
-function ZJTimer_Private_Menu_TEMPLATE_TimerAttack_Enabled()
-	return ZJTimer_Private_Enabled and ZJTimer_Private_TemplateInstances[ZJTimer_Private_InjectingMenu]["ZJTimer_Menu_TEMPLATE_TimerAttack"].instanceData[instanceId].enabled
-end
-
-function ZJTimer_Private_Menu_TEMPLATE_TimerAttack_Frame()
-	local portraitIndex = ZJTimer_Private_TemplateInstances[ZJTimer_Private_InjectingMenu]["ZJTimer_Menu_TEMPLATE_TimerAttack"].instanceData[instanceId].portraitIndex
-	return math.floor(90 * ZJSprite_GetAttackTimerPercentage(EEex_Sprite_GetInPortrait(portraitIndex)) + 0.5)
+	return ZJTimer_Private_Enabled and ZJTimer_Private_Menu_TEMPLATE_Instance("ZJTimer_Menu_TEMPLATE_CastMarker").enabled
 end
 
 function ZJTimer_Private_Menu_TEMPLATE_AttackMarker_Enabled()

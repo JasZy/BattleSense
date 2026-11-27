@@ -1,4 +1,3 @@
-
 menu
 {
 	name "ZJTimer_Menu"
@@ -23,15 +22,14 @@ menu
 		name "ZJTimer_Menu_TEMPLATE_Background"
 	}
 
+	-- The bars, a fill in the color of the bar's option, (area set in ZJTimer.lua: its height is how full it is)
+
 	template
 	{
 		label
 		{
-			enabled "ZJTimer_Private_Menu_TEMPLATE_TimerModal_Enabled()"
-			bam "ZJTBAR"
-			scaleToClip
-			sequence lua "ZJBarColors_Sequence('Modal')"
-			frame lua "ZJTimer_Private_Menu_TEMPLATE_TimerModal_Frame()"
+			enabled "ZJTimer_Private_Menu_TEMPLATE_Enabled('ZJTimer_Menu_TEMPLATE_TimerModal')"
+			fill lua "ZJBarColors_Fill('Modal')"
 		}
 		name "ZJTimer_Menu_TEMPLATE_TimerModal"
 	}
@@ -40,11 +38,8 @@ menu
 	{
 		label
 		{
-			enabled "ZJTimer_Private_Menu_TEMPLATE_TimerContingency_Enabled()"
-			bam "ZJTBAR"
-			scaleToClip
-			sequence lua "ZJBarColors_Sequence('Contingency')"
-			frame lua "ZJTimer_Private_Menu_TEMPLATE_TimerContingency_Frame()"
+			enabled "ZJTimer_Private_Menu_TEMPLATE_Enabled('ZJTimer_Menu_TEMPLATE_TimerContingency')"
+			fill lua "ZJBarColors_Fill('Contingency')"
 		}
 		name "ZJTimer_Menu_TEMPLATE_TimerContingency"
 	}
@@ -53,11 +48,8 @@ menu
 	{
 		label
 		{
-			enabled "ZJTimer_Private_Menu_TEMPLATE_TimerCast_Enabled()"
-			bam "ZJTBAR"
-			scaleToClip
-			sequence lua "ZJBarColors_Sequence('Cast')"
-			frame lua "ZJTimer_Private_Menu_TEMPLATE_TimerCast_Frame()"
+			enabled "ZJTimer_Private_Menu_TEMPLATE_Enabled('ZJTimer_Menu_TEMPLATE_TimerCast')"
+			fill lua "ZJBarColors_Fill('Cast')"
 		}
 		name "ZJTimer_Menu_TEMPLATE_TimerCast"
 	}
@@ -77,11 +69,8 @@ menu
 	{
 		label
 		{
-			enabled "ZJTimer_Private_Menu_TEMPLATE_TimerAttack_Enabled()"
-			bam "ZJTBAR"
-			scaleToClip
-			sequence lua "ZJBarColors_Sequence('Attack')"
-			frame lua "ZJTimer_Private_Menu_TEMPLATE_TimerAttack_Frame()"
+			enabled "ZJTimer_Private_Menu_TEMPLATE_Enabled('ZJTimer_Menu_TEMPLATE_TimerAttack')"
+			fill lua "ZJBarColors_Fill('Attack')"
 		}
 		name "ZJTimer_Menu_TEMPLATE_TimerAttack"
 	}
@@ -97,16 +86,242 @@ menu
 		name "ZJTimer_Menu_TEMPLATE_AttackMarker"
 	}
 
+	-- A resistance ring: the element's icon, (ZJCREELM.BAM, shared with Creature Info), with the white ring of ZJTRRING.BAM
+	-- around it twice: the whole ring in the "not resisted" color, and the resisted part on top in the "resisted"
+	-- color. Like the bars, each has a template per color.
 	template
 	{
 		label
 		{
-			enabled "ZJTimer_Private_Menu_TEMPLATE_ResistRing_Enabled()"
-			bam "ZJTRESIS"
+			enabled "ZJTimer_Private_Menu_TEMPLATE_Enabled('ZJTimer_Menu_TEMPLATE_ResistIcon')"
+			bam "ZJCREELM"
 			scaleToClip
-			sequence lua "ZJTimer_Private_Menu_TEMPLATE_ResistRing_Sequence()"
-			frame lua "ZJTimer_Private_Menu_TEMPLATE_ResistRing_Frame()"
+			frame lua "ZJTimer_Private_Menu_TEMPLATE_Frame('ZJTimer_Menu_TEMPLATE_ResistIcon')"
 		}
-		name "ZJTimer_Menu_TEMPLATE_ResistRing"
+		name "ZJTimer_Menu_TEMPLATE_ResistIcon"
+	}
+
+	template
+	{
+		label
+		{
+			enabled "ZJTimer_Private_Menu_TEMPLATE_Enabled('ZJTimer_Menu_TEMPLATE_ResistUnresisted1')"
+			bam "ZJTRRING"
+			scaleToClip
+			frame lua "ZJTimer_Private_ResistRingMaxFrame"
+			useOverlayTint "true"
+			overlayTint 230 0 0
+		}
+		name "ZJTimer_Menu_TEMPLATE_ResistUnresisted1"
+	}
+
+	template
+	{
+		label
+		{
+			enabled "ZJTimer_Private_Menu_TEMPLATE_Enabled('ZJTimer_Menu_TEMPLATE_ResistUnresisted2')"
+			bam "ZJTRRING"
+			scaleToClip
+			frame lua "ZJTimer_Private_ResistRingMaxFrame"
+			useOverlayTint "true"
+			overlayTint 255 145 0
+		}
+		name "ZJTimer_Menu_TEMPLATE_ResistUnresisted2"
+	}
+
+	template
+	{
+		label
+		{
+			enabled "ZJTimer_Private_Menu_TEMPLATE_Enabled('ZJTimer_Menu_TEMPLATE_ResistUnresisted3')"
+			bam "ZJTRRING"
+			scaleToClip
+			frame lua "ZJTimer_Private_ResistRingMaxFrame"
+			useOverlayTint "true"
+			overlayTint 255 225 0
+		}
+		name "ZJTimer_Menu_TEMPLATE_ResistUnresisted3"
+	}
+
+	template
+	{
+		label
+		{
+			enabled "ZJTimer_Private_Menu_TEMPLATE_Enabled('ZJTimer_Menu_TEMPLATE_ResistUnresisted4')"
+			bam "ZJTRRING"
+			scaleToClip
+			frame lua "ZJTimer_Private_ResistRingMaxFrame"
+			useOverlayTint "true"
+			overlayTint 0 210 0
+		}
+		name "ZJTimer_Menu_TEMPLATE_ResistUnresisted4"
+	}
+
+	template
+	{
+		label
+		{
+			enabled "ZJTimer_Private_Menu_TEMPLATE_Enabled('ZJTimer_Menu_TEMPLATE_ResistUnresisted5')"
+			bam "ZJTRRING"
+			scaleToClip
+			frame lua "ZJTimer_Private_ResistRingMaxFrame"
+			useOverlayTint "true"
+			overlayTint 0 225 225
+		}
+		name "ZJTimer_Menu_TEMPLATE_ResistUnresisted5"
+	}
+
+	template
+	{
+		label
+		{
+			enabled "ZJTimer_Private_Menu_TEMPLATE_Enabled('ZJTimer_Menu_TEMPLATE_ResistUnresisted6')"
+			bam "ZJTRRING"
+			scaleToClip
+			frame lua "ZJTimer_Private_ResistRingMaxFrame"
+			useOverlayTint "true"
+			overlayTint 40 110 255
+		}
+		name "ZJTimer_Menu_TEMPLATE_ResistUnresisted6"
+	}
+
+	template
+	{
+		label
+		{
+			enabled "ZJTimer_Private_Menu_TEMPLATE_Enabled('ZJTimer_Menu_TEMPLATE_ResistUnresisted7')"
+			bam "ZJTRRING"
+			scaleToClip
+			frame lua "ZJTimer_Private_ResistRingMaxFrame"
+			useOverlayTint "true"
+			overlayTint 175 80 255
+		}
+		name "ZJTimer_Menu_TEMPLATE_ResistUnresisted7"
+	}
+
+	template
+	{
+		label
+		{
+			enabled "ZJTimer_Private_Menu_TEMPLATE_Enabled('ZJTimer_Menu_TEMPLATE_ResistUnresisted8')"
+			bam "ZJTRRING"
+			scaleToClip
+			frame lua "ZJTimer_Private_ResistRingMaxFrame"
+			useOverlayTint "true"
+			overlayTint 255 100 200
+		}
+		name "ZJTimer_Menu_TEMPLATE_ResistUnresisted8"
+	}
+
+	template
+	{
+		label
+		{
+			enabled "ZJTimer_Private_Menu_TEMPLATE_Enabled('ZJTimer_Menu_TEMPLATE_ResistResisted1')"
+			bam "ZJTRRING"
+			scaleToClip
+			frame lua "ZJTimer_Private_Menu_TEMPLATE_Frame('ZJTimer_Menu_TEMPLATE_ResistResisted1')"
+			useOverlayTint "true"
+			overlayTint 230 0 0
+		}
+		name "ZJTimer_Menu_TEMPLATE_ResistResisted1"
+	}
+
+	template
+	{
+		label
+		{
+			enabled "ZJTimer_Private_Menu_TEMPLATE_Enabled('ZJTimer_Menu_TEMPLATE_ResistResisted2')"
+			bam "ZJTRRING"
+			scaleToClip
+			frame lua "ZJTimer_Private_Menu_TEMPLATE_Frame('ZJTimer_Menu_TEMPLATE_ResistResisted2')"
+			useOverlayTint "true"
+			overlayTint 255 145 0
+		}
+		name "ZJTimer_Menu_TEMPLATE_ResistResisted2"
+	}
+
+	template
+	{
+		label
+		{
+			enabled "ZJTimer_Private_Menu_TEMPLATE_Enabled('ZJTimer_Menu_TEMPLATE_ResistResisted3')"
+			bam "ZJTRRING"
+			scaleToClip
+			frame lua "ZJTimer_Private_Menu_TEMPLATE_Frame('ZJTimer_Menu_TEMPLATE_ResistResisted3')"
+			useOverlayTint "true"
+			overlayTint 255 225 0
+		}
+		name "ZJTimer_Menu_TEMPLATE_ResistResisted3"
+	}
+
+	template
+	{
+		label
+		{
+			enabled "ZJTimer_Private_Menu_TEMPLATE_Enabled('ZJTimer_Menu_TEMPLATE_ResistResisted4')"
+			bam "ZJTRRING"
+			scaleToClip
+			frame lua "ZJTimer_Private_Menu_TEMPLATE_Frame('ZJTimer_Menu_TEMPLATE_ResistResisted4')"
+			useOverlayTint "true"
+			overlayTint 0 210 0
+		}
+		name "ZJTimer_Menu_TEMPLATE_ResistResisted4"
+	}
+
+	template
+	{
+		label
+		{
+			enabled "ZJTimer_Private_Menu_TEMPLATE_Enabled('ZJTimer_Menu_TEMPLATE_ResistResisted5')"
+			bam "ZJTRRING"
+			scaleToClip
+			frame lua "ZJTimer_Private_Menu_TEMPLATE_Frame('ZJTimer_Menu_TEMPLATE_ResistResisted5')"
+			useOverlayTint "true"
+			overlayTint 0 225 225
+		}
+		name "ZJTimer_Menu_TEMPLATE_ResistResisted5"
+	}
+
+	template
+	{
+		label
+		{
+			enabled "ZJTimer_Private_Menu_TEMPLATE_Enabled('ZJTimer_Menu_TEMPLATE_ResistResisted6')"
+			bam "ZJTRRING"
+			scaleToClip
+			frame lua "ZJTimer_Private_Menu_TEMPLATE_Frame('ZJTimer_Menu_TEMPLATE_ResistResisted6')"
+			useOverlayTint "true"
+			overlayTint 40 110 255
+		}
+		name "ZJTimer_Menu_TEMPLATE_ResistResisted6"
+	}
+
+	template
+	{
+		label
+		{
+			enabled "ZJTimer_Private_Menu_TEMPLATE_Enabled('ZJTimer_Menu_TEMPLATE_ResistResisted7')"
+			bam "ZJTRRING"
+			scaleToClip
+			frame lua "ZJTimer_Private_Menu_TEMPLATE_Frame('ZJTimer_Menu_TEMPLATE_ResistResisted7')"
+			useOverlayTint "true"
+			overlayTint 175 80 255
+		}
+		name "ZJTimer_Menu_TEMPLATE_ResistResisted7"
+	}
+
+	template
+	{
+		label
+		{
+			enabled "ZJTimer_Private_Menu_TEMPLATE_Enabled('ZJTimer_Menu_TEMPLATE_ResistResisted8')"
+			bam "ZJTRRING"
+			scaleToClip
+			frame lua "ZJTimer_Private_Menu_TEMPLATE_Frame('ZJTimer_Menu_TEMPLATE_ResistResisted8')"
+			useOverlayTint "true"
+			overlayTint 255 100 200
+		}
+		name "ZJTimer_Menu_TEMPLATE_ResistResisted8"
 	}
 }

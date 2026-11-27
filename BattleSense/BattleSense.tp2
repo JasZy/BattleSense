@@ -23,6 +23,7 @@ ALWAYS
 			     ~BattleSense/copy/core/ZJPopup.lua~ ~override~
 			     ~BattleSense/copy/core/ZJPopup.menu~ ~override~
 			     ~BattleSense/copy/core/ZJArea.lua~ ~override~
+			     ~BattleSense/copy/core/ZJCREELM.BAM~ ~override~
 		END
 	END
 

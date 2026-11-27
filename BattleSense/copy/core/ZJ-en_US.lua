@@ -105,6 +105,18 @@ uiStrings["ZJBattleSense_Options_TRANSLATION_CreatureInfo_ImmunityColor_Descript
 The color of the hit roll and damage of the rows where the creature is immune to the attacker's weapon, with "Immune" behind the damage. Click to pick the next color, "Off" shows the rows as if the creature wasn't immune: the normal roll and damage, with its resistance and the extra damage of a hit.
 ]]
 
+uiStrings["ZJBattleSense_Options_TRANSLATION_CreatureInfo_TargetAttackIconColor"] = "Target's Attack Icon Color"
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_CreatureInfo_TargetAttackIconColor_Description"] = [[
+The color of the weapon, spell and item icons of what the creature under the cursor does: in front of the names it attacks or casts at, and below its name. Click to pick the next color.
+]]
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_CreatureInfo_AttackIconColor"] = "Attack Icon Color"
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_CreatureInfo_AttackIconColor_Description"] = [[
+The color of the weapon icons in front of the hit rolls of the party's attacks on the creature under the cursor. Click to pick the next color.
+]]
+
 
 -----------
 -- Timer --
@@ -432,7 +444,19 @@ uiStrings["ZJBattleSense_Options_TRANSLATION_Timer_ShowResistRings"] = "Show Res
 uiStrings["ZJBattleSense_Options_TRANSLATION_Timer_ShowResistRings_Description"] = [[
 Adds a ring beside the portrait for every element the character has resistance to, and for magic resistance. From top to bottom: fire, cold, electricity, acid, and magic, each displayed as its protection icon.
 
-The green part of the ring, starting at the top and going clockwise, displays the resistance percentage. The ring is completely green at 100% or more, and isn't shown at 0%.
+The part of the ring in the "Resisted Color", starting at the top and going clockwise, displays the resistance percentage, the rest is in the "Not Resisted Color". The ring is completely in the "Resisted Color" at 100% or more, and isn't shown at 0%.
+]]
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_Timer_ResistedColor"] = "Resisted Color"
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_Timer_ResistedColor_Description"] = [[
+The color of the part of a resistance ring that shows the resistance percentage, (see "Show Resistance Rings"). Click to pick the next color.
+]]
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_Timer_UnresistedColor"] = "Not Resisted Color"
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_Timer_UnresistedColor_Description"] = [[
+The color of the rest of a resistance ring, (see "Show Resistance Rings"). Click to pick the next color.
 ]]
 
 ----------------
@@ -573,6 +597,18 @@ Items aimed at a creature, (a wand, a thrown potion), are described by Spell Inf
 
 uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_Unidentified"]        = "Not identified"
 uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_IfEquipped"]          = "If %s equips this:"
+uiStrings["ZJBattleSense_Options_TRANSLATION_ItemInfo_BetterColor"] = "Better Color"
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_ItemInfo_BetterColor_Description"] = [[
+The color of a value that is better than that of the item it replaces, or than before drinking a potion. Click to pick the next color.
+]]
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_ItemInfo_WorseColor"] = "Worse Color"
+
+uiStrings["ZJBattleSense_Options_TRANSLATION_ItemInfo_WorseColor_Description"] = [[
+The color of a value that is worse than that of the item it replaces, or than before drinking a potion, and of "can't be used". Click to pick the next color.
+]]
+
 uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_IfEquippedReplacing"] = "If %s equips this instead of %s:"
 uiStrings["ZJBattleSense_TRANSLATION_ItemInfo_NotUsable"]           = "Not usable by %s"
 
